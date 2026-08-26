@@ -1,8 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-
 import { getTrustedAdminSession } from '@/infrastructure/supabase/auth/server';
+import { getServiceSupabaseClient } from '@/infrastructure/supabase/client/service-client';
 import type { Database } from '@/infrastructure/supabase/database.types';
-import { env } from '@/lib/env';
 
 export type AdminUserProfileChanges = {
   display_name?: string;
@@ -25,20 +23,11 @@ type AdminUserOperationDependencies = {
   getServiceClient: () => ServiceRpcClient;
 };
 
-function createServiceClient(): ServiceRpcClient {
-  if (!(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY)) {
-    throw new Error('Server Supabase service configuration is unavailable.');
-  }
-  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
-
 export async function executeAdminUserUpdate(
   input: { targetId: string; changes: AdminUserProfileChanges },
   dependencies: AdminUserOperationDependencies = {
     getSession: getTrustedAdminSession,
-    getServiceClient: createServiceClient,
+    getServiceClient: getServiceSupabaseClient,
   },
 ) {
   const session = await dependencies.getSession();

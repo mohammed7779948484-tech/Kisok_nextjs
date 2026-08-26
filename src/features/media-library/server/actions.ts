@@ -1,23 +1,13 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
-
 import { getTrustedAdminSession } from '@/infrastructure/supabase/auth/server';
+import { getServiceSupabaseClient } from '@/infrastructure/supabase/client/service-client';
 import type { Database } from '@/infrastructure/supabase/database.types';
 import { env } from '@/lib/env';
 
 import type { MediaAssetRecord } from '../types';
 import { type CloudinaryUploadParameters, createCloudinaryUploadSignature } from './cloudinary';
 import { executeMediaAssetDelete } from './delete-media';
-
-function createServiceClient() {
-  if (!(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY)) {
-    throw new Error('Server Supabase service configuration is unavailable.');
-  }
-  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
 
 function mapAsset(row: Database['public']['Tables']['media_assets']['Row']): MediaAssetRecord {
   return {
@@ -29,6 +19,8 @@ function mapAsset(row: Database['public']['Tables']['media_assets']['Row']): Med
     height: row.height,
     bytes: row.bytes,
     createdAt: row.created_at,
+    assetId: row.asset_id,
+    createdBy: row.created_by,
   };
 }
 
@@ -79,7 +71,7 @@ export async function deleteMediaAsset(id: string): Promise<void> {
     throw new Error('An active Admin session is required.');
   }
 
-  const client = createServiceClient();
+  const client = getServiceSupabaseClient();
   await executeMediaAssetDelete(id, {
     getAsset: async (assetId) => {
       const result = await client
@@ -111,6 +103,8 @@ export async function deleteMediaAsset(id: string): Promise<void> {
         height: asset.height,
         bytes: asset.bytes,
         created_at: asset.createdAt,
+        asset_id: asset.assetId,
+        created_by: asset.createdBy,
       });
       if (result.error) throw result.error;
     },
