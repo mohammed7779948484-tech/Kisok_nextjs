@@ -1,6 +1,6 @@
 # KISOK Admin V2 — Completion Matrix
 
-**Audit baseline:** current HEAD on `feat/lean-v2-admin-integration` (post `89318ae`, this session's fixes included).
+**Audit baseline:** current HEAD on `feat/lean-v2-admin-integration` (post `1e4c14a`, this continuation session's fixes and CRUD completion included).
 
 **Authority:** Lean V2 migrations and the explicitly authorized hosted Supabase project. A route, configured data provider, fixture-backed component, or unit mock is not counted as completed CRUD. A repository/RPC method with no UI caller is marked "dead code", not "done".
 
@@ -21,26 +21,35 @@ All eight items below were independently verified against the actual code at HEA
 | 8b | Seed `orders.display_number` values (`KSK001`…`KSK005`) violated the `^[A-HJ-NP-Z2-9]{6}$` CHECK (contain `0`/`1`) | **Fixed** | Replaced with `KS2AB2`…`KS2AB6`. Regression test: `test/seed-coherence.test.ts` (fails against the pre-fix seed). |
 | 8c | Seed `inventory.current_quantity` disagreed with the sum of that variant's `inventory_adjustments` ledger rows for 2 of 4 variants | **Fixed** | Moved the direct `UPDATE ... CASE` to run after every ledger row and recomputed it as the true cumulative sum (7/19/1/4, was 6/19/1/5). Regression test: `test/seed-coherence.test.ts` (fails against the pre-fix seed). |
 
+## Continuation-session correctness fixes (A1–A4)
+
+| # | Bug | Status | Evidence |
+| --- | --- | --- | --- |
+| A1 | Auth bootstrap silently reused a stale/unusable password hash for an already-existing local Auth user instead of resetting it | **Fixed** | `scripts/lib/local-auth-seed.ts`'s `seedLocalAuthUser` now always calls `PUT /auth/v1/admin/users/{id}` when the user exists. RED: `local-auth-seed.test.ts` "resets the password..." failed (0 PUT calls) pre-fix. Replaced the platform-specific `.sh`/`.ps1` scripts with one cross-platform `scripts/seed-local-auth.ts`. |
+| A2 | Product Catalog stock aggregation counted inactive Variants' stock, disagreeing with Dashboard (which already excludes them) | **Fixed** | `listProducts()` now filters to `activeVariants` before aggregating `availableStock`/low-stock/`variantCount`. RED: 3/4 new `product.test.ts` cases failed pre-fix. |
+| A3 | Variant Option replacement (already diff-based per bug #5) had no rollback for a later-stage (update/delete) write failure — only the first-insert-fails case was covered | **Fixed** | Client-orchestrated compensating-rollback (saga): every successful insert/update/delete step is tracked and reversed in order on any later failure; a rollback failure combines both errors into one message rather than swallowing either. A real `security invoker` RPC would be strictly stronger but was judged too risky to ship unverified against the network-blocked hosted DB and the static validator's frozen 13-migration/final-grants-file invariants — recorded as a follow-up. RED: 3 new later-stage-failure cases in `variant-options.test.ts` failed pre-fix (8 tests total after). |
+| A4 | Media delete-compensation restore lost `updated_at` (fell back to the restore-time default) and silently dropped the original Cloudinary-failure context on a dual failure (Cloudinary delete fails AND DB restore also fails) | **Fixed** | Added `updatedAt` to `MediaAssetRecord` end-to-end; `delete-media.ts` now catches a restore failure and throws one combined error naming both failures plus "requires manual reconciliation". RED: restore-metadata test failed on missing `updated_at`; new dual-failure test failed (got only the restore error) pre-fix. |
+
 ## Feature acceptance matrix
 
 | Resource | Read | Search | Filter | Sort | Pagination | Create | Update | Deactivate | Delete | Reorder | Relations | Tests |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Brands | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ⚠️ repo method, no UI | ⚠️ repo method, no UI | ❌ | ❌ | ⚠️ partial | ✅ |
-| Categories | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ (incl. reparent) | ✅ | ❌ | ⚠️ repo method, no UI | ⚠️ partial | ✅ |
-| Option Types | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ⚠️ repo method, no UI | ⚠️ repo method, no UI | ❌ | ❌ | ⚠️ partial | ✅ |
-| Option Values | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ⚠️ partial | ✅ | ❌ | ⚠️ repo method, no UI | ⚠️ partial | ✅ |
-| Products | ✅ (incl. corrected stock status) | ❌ | ❌ | ❌ | ❌ | ⚠️ partial (no full editor) | ❌ missing | ❌ missing | ❌ | ❌ | ⚠️ partial (brand/category on create only) | ✅ |
-| Product Categories | ⚠️ read-through-Product only | – | – | – | – | ✅ (on Product create) | ❌ | – | ❌ | – | ⚠️ partial | ✅ |
-| Variants | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ (DB-generated SKU) | ⚠️ repo method, no UI | ⚠️ repo method, no UI | ❌ | ❌ | ⚠️ repo method, no UI | ✅ |
-| Variant Options | ❌ (no read UI) | – | – | – | – | ⚠️ repo method, no UI | ⚠️ repo method, no UI (now failure-safe, see bug #5) | – | ❌ | – | ⚠️ repo method, no UI | ✅ repo-level |
-| Variant Media | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Media Assets | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ signature code exists, no upload UI | ❌ | – | ✅ (usage-guarded, compensation now complete) | – | ✅ | ✅ |
+| Brands | ✅ Refine `useList` | ✅ debounced | ❌ | ✅ `display_order` | ✅ Refine server pagination | ✅ Refine `useForm`+Zod | ✅ Refine `useForm`+Zod | ✅ `useUpdate` | ❌ (matches Lean V2: no delete UI anywhere in catalog masters) | ⚠️ repo method (`reorderBrands`), no UI | ⚠️ partial (still selected by name in Product editor, no FK reassignment tooling) | ✅ |
+| Categories | ✅ Refine `useList` | ✅ debounced | ✅ `parent_id` scope (root/child) | ❌ | ✅ Refine server pagination | ✅ Refine `useForm`+Zod | ✅ Refine `useForm`+Zod (incl. reparent) | ✅ `useUpdate` | ❌ (`ON DELETE RESTRICT` on `parent_id`; no delete-blocked-by-references UI built) | ✅ `useCategoryReorder` + `reorder_items` RPC | ✅ two-level hierarchy shown | ✅ |
+| Option Types | ✅ Refine `useList` | ✅ debounced | ❌ | ❌ | ✅ Refine server pagination | ✅ Refine `useForm`+Zod | ✅ Refine `useForm`+Zod | ✅ `useUpdate` | ❌ (`ON DELETE RESTRICT` on Values' `option_type_id`) | ✅ `useOptionTypeReorder` + `reorder_items` RPC | – | ✅ |
+| Option Values | ✅ Refine `useList` (dependent, per selected Type, unpaginated) | ❌ (not needed at this scale) | ✅ scoped to selected Option Type | ❌ | – (unpaginated by design, single Type's Values) | ✅ Refine `useForm`+Zod | ✅ Refine `useForm`+Zod | ✅ `useUpdate` | ❌ | ✅ `useOptionValueReorder` + `reorder_items` RPC, scoped per Type | ✅ | ✅ |
+| Products | ✅ (incl. corrected active-Variant-only stock status, A2) | ✅ client-side | ❌ | ❌ | ✅ client-side | ✅ `ProductFormDialog` (name/brand/categories/description/featured) | ✅ `ProductFormDialog` edit mode + `updateProduct` | ✅ activate/deactivate | ❌ | ❌ | ✅ Brand + Category reassignment after creation via `setProductCategories` | ✅ |
+| Product Categories | ✅ `listProductCategoryIds` | – | – | – | – | ✅ (on Product create) | ✅ `setProductCategories` diff (add/remove) | – | ✅ (via diff) | – | ✅ | ✅ |
+| Variants | ✅ | ❌ | ❌ | ❌ | ❌ (per-Product list, not paginated) | ✅ (DB-generated SKU) | ✅ `VariantFormDialog` (barcode/title_override/threshold/active); SKU read-only | ✅ activate/deactivate | ❌ | ❌ | ✅ | ✅ |
+| Variant Options | ✅ `VariantOptionsDialog` (`listVariantOptionValues`) | – | – | – | – | ✅ staged combination → `replaceVariantOptionValues` | ✅ same call, diff+rollback (A3) | – | ✅ (via diff) | – | ✅ one Value per Type enforced client + server | ✅ |
+| Variant Media | ✅ `VariantMediaPicker` | ❌ | – | ❌ | – | ✅ attach existing + upload-and-attach | ✅ reorder (`reorder_items`, `variant_media` scope) | – | ✅ "Remove from Variant" (`detachVariantMedia`, join-row only — never the asset) | ✅ | ✅ set-primary (two sequential UPDATEs around the partial unique index) | ✅ |
+| Media Assets | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ upload UI: sign → Cloudinary POST → register (each stage gated on the previous) | ❌ | – | ✅ (usage-guarded, compensation complete incl. A4) | – | ✅ | ✅ |
 | Inventory | ✅ | ❌ | ❌ | ❌ | ❌ | – | ✅ (adjust/set-qty RPCs) | – | – | – | ✅ | ✅ |
-| Orders | ✅ | ❌ | ❌ | ❌ | ❌ | – | ✅ per-role via RPC (now role-correct, see bug #2) | – | – | – | ✅ | ✅ |
-| Admin Users | ✅ (now server-boundary-correct, see bug #1) | ✅ | ❌ | ❌ | ⚠️ repo method, no UI | ❌ (no Auth-user create flow) | ⚠️ only `is_active` wired to UI | ✅ | ❌ | – | – | ✅ |
+| Orders | ✅ | ❌ | ❌ | ❌ | ❌ | – | ✅ per-role via RPC (role-correct, see bug #2) | – | – | – | ✅ | ✅ |
+| Admin Users | ✅ (server-boundary-correct, see bug #1) | ✅ single debounced pattern (redundant Search button removed) | ❌ | ❌ | ✅ wired to `totalCount` | ✅ `createAdminUser` (Auth user + profiles row, rollback on partial failure) | ✅ display name + role (`EditAdminUserDialog`) + password reset (`resetAdminUserPassword`) | ✅ | ❌ (DB enforces last-active-admin + self-demotion protection instead — not duplicated client-side) | – | – | ✅ |
 | Store Settings | ✅ | – | – | – | – | – | ✅ (incl. logo picker) | – | – | – | ✅ | ✅ |
-| Dashboard | ✅ (now correct global counts, see bug #3) | – | – | – | – | – | – | – | – | – | ✅ | ✅ |
-| Auth | ✅ login/protect/logout/refresh persistence | – | – | – | – | – | – | – | – | – | – | ⚠️ policy-level only; real hosted login untested this session (see blocker) |
+| Dashboard | ✅ (correct global counts, see bug #3) | – | – | – | – | – | – | – | – | – | ✅ | ✅ |
+| Auth | ✅ login/protect/logout/refresh persistence | – | – | – | – | – | – | – | – | – | – | ✅ unit-level; real hosted login attempted via Playwright this session — reached the real Supabase Auth token endpoint and failed with the same `ERR_TUNNEL_CONNECTION_FAILED` egress denial documented below (proves the wiring is correct; hosted credential verification remains blocked) |
 
 ## Known blocker: hosted DB / browser verification network access
 
@@ -60,16 +69,20 @@ $ curl "$HTTPS_PROXY/__agentproxy/status"
 - Any live query to independently verify the grants in `20260826050013_lean_rls_grants.sql` are actually applied as written on the hosted project.
 - Full browser acceptance across the Admin surfaces.
 
-All eight correctness fixes above were instead verified via: (a) direct reading of the migration SQL that defines the authoritative contract, (b) unit/regression tests that fail against the pre-fix code and pass against the fix, (c) `pnpm check:lean-v2` (static Lean V2 validator, no DB connection required), and (d) full `pnpm test`/`type-check`/`ci:check`/`check:deprecated`/`build`. This is real evidence for the code-level correctness of each fix, but it is not hosted or browser proof — that remains a genuine, environment-level blocker for this session, not a shortcut taken on the work itself. It should be re-run from an environment with real network access to `*.supabase.co` before treating any hosted/browser row above as proven.
+All eight correctness fixes above, and A1–A4, were instead verified via: (a) direct reading of the migration SQL that defines the authoritative contract, (b) unit/regression tests that fail against the pre-fix code and pass against the fix, (c) `pnpm check:lean-v2` (static Lean V2 validator, no DB connection required), and (d) full `pnpm test`/`type-check`/`ci:check`/`check:deprecated`/`build`. This continuation session additionally started the dev server and drove a real Chromium browser (Playwright) through every Admin route and a real login submission — this proved the proxy-based route protection, i18n routing, and the Supabase Auth wiring are all structurally correct, and independently reproduced the exact same `ERR_TUNNEL_CONNECTION_FAILED` denial on the real `auth/v1/token?grant_type=password` request that curl/Node/psql hit earlier. This is strong evidence the failure is a genuine environment-level network policy, not an application bug — but it is still not a successful hosted login, and no authenticated screen has been visually verified this session. Re-run hosted/browser verification from a network-unblocked environment before treating any hosted/authenticated-browser claim as proven.
 
-## Required implementation order (unchanged from prior review, still valid)
+## Refine/TanStack architecture — before/after this continuation
 
-1. Complete catalog taxonomy CRUD (delete/reference behavior, reorder UI, search/filter/pagination).
-2. Complete Product editor (update, activation, full category/brand editing after create) and wire Variant Options / Variant Media into the UI (repository methods already exist and are tested).
-3. Build the Media Library upload/register UI once Cloudinary credentials are supplied (signing code is implemented and tested; only the credential and the upload UI are missing).
-4. Complete Admin Users (search/filter/pagination UI, Auth-user creation, role editing UI — `admin_update_profile` already supports it).
-5. Migrate simple table-shaped CRUD (Brands/Categories/Option Types/Option Values/Media list/Store Settings) onto real Refine hooks + `@refinedev/react-table` + `@refinedev/react-hook-form`, per `docs/refine-integration-plan.md`.
-6. Re-run hosted/browser verification from a network-unblocked environment.
+Brands, Categories, Option Types, and Option Values are now genuinely on `@refinedev/core`'s `useList`/`useForm`/`useUpdate` (backed by TanStack Query internally) + `@refinedev/react-hook-form` + Zod — list lifecycle, pagination, and simple activate/deactivate mutations are Refine's, not hand-rolled `useState`/`useEffect`. Reorder for all three stays a custom mutation wrapping the `reorder_items` RPC — a deliberate, documented exception, not an oversight (Refine's generic `.update()` cannot express a scoped list-reindex). Products/Variants/Variant Options/Variant Media/Media Assets/Admin Users remain on the manual-repository + hooks pattern, each with a recorded architectural justification (multi-table aggregation, side-channel writes, or a privileged server-only boundary that a generic Refine data provider call cannot express) rather than an unreviewed blanket migration.
+
+## Required implementation order (superseded — see status)
+
+1. ~~Complete catalog taxonomy CRUD (delete/reference behavior, reorder UI, search/filter/pagination).~~ **Done** except hard delete (intentionally deferred — see the Categories/Option Types/Option Values rows above).
+2. ~~Complete Product editor (update, activation, full category/brand editing after create) and wire Variant Options / Variant Media into the UI.~~ **Done.**
+3. ~~Build the Media Library upload/register UI once Cloudinary credentials are supplied.~~ **Implementation done**; live verification still blocked (no Cloudinary credentials in this environment, egress denied).
+4. ~~Complete Admin Users (search/filter/pagination UI, Auth-user creation, role editing UI).~~ **Done.**
+5. ~~Migrate simple table-shaped CRUD onto real Refine hooks.~~ **Done for Brands/Categories/Option Types/Option Values** (the plain single/two-table CRUD resources); Products/Media/Admin Users deliberately stayed manual per the architecture note above.
+6. Re-run hosted/browser verification from a network-unblocked environment. **Still the one genuine open item** — everything else in this list is implemented and unit/regression-tested.
 
 ## Completion rule
 
