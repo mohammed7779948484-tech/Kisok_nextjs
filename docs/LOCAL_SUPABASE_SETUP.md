@@ -29,3 +29,20 @@ This is an environment limitation rather than a migration or application failure
 ## Browser environment variables
 
 After Supabase starts, populate a local `.env` from `pnpm supabase status -o env` and retain only the public URL/publishable key for the browser. Keep `SUPABASE_SERVICE_ROLE_KEY` and Cloudinary secrets server-only. The Admin route will intentionally remain unavailable until an authenticated user resolves through the trusted `current_active_profile()` RPC.
+
+## Local login credentials
+
+`supabase/seed.sql` inserts `auth.users` rows with `encrypted_password = ''` only so `profiles(id)`'s foreign key is satisfiable during `supabase db reset` — that value is not a real password hash and cannot authenticate. After `supabase db reset` completes, run one of:
+
+- `bash scripts/seed-local-auth.sh` (Linux/macOS)
+- `pwsh scripts/seed-local-auth.ps1` (Windows)
+
+against the running local instance to create working local logins through the Auth Admin API:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@kiosk.local` | `KioskLocalAdmin123!` |
+| Preparation | `preparation@kiosk.local` | `KioskLocalPreparation123!` |
+| Customer | `customer@kiosk.local` | `KioskLocalCustomer123!` |
+
+These are local-development-only credentials; both scripts refuse to run against a non-local `API_URL`. They are independent of the hosted test project's `Admin@gmail.com` account, which is provisioned directly in that Supabase project, not through this seed.

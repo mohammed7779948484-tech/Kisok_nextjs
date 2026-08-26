@@ -1,5 +1,11 @@
 -- Deterministic local-only KISOK Admin dataset.
 -- KISOK has no pricing, currency, revenue, tax, or payment domain.
+--
+-- `encrypted_password = ''` below only satisfies the profiles(id) FK during
+-- `supabase db reset` — it is not a working password hash and cannot be used
+-- to log in. Run `scripts/seed-local-auth.sh` (or `.ps1` on Windows) against
+-- your local Supabase instance afterward to get real, documented local
+-- credentials via the Auth Admin API. See docs/LOCAL_SUPABASE_SETUP.md.
 
 insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
 values
@@ -114,24 +120,20 @@ values
   ('70000000-0000-0000-0000-000000000003', '60000000-0000-0000-0000-000000000003', 3, 0, 3, 'initial_stock', null, '11111111-1111-1111-1111-111111111111'),
   ('70000000-0000-0000-0000-000000000004', '60000000-0000-0000-0000-000000000004', 5, 0, 5, 'initial_stock', null, '11111111-1111-1111-1111-111111111111');
 
-update public.inventory set current_quantity = case variant_id
-  when '60000000-0000-0000-0000-000000000001' then 6
-  when '60000000-0000-0000-0000-000000000002' then 19
-  when '60000000-0000-0000-0000-000000000003' then 1
-  when '60000000-0000-0000-0000-000000000004' then 5
-end;
-
 insert into public.orders (
   id, display_number, client_request_id, request_fingerprint, status,
   created_by, assigned_preparation_id, completed_by, completed_at,
   cancelled_by, cancelled_at, cancellation_reason
 )
 values
-  ('80000000-0000-0000-0000-000000000001', 'KSK001', '81000000-0000-0000-0000-000000000001', 'kiosk.seed.001', 'new', '44444444-4444-4444-4444-444444444444', null, null, null, null, null, null),
-  ('80000000-0000-0000-0000-000000000002', 'KSK002', '81000000-0000-0000-0000-000000000002', 'kiosk.seed.002', 'preparing', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null),
-  ('80000000-0000-0000-0000-000000000003', 'KSK003', '81000000-0000-0000-0000-000000000003', 'kiosk.seed.003', 'ready', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null),
-  ('80000000-0000-0000-0000-000000000004', 'KSK004', '81000000-0000-0000-0000-000000000004', 'kiosk.seed.004', 'completed', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now(), null, null, null),
-  ('80000000-0000-0000-0000-000000000005', 'KSK005', '81000000-0000-0000-0000-000000000005', 'kiosk.seed.005', 'cancelled', '44444444-4444-4444-4444-444444444444', null, null, null, '33333333-3333-3333-3333-333333333333', now(), 'Customer cancelled')
+  -- Six characters from the display_number CHECK's restricted alphabet
+  -- (A-H, J-N, P-Z, 2-9 — no 0/O/1/I) per
+  -- 20260826050004_lean_inventory_orders_schema.sql.
+  ('80000000-0000-0000-0000-000000000001', 'KS2AB2', '81000000-0000-0000-0000-000000000001', 'kiosk.seed.001', 'new', '44444444-4444-4444-4444-444444444444', null, null, null, null, null, null),
+  ('80000000-0000-0000-0000-000000000002', 'KS2AB3', '81000000-0000-0000-0000-000000000002', 'kiosk.seed.002', 'preparing', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null),
+  ('80000000-0000-0000-0000-000000000003', 'KS2AB4', '81000000-0000-0000-0000-000000000003', 'kiosk.seed.003', 'ready', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null),
+  ('80000000-0000-0000-0000-000000000004', 'KS2AB5', '81000000-0000-0000-0000-000000000004', 'kiosk.seed.004', 'completed', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now(), null, null, null),
+  ('80000000-0000-0000-0000-000000000005', 'KS2AB6', '81000000-0000-0000-0000-000000000005', 'kiosk.seed.005', 'cancelled', '44444444-4444-4444-4444-444444444444', null, null, null, '33333333-3333-3333-3333-333333333333', now(), 'Customer cancelled')
 on conflict (id) do nothing;
 
 insert into public.order_items (
@@ -155,3 +157,23 @@ values
   ('70000000-0000-0000-0000-000000000008', '60000000-0000-0000-0000-000000000004', -1, 5, 4, 'order_deduction', null, '44444444-4444-4444-4444-444444444444', '80000000-0000-0000-0000-000000000004'),
   ('70000000-0000-0000-0000-000000000009', '60000000-0000-0000-0000-000000000001', -1, 7, 6, 'order_deduction', null, '44444444-4444-4444-4444-444444444444', '80000000-0000-0000-0000-000000000005'),
   ('70000000-0000-0000-0000-000000000010', '60000000-0000-0000-0000-000000000001', 1, 6, 7, 'order_cancellation_restoration', null, '33333333-3333-3333-3333-333333333333', '80000000-0000-0000-0000-000000000005');
+
+-- Applied once, after every ledger row above, so current_quantity always
+-- equals the cumulative sum of this variant's inventory_adjustments rows —
+-- never a value the ledger can't independently reconstruct.
+-- variant 0001: initial 8, -1 (order 0002), -1 (order 0005), +1 (restoration) = 7
+-- variant 0002: initial 20, -1 (order 0001) = 19
+-- variant 0003: initial 3, -2 (order 0003) = 1
+-- variant 0004: initial 5, -1 (order 0004) = 4
+update public.inventory set current_quantity = case variant_id
+  when '60000000-0000-0000-0000-000000000001' then 7
+  when '60000000-0000-0000-0000-000000000002' then 19
+  when '60000000-0000-0000-0000-000000000003' then 1
+  when '60000000-0000-0000-0000-000000000004' then 4
+end
+where variant_id in (
+  '60000000-0000-0000-0000-000000000001',
+  '60000000-0000-0000-0000-000000000002',
+  '60000000-0000-0000-0000-000000000003',
+  '60000000-0000-0000-0000-000000000004'
+);
