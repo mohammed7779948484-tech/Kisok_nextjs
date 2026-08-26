@@ -2,14 +2,13 @@
 
 import { useState } from 'react';
 
-import { StatusPill } from '@/components/admin/StatusPill';
-import { KisokButton } from '@/components/kisok-ui';
+import { KisokButton, StatusPill } from '@/shared/ui';
 
-import { localProductCatalogContract } from '../data/local-products';
+import { productCatalogRepository } from '../repositories';
 
 export function ProductCatalogPanel() {
   const [draftOpen, setDraftOpen] = useState(false);
-  const products = localProductCatalogContract.list();
+  const products = productCatalogRepository.list();
 
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">

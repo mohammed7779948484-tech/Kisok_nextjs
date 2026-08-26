@@ -1,12 +1,11 @@
 'use client';
 
-import { StatusPill } from '@/components/admin/StatusPill';
-import { KisokButton } from '@/components/kisok-ui';
+import { KisokButton, StatusPill } from '@/shared/ui';
 
-import { localCatalogTaxonomyContract } from '../data/local-taxonomy';
+import { catalogTaxonomyRepository } from '../repositories';
 
 export function CatalogTaxonomyPanel({ onAction }: { onAction: (message: string) => void }) {
-  const catalogRows = localCatalogTaxonomyContract.list();
+  const catalogRows = catalogTaxonomyRepository.list();
 
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">

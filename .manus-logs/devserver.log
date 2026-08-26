@@ -606,3 +606,916 @@
 [2026-08-26T04:41:09.179Z] }
 [2026-08-26T04:41:09.179Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
 [2026-08-26T04:41:18.618Z] GET / 200 in 62ms (next.js: 4ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 44ms)
+[2026-08-26T04:42:14.321Z] GET / 200 in 79ms (next.js: 10ms, proxy.ts: 7ms, generate-params: 11ms, application-code: 51ms)
+[2026-08-26T04:42:50.480Z] GET /?from_webdev=1 200 in 77ms (next.js: 6ms, proxy.ts: 5ms, generate-params: 19ms, application-code: 48ms)
+[2026-08-26T04:42:50.767Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_09ij6zr._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:42:50.767Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:42:50.767Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:42:50.767Z] // next.config.js
+[2026-08-26T04:42:50.767Z] module.exports = {
+[2026-08-26T04:42:50.767Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:42:50.768Z] }
+[2026-08-26T04:42:50.768Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:42:51.559Z] GET /?from_webdev=1 200 in 64ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 45ms)
+[2026-08-26T04:42:53.481Z] HEAD / 200 in 78ms (next.js: 5ms, proxy.ts: 9ms, generate-params: 11ms, application-code: 53ms)
+[2026-08-26T04:42:54.149Z] GET /?from_webdev=1 200 in 64ms (next.js: 5ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 44ms)
+[2026-08-26T04:42:54.850Z] GET /?from_webdev=1 200 in 57ms (next.js: 5ms, proxy.ts: 3ms, generate-params: 10ms, application-code: 39ms)
+[2026-08-26T04:42:56.070Z] GET /?from_webdev=1 200 in 64ms (next.js: 5ms, proxy.ts: 4ms, generate-params: 9ms, application-code: 46ms)
+[2026-08-26T04:42:56.697Z] GET /?from_webdev=1 200 in 59ms (next.js: 5ms, proxy.ts: 3ms, generate-params: 9ms, application-code: 42ms)
+[2026-08-26T04:51:13.450Z] ⨯ ./src/components/kisok-ui/index.ts:1:1
+[2026-08-26T04:51:13.451Z] Error: Module not found: Can't resolve './KisokButton'
+[2026-08-26T04:51:13.451Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.451Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.451Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.451Z] [90m3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.451Z] [90m4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.451Z] Import traces:
+[2026-08-26T04:51:13.451Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.451Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.451Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.451Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.451Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.451Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.451Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.451Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.451Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.451Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.451Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.451Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.451Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.451Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.451Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.451Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.451Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.452Z] ⨯ ./src/components/kisok-ui/index.ts:1:1
+[2026-08-26T04:51:13.452Z] Error: Module not found: Can't resolve './KisokButton'
+[2026-08-26T04:51:13.452Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.452Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.452Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.452Z] [90m3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.452Z] [90m4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.452Z] Import traces:
+[2026-08-26T04:51:13.452Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.452Z] ⨯ ./src/components/kisok-ui/index.ts:1:1
+[2026-08-26T04:51:13.452Z] Error: Module not found: Can't resolve './KisokButton'
+[2026-08-26T04:51:13.452Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.452Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.452Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.452Z] [90m3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.452Z] [90m4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.452Z] Import traces:
+[2026-08-26T04:51:13.452Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.452Z] ⨯ ./src/components/kisok-ui/index.ts:1:1
+[2026-08-26T04:51:13.452Z] Error: Module not found: Can't resolve './KisokButton'
+[2026-08-26T04:51:13.452Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.452Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.452Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.452Z] [90m3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.452Z] [90m4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.452Z] Import traces:
+[2026-08-26T04:51:13.452Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.452Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.452Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.452Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.453Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.453Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.453Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.453Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [90m10 |[0m
+[2026-08-26T04:51:13.453Z] Import traces:
+[2026-08-26T04:51:13.453Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.453Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.453Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.453Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.453Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.453Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.453Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.453Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.453Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.453Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.453Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.453Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.453Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.453Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [90m10 |[0m
+[2026-08-26T04:51:13.454Z] Import traces:
+[2026-08-26T04:51:13.454Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.454Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.454Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.454Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.454Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.454Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.454Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.454Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.454Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.454Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.454Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.454Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.454Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.454Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.454Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.454Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [90m10 |[0m
+[2026-08-26T04:51:13.455Z] Import traces:
+[2026-08-26T04:51:13.455Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.455Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.455Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.455Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.455Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.455Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.455Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.455Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.455Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.455Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.455Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.455Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.455Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.455Z] [90m10 |[0m
+[2026-08-26T04:51:13.455Z] Import traces:
+[2026-08-26T04:51:13.455Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.455Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.455Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.456Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.456Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.456Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.456Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.456Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.456Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.456Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.456Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.456Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.456Z] [90m10 |[0m
+[2026-08-26T04:51:13.456Z] Import traces:
+[2026-08-26T04:51:13.456Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.456Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.456Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.456Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.456Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.456Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.457Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.457Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.457Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.457Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.457Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.457Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.457Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.457Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.457Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.457Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.457Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.457Z] [90m10 |[0m
+[2026-08-26T04:51:13.457Z] Import traces:
+[2026-08-26T04:51:13.457Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.457Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.457Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.457Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.457Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.457Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.457Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.457Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.458Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.458Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.458Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.458Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.458Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.458Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.458Z] [90m10 |[0m
+[2026-08-26T04:51:13.458Z] Import traces:
+[2026-08-26T04:51:13.458Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.458Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.458Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.458Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.458Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.458Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.458Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.458Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.459Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.459Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.459Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.459Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.459Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.459Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.459Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.459Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.459Z] [90m10 |[0m
+[2026-08-26T04:51:13.459Z] Import traces:
+[2026-08-26T04:51:13.459Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.459Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.459Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.459Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.459Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.459Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.459Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.459Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.459Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.459Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.459Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.459Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.460Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.460Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.460Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.460Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.460Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.460Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.460Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.460Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.460Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.460Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.460Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.460Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.460Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.460Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.460Z] [90m10 |[0m
+[2026-08-26T04:51:13.460Z] Import traces:
+[2026-08-26T04:51:13.460Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.460Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.460Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.460Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.460Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.461Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.461Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.461Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.461Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.461Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.461Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.461Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.461Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.461Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.461Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.461Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.461Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.461Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.461Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.461Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.461Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.461Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.462Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.462Z] [90m10 |[0m
+[2026-08-26T04:51:13.462Z] Import traces:
+[2026-08-26T04:51:13.462Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.462Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.462Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.462Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.462Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.462Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.462Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.462Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.462Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.462Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.462Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.462Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.462Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.462Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.462Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.462Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.462Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.462Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.462Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.463Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.463Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.463Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.463Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.463Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.463Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.463Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.463Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.463Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.463Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.463Z] [90m10 |[0m
+[2026-08-26T04:51:13.463Z] Import traces:
+[2026-08-26T04:51:13.463Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.463Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.463Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.463Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.463Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.463Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.463Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.463Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.463Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.463Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.463Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.463Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.463Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.464Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.464Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.464Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.464Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.464Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.464Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.464Z] [90m10 |[0m
+[2026-08-26T04:51:13.464Z] Import traces:
+[2026-08-26T04:51:13.464Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.464Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.464Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.464Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.464Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.464Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.464Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.464Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.465Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.465Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.465Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.465Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.465Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.465Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.465Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.465Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.465Z] [90m10 |[0m
+[2026-08-26T04:51:13.465Z] Import traces:
+[2026-08-26T04:51:13.465Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.465Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.465Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.465Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.465Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.465Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.465Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.465Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.465Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.465Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.465Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.465Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.466Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.466Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.466Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.466Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.466Z] ⨯ ./src/components/kisok-ui/index.ts:2:1
+[2026-08-26T04:51:13.466Z] Error: Module not found: Can't resolve './KisokDialog'
+[2026-08-26T04:51:13.466Z] [90m 1 |[0m [36mexport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'./KisokButton'[0m;
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 3 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 4 |[0m   [33mKisokDialogContent[0m,
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 5 |[0m   [33mKisokDialogDescription[0m,
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 6 |[0m   [33mKisokDialogFooter[0m,
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 7 |[0m   [33mKisokDialogHeader[0m,
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 8 |[0m   [33mKisokDialogTitle[0m,
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [31m[1m>[0m [90m 9 |[0m } [36mfrom[0m [32m'./KisokDialog'[0m;
+[2026-08-26T04:51:13.466Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.466Z] [90m10 |[0m
+[2026-08-26T04:51:13.466Z] Import traces:
+[2026-08-26T04:51:13.466Z] #1 [Client Component Browser]:
+[2026-08-26T04:51:13.466Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.466Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:51:13.466Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.466Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] #2 [Client Component Browser]:
+[2026-08-26T04:51:13.466Z] ./src/components/kisok-ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.466Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.466Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.466Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.466Z] #3 [Client Component SSR]:
+[2026-08-26T04:51:13.466Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] #4 [Client Component SSR]:
+[2026-08-26T04:51:13.467Z] ./src/components/kisok-ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.467Z] ⨯ ./src/shared/ui/index.ts:1:1
+[2026-08-26T04:51:13.467Z] Error: Module not found: Can't resolve '@/components/admin/StatusPill'
+[2026-08-26T04:51:13.467Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mStatusPill[0m } [36mfrom[0m [32m'@/components/admin/StatusPill'[0m;
+[2026-08-26T04:51:13.467Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.467Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.467Z] [90m3 |[0m   [33mKisokButton[0m,
+[2026-08-26T04:51:13.467Z] [90m4 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.467Z] Import map: aliased to relative './src/components/admin/StatusPill' inside of [project]/
+[2026-08-26T04:51:13.467Z] Import traces:
+[2026-08-26T04:51:13.467Z] Client Component Browser:
+[2026-08-26T04:51:13.467Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] Client Component SSR:
+[2026-08-26T04:51:13.467Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.467Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.467Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.467Z] ⨯ ./src/shared/ui/index.ts:1:1
+[2026-08-26T04:51:13.467Z] Error: Module not found: Can't resolve '@/components/admin/StatusPill'
+[2026-08-26T04:51:13.467Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mStatusPill[0m } [36mfrom[0m [32m'@/components/admin/StatusPill'[0m;
+[2026-08-26T04:51:13.467Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.467Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.467Z] [90m3 |[0m   [33mKisokButton[0m,
+[2026-08-26T04:51:13.467Z] [90m4 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.467Z] Import map: aliased to relative './src/components/admin/StatusPill' inside of [project]/
+[2026-08-26T04:51:13.467Z] Import traces:
+[2026-08-26T04:51:13.467Z] Client Component Browser:
+[2026-08-26T04:51:13.468Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] Client Component SSR:
+[2026-08-26T04:51:13.468Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.468Z] ⨯ ./src/shared/ui/index.ts:1:1
+[2026-08-26T04:51:13.468Z] Error: Module not found: Can't resolve '@/components/admin/StatusPill'
+[2026-08-26T04:51:13.468Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mStatusPill[0m } [36mfrom[0m [32m'@/components/admin/StatusPill'[0m;
+[2026-08-26T04:51:13.468Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.468Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.468Z] [90m3 |[0m   [33mKisokButton[0m,
+[2026-08-26T04:51:13.468Z] [90m4 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.468Z] Import map: aliased to relative './src/components/admin/StatusPill' inside of [project]/
+[2026-08-26T04:51:13.468Z] Import traces:
+[2026-08-26T04:51:13.468Z] Client Component Browser:
+[2026-08-26T04:51:13.468Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] Client Component SSR:
+[2026-08-26T04:51:13.468Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.468Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.468Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:51:13.468Z] ⨯ ./src/shared/ui/index.ts:1:1
+[2026-08-26T04:51:13.468Z] Error: Module not found: Can't resolve '@/components/admin/StatusPill'
+[2026-08-26T04:51:13.468Z] [31m[1m>[0m [90m1 |[0m [36mexport[0m { [33mStatusPill[0m } [36mfrom[0m [32m'@/components/admin/StatusPill'[0m;
+[2026-08-26T04:51:13.468Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:51:13.468Z] [90m2 |[0m [36mexport[0m {
+[2026-08-26T04:51:13.469Z] [90m3 |[0m   [33mKisokButton[0m,
+[2026-08-26T04:51:13.469Z] [90m4 |[0m   [33mKisokDialog[0m,
+[2026-08-26T04:51:13.469Z] Import map: aliased to relative './src/components/admin/StatusPill' inside of [project]/
+[2026-08-26T04:51:13.469Z] Import traces:
+[2026-08-26T04:51:13.469Z] Client Component Browser:
+[2026-08-26T04:51:13.469Z] ./src/shared/ui/index.ts [Client Component Browser]
+[2026-08-26T04:51:13.469Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:51:13.469Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.469Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.469Z] Client Component SSR:
+[2026-08-26T04:51:13.469Z] ./src/shared/ui/index.ts [Client Component SSR]
+[2026-08-26T04:51:13.469Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:51:13.469Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:51:13.469Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:51:13.469Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:54:58.504Z] GET / 200 in 194ms (next.js: 18ms, proxy.ts: 3ms, generate-params: 16ms, application-code: 156ms)
+[2026-08-26T04:54:58.575Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_1zmgda1._.js from "127.0.0.1".
+[2026-08-26T04:54:58.575Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:54:58.575Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:54:58.575Z] // next.config.js
+[2026-08-26T04:54:58.575Z] module.exports = {
+[2026-08-26T04:54:58.575Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T04:54:58.575Z] }
+[2026-08-26T04:54:58.575Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:54:58.582Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_1g4t9wq._.js from "127.0.0.1".
+[2026-08-26T04:54:58.582Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:54:58.582Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:54:58.582Z] // next.config.js
+[2026-08-26T04:54:58.582Z] module.exports = {
+[2026-08-26T04:54:58.582Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T04:54:58.582Z] }
+[2026-08-26T04:54:58.582Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:54:58.582Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1hn7_tailwind-merge_dist_bundle-mjs_mjs_04a_myf._.js from "127.0.0.1".
+[2026-08-26T04:54:58.582Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:54:58.582Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:54:58.582Z] // next.config.js
+[2026-08-26T04:54:58.582Z] module.exports = {
+[2026-08-26T04:54:58.582Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T04:54:58.582Z] }
+[2026-08-26T04:54:58.582Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:54:58.583Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1a7c_zod_v4_0_p_dem._.js from "127.0.0.1".
+[2026-08-26T04:54:58.583Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:54:58.583Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:54:58.583Z] // next.config.js
+[2026-08-26T04:54:58.583Z] module.exports = {
+[2026-08-26T04:54:58.583Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T04:54:58.583Z] }
+[2026-08-26T04:54:58.583Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:54:58.586Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1-ajsuq._.js from "127.0.0.1".
+[2026-08-26T04:54:58.586Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:54:58.586Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:54:58.586Z] // next.config.js
+[2026-08-26T04:54:58.586Z] module.exports = {
+[2026-08-26T04:54:58.586Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T04:54:58.586Z] }
+[2026-08-26T04:54:58.586Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins

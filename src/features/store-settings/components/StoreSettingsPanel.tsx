@@ -10,13 +10,14 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
-} from '@/components/kisok-ui';
+} from '@/shared/ui';
 
-import { localStoreSettingsContract } from '../data/local-store-settings';
+import { storeSettingsRepository } from '../repositories';
+import { storeSettingsSchema } from '../schemas/store-settings.schema';
 
 export function StoreSettingsPanel({ onAction }: { onAction: (message: string) => void }) {
   const [editOpen, setEditOpen] = useState(false);
-  const [settings, setSettings] = useState(() => ({ ...localStoreSettingsContract.get() }));
+  const [settings, setSettings] = useState(() => ({ ...storeSettingsRepository.get() }));
   const [lowStockThresholdDraft, setLowStockThresholdDraft] = useState(settings.lowStockThreshold);
   const [orderResetDraft, setOrderResetDraft] = useState(settings.orderReset);
   const [storeIdentityDraft, setStoreIdentityDraft] = useState(settings.storeIdentity);
@@ -29,16 +30,15 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
   }
 
   function saveLocalSettings() {
-    const storeIdentity = storeIdentityDraft.trim();
-    if (!storeIdentity) {
+    const validation = storeSettingsSchema.safeParse({
+      lowStockThreshold: lowStockThresholdDraft,
+      orderReset: orderResetDraft,
+      storeIdentity: storeIdentityDraft,
+    });
+    if (!validation.success) {
       return;
     }
-    setSettings((current) => ({
-      ...current,
-      lowStockThreshold: lowStockThresholdDraft.trim() || current.lowStockThreshold,
-      orderReset: orderResetDraft.trim() || current.orderReset,
-      storeIdentity,
-    }));
+    setSettings((current) => ({ ...current, ...validation.data }));
     setEditOpen(false);
     onAction('Local store settings saved');
   }

@@ -1,3 +1,5 @@
+import type { ListDataContract } from '@/shared/contracts';
+
 export interface LocalTaxonomyNode {
   children: number;
   name: string;
@@ -5,6 +7,4 @@ export interface LocalTaxonomyNode {
   visibility: 'Active';
 }
 
-export interface CatalogTaxonomyDataContract {
-  list(): readonly LocalTaxonomyNode[];
-}
+export interface CatalogTaxonomyDataContract extends ListDataContract<LocalTaxonomyNode> {}

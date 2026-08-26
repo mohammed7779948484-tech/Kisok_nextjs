@@ -1,3 +1,5 @@
+import type { ValueDataContract } from '@/shared/contracts';
+
 export interface LocalStoreSettings {
   lowStockThreshold: string;
   orderReset: string;
@@ -5,6 +7,4 @@ export interface LocalStoreSettings {
   timezone: string;
 }
 
-export interface StoreSettingsDataContract {
-  get(): Readonly<LocalStoreSettings>;
-}
+export interface StoreSettingsDataContract extends ValueDataContract<LocalStoreSettings> {}

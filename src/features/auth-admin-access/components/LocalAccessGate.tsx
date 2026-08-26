@@ -1,9 +1,9 @@
 'use client';
 
-import { localAccessContract } from '../data/local-access';
+import { adminAccessRepository } from '../repositories';
 
 export function LocalAccessGate({ onEnter }: { onEnter: () => void }) {
-  const accessState = localAccessContract.get();
+  const accessState = adminAccessRepository.get();
 
   return (
     <main className="grid min-h-dvh place-items-center bg-[#101010] p-5 text-[#f1f1ef] sm:p-8">

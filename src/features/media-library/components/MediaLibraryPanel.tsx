@@ -10,14 +10,14 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
-} from '@/components/kisok-ui';
+} from '@/shared/ui';
 
-import { localMediaLibraryContract } from '../data/local-media-assets';
+import { mediaLibraryRepository } from '../repositories';
 import type { LocalMediaAsset } from '../types';
 
 export function MediaLibraryPanel({ onAction }: { onAction: (message: string) => void }) {
   const [assetForRemoval, setAssetForRemoval] = useState<LocalMediaAsset | null>(null);
-  const mediaAssets = localMediaLibraryContract.list();
+  const mediaAssets = mediaLibraryRepository.list();
 
   function stageRemovalReview() {
     if (assetForRemoval) {

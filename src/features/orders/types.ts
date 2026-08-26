@@ -1,3 +1,5 @@
+import type { ListDataContract } from '@/shared/contracts';
+
 export type OrderStatus = 'Completed' | 'New' | 'Preparing';
 
 export interface LocalOrder {
@@ -7,6 +9,4 @@ export interface LocalOrder {
   type: string;
 }
 
-export interface OrdersDataContract {
-  list(): readonly LocalOrder[];
-}
+export interface OrdersDataContract extends ListDataContract<LocalOrder> {}

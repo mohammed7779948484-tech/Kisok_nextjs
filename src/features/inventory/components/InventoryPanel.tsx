@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-import { StatusPill } from '@/components/admin/StatusPill';
 import {
   KisokButton,
   KisokDialog,
@@ -11,14 +10,15 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
-} from '@/components/kisok-ui';
+  StatusPill,
+} from '@/shared/ui';
 
-import { localInventoryContract } from '../data/local-inventory';
+import { inventoryRepository } from '../repositories';
 
 export function InventoryPanel({ onAction }: { onAction: (message: string) => void }) {
   const [adjustmentOpen, setAdjustmentOpen] = useState(false);
   const [reason, setReason] = useState('');
-  const inventoryRows = localInventoryContract.list();
+  const inventoryRows = inventoryRepository.list();
 
   function stageAdjustment() {
     onAction('Inventory adjustment staged locally');

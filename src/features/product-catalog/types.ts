@@ -1,3 +1,5 @@
+import type { ListDataContract } from '@/shared/contracts';
+
 export interface LocalProduct {
   category: string;
   name: string;
@@ -5,6 +7,4 @@ export interface LocalProduct {
   stock: number;
 }
 
-export interface ProductCatalogDataContract {
-  list(): readonly LocalProduct[];
-}
+export interface ProductCatalogDataContract extends ListDataContract<LocalProduct> {}

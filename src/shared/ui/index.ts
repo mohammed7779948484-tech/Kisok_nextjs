@@ -7,3 +7,4 @@ export {
   KisokDialogHeader,
   KisokDialogTitle,
 } from './KisokDialog';
+export { StatusPill } from './StatusPill';

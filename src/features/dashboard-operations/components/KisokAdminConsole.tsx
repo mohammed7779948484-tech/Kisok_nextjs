@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 
-import { StatusPill } from '@/components/admin/StatusPill';
 import { AdminUsersPanel } from '@/features/admin-users/components/AdminUsersPanel';
 import { LocalAccessGate } from '@/features/auth-admin-access/components/LocalAccessGate';
 import { CatalogTaxonomyPanel } from '@/features/catalog-taxonomy/components/CatalogTaxonomyPanel';
@@ -11,9 +10,10 @@ import { MediaLibraryPanel } from '@/features/media-library/components/MediaLibr
 import { OrdersPanel as OrdersFeaturePanel } from '@/features/orders/components/OrdersPanel';
 import { ProductCatalogPanel } from '@/features/product-catalog/components/ProductCatalogPanel';
 import { StoreSettingsPanel } from '@/features/store-settings/components/StoreSettingsPanel';
+import { StatusPill } from '@/shared/ui';
 
-import { localOperationsContract } from '../data/local-operations';
 import { summarizeOperations } from '../lib/dashboard-model';
+import { operationsRepository } from '../repositories';
 
 const navigation = [
   { id: 'dashboard', label: 'Overview', marker: '01' },
@@ -66,7 +66,7 @@ const panelCopy: Record<
 };
 
 function OverviewPanel() {
-  const summary = summarizeOperations(localOperationsContract.get());
+  const summary = summarizeOperations(operationsRepository.get());
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1.24fr_0.76fr]">

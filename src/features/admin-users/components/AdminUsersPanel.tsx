@@ -1,12 +1,11 @@
 'use client';
 
-import { StatusPill } from '@/components/admin/StatusPill';
-import { KisokButton } from '@/components/kisok-ui';
+import { KisokButton, StatusPill } from '@/shared/ui';
 
-import { localAdminUsersContract } from '../data/local-admin-users';
+import { adminUsersRepository } from '../repositories';
 
 export function AdminUsersPanel({ onAction }: { onAction: (message: string) => void }) {
-  const localUsers = localAdminUsersContract.list();
+  const localUsers = adminUsersRepository.list();
 
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">

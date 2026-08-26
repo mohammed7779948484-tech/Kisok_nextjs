@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-import { StatusPill } from '@/components/admin/StatusPill';
 import {
   KisokButton,
   KisokDialog,
@@ -11,9 +10,10 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
-} from '@/components/kisok-ui';
+  StatusPill,
+} from '@/shared/ui';
 
-import { localOrdersContract } from '../data/local-orders';
+import { ordersRepository } from '../repositories';
 import type { LocalOrder } from '../types';
 
 export function OrdersPanel({ onAction }: { onAction: (message: string) => void }) {
@@ -21,7 +21,7 @@ export function OrdersPanel({ onAction }: { onAction: (message: string) => void 
   const [handoffNote, setHandoffNote] = useState('');
   const [orderForCancellation, setOrderForCancellation] = useState<LocalOrder | null>(null);
   const [orderForHandoff, setOrderForHandoff] = useState<LocalOrder | null>(null);
-  const orderRows = localOrdersContract.list();
+  const orderRows = ordersRepository.list();
 
   function stageCancellation() {
     if (orderForCancellation) {

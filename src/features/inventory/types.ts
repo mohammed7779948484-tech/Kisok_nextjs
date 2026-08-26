@@ -1,3 +1,5 @@
+import type { ListDataContract } from '@/shared/contracts';
+
 export interface LocalInventoryRecord {
   available: number;
   lastAction: string;
@@ -5,6 +7,4 @@ export interface LocalInventoryRecord {
   threshold: number;
 }
 
-export interface InventoryDataContract {
-  list(): readonly LocalInventoryRecord[];
-}
+export interface InventoryDataContract extends ListDataContract<LocalInventoryRecord> {}

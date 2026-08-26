@@ -1,11 +1,12 @@
+import type { ValueDataContract } from '@/shared/contracts';
+
 import type { DashboardInventoryRecord, DashboardOrderRecord } from '../lib/dashboard-model';
 
-export interface DashboardOperationsDataContract {
-  get(): {
+export interface DashboardOperationsDataContract
+  extends ValueDataContract<{
     inventory: DashboardInventoryRecord[];
     orders: DashboardOrderRecord[];
-  };
-}
+  }> {}
 
 const localOperations = {
   inventory: [
