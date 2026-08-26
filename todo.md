@@ -45,4 +45,4 @@
 - [x] البحث في Refine Core وRefine مع Next.js Router وshadcn/ui وSupabase وتقييم ملاءمتها لبنية Features/repositories في Kisok وnext-maker.
 - [x] إعداد مخطط تكامل Refine منفصل عن مكوّنات العرض وتهيئته لاستبدال عقود repositories محليًا بمزوّد Supabase لاحقًا من دون أسرار أو اتصال فعلي.
 - [x] التحقق من أي إعداد Refine جديد عبر اختبارات ووثائق وبوابة الجودة الكاملة في Node.js 24+.
-- [ ] إنشاء commit من حالة Refine وshadcn المتحققة ودفعه إلى مستودع GitHub الذي حدده المستخدم.
+- [x] إنشاء commit من حالة Refine وshadcn المتحققة ودفعه إلى مستودع GitHub الذي حدده المستخدم.
