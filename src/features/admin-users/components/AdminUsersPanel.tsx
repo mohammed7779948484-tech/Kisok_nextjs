@@ -1,39 +1,429 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useState } from 'react';
 
-import { KisokButton, KisokInput, StatusPill } from '@/shared/ui';
+import { Label } from '@/components/ui/label';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { Database } from '@/infrastructure/supabase/database.types';
+import {
+  KisokButton,
+  KisokDialog,
+  KisokDialogContent,
+  KisokDialogDescription,
+  KisokDialogFooter,
+  KisokDialogHeader,
+  KisokDialogTitle,
+  KisokInput,
+  StatusPill,
+} from '@/shared/ui';
 
 import { adminUsersRepository } from '../repositories';
-import { updateAdminUser } from '../server/actions';
+import { createAdminUser, resetAdminUserPassword, updateAdminUser } from '../server/actions';
 import type { AdminUserRecord } from '../types';
 
-function roleLabel(role: AdminUserRecord['role']) {
-  return role === 'admin' ? 'Administrator' : role === 'preparation' ? 'Preparation' : 'Customer';
+type AppRole = Database['public']['Enums']['app_role'];
+
+const PAGE_SIZE = 20;
+const ROLE_OPTIONS: Array<{ value: AppRole; label: string }> = [
+  { value: 'admin', label: 'Administrator' },
+  { value: 'preparation', label: 'Preparation' },
+  { value: 'customer', label: 'Customer' },
+];
+
+function roleLabel(role: AppRole) {
+  return ROLE_OPTIONS.find((option) => option.value === role)?.label ?? role;
+}
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+/** Debounced-as-you-type search: one deliberate pattern, not a live-effect
+ * search plus a redundant "Search" button. */
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
+type EditDialogState = { open: boolean; user: AdminUserRecord | null };
+
+function EditAdminUserDialog({
+  dialogState,
+  onOpenChange,
+  onSaved,
+}: {
+  dialogState: EditDialogState;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void | Promise<void>;
+}) {
+  const { open, user } = dialogState;
+  const [displayName, setDisplayName] = useState('');
+  const [role, setRole] = useState<AppRole>('preparation');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!(open && user)) return;
+    setDisplayName(user.displayName);
+    setRole(user.role);
+    setError(null);
+  }, [open, user]);
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!user) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await updateAdminUser({
+        targetId: user.id,
+        changes: { display_name: displayName.trim(), role },
+      });
+      await onSaved();
+      onOpenChange(false);
+    } catch (caught) {
+      setError(errorMessage(caught, 'This profile could not be updated.'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <KisokDialog onOpenChange={onOpenChange} open={open}>
+      <KisokDialogContent>
+        <KisokDialogHeader>
+          <KisokDialogTitle>Edit team member</KisokDialogTitle>
+          <KisokDialogDescription>
+            Update the display name and role for this hosted profile.
+          </KisokDialogDescription>
+        </KisokDialogHeader>
+        <form className="grid gap-4" onSubmit={onSubmit}>
+          <div className="grid gap-2">
+            <Label htmlFor="admin-user-edit-name">Display name</Label>
+            <KisokInput
+              id="admin-user-edit-name"
+              onChange={(event) => setDisplayName(event.target.value)}
+              required
+              value={displayName}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="admin-user-edit-role">Role</Label>
+            <Select onValueChange={(value) => setRole(value as AppRole)} value={role}>
+              <SelectTrigger className="w-full" id="admin-user-edit-role">
+                <SelectValue>{(value: AppRole) => roleLabel(value)}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {ROLE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {error ? (
+            <p className="text-destructive text-sm" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <KisokDialogFooter>
+            <KisokButton
+              disabled={submitting}
+              onClick={() => onOpenChange(false)}
+              type="button"
+              variant="quiet"
+            >
+              Cancel
+            </KisokButton>
+            <KisokButton disabled={submitting} type="submit">
+              {submitting ? 'Saving…' : 'Save changes'}
+            </KisokButton>
+          </KisokDialogFooter>
+        </form>
+      </KisokDialogContent>
+    </KisokDialog>
+  );
+}
+
+function CreateAdminUserDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => void | Promise<void>;
+}) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [role, setRole] = useState<AppRole>('preparation');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) return;
+    setEmail('');
+    setPassword('');
+    setDisplayName('');
+    setRole('preparation');
+    setError(null);
+  }, [open]);
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createAdminUser({
+        email: email.trim(),
+        password,
+        displayName: displayName.trim(),
+        role,
+      });
+      await onCreated();
+      onOpenChange(false);
+    } catch (caught) {
+      setError(errorMessage(caught, 'This team member could not be created.'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <KisokDialog onOpenChange={onOpenChange} open={open}>
+      <KisokDialogContent>
+        <KisokDialogHeader>
+          <KisokDialogTitle>Create team member</KisokDialogTitle>
+          <KisokDialogDescription>
+            Creates a confirmed Auth account and its Lean profile directly — no invite email is
+            sent.
+          </KisokDialogDescription>
+        </KisokDialogHeader>
+        <form className="grid gap-4" onSubmit={onSubmit}>
+          <div className="grid gap-2">
+            <Label htmlFor="admin-user-create-name">Display name</Label>
+            <KisokInput
+              id="admin-user-create-name"
+              onChange={(event) => setDisplayName(event.target.value)}
+              required
+              value={displayName}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="admin-user-create-email">Email</Label>
+            <KisokInput
+              id="admin-user-create-email"
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              type="email"
+              value={email}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="admin-user-create-password">Initial password</Label>
+            <KisokInput
+              id="admin-user-create-password"
+              minLength={6}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              type="password"
+              value={password}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="admin-user-create-role">Role</Label>
+            <Select onValueChange={(value) => setRole(value as AppRole)} value={role}>
+              <SelectTrigger className="w-full" id="admin-user-create-role">
+                <SelectValue>{(value: AppRole) => roleLabel(value)}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {ROLE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {error ? (
+            <p className="text-destructive text-sm" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <KisokDialogFooter>
+            <KisokButton
+              disabled={submitting}
+              onClick={() => onOpenChange(false)}
+              type="button"
+              variant="quiet"
+            >
+              Cancel
+            </KisokButton>
+            <KisokButton disabled={submitting} type="submit">
+              {submitting ? 'Creating…' : 'Create team member'}
+            </KisokButton>
+          </KisokDialogFooter>
+        </form>
+      </KisokDialogContent>
+    </KisokDialog>
+  );
+}
+
+type PasswordDialogState = { open: boolean; user: AdminUserRecord | null };
+
+function ResetPasswordDialog({
+  dialogState,
+  onOpenChange,
+}: {
+  dialogState: PasswordDialogState;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { open, user } = dialogState;
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (open) return;
+    setPassword('');
+    setError(null);
+    setSuccess(false);
+  }, [open]);
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!user) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await resetAdminUserPassword({ targetId: user.id, password });
+      setSuccess(true);
+    } catch (caught) {
+      setError(errorMessage(caught, 'The password could not be reset.'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <KisokDialog onOpenChange={onOpenChange} open={open}>
+      <KisokDialogContent>
+        <KisokDialogHeader>
+          <KisokDialogTitle>Reset password</KisokDialogTitle>
+          <KisokDialogDescription>
+            {user ? `Set a new password for ${user.displayName}.` : null} This takes effect
+            immediately.
+          </KisokDialogDescription>
+        </KisokDialogHeader>
+        {success ? (
+          <div className="grid gap-4">
+            <p className="text-sm">Password updated.</p>
+            <KisokDialogFooter>
+              <KisokButton onClick={() => onOpenChange(false)} type="button">
+                Done
+              </KisokButton>
+            </KisokDialogFooter>
+          </div>
+        ) : (
+          <form className="grid gap-4" onSubmit={onSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="admin-user-reset-password">New password</Label>
+              <KisokInput
+                id="admin-user-reset-password"
+                minLength={6}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                type="password"
+                value={password}
+              />
+            </div>
+            {error ? (
+              <p className="text-destructive text-sm" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <KisokDialogFooter>
+              <KisokButton
+                disabled={submitting}
+                onClick={() => onOpenChange(false)}
+                type="button"
+                variant="quiet"
+              >
+                Cancel
+              </KisokButton>
+              <KisokButton disabled={submitting} type="submit">
+                {submitting ? 'Saving…' : 'Save new password'}
+              </KisokButton>
+            </KisokDialogFooter>
+          </form>
+        )}
+      </KisokDialogContent>
+    </KisokDialog>
+  );
 }
 
 export function AdminUsersPanel() {
   const [users, setUsers] = useState<AdminUserRecord[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [editState, setEditState] = useState<EditDialogState>({ open: false, user: null });
+  const [passwordState, setPasswordState] = useState<PasswordDialogState>({
+    open: false,
+    user: null,
+  });
+  const [createOpen, setCreateOpen] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setUsers(await adminUsersRepository.search(searchTerm));
+      const results = await adminUsersRepository.search(
+        debouncedSearch,
+        PAGE_SIZE,
+        (page - 1) * PAGE_SIZE,
+      );
+      setUsers(results);
+      setTotalCount(results[0]?.totalCount ?? 0);
     } catch {
       setError('Team access records could not be loaded. Check the connection and try again.');
     } finally {
       setLoading(false);
     }
-  }, [searchTerm]);
+  }, [debouncedSearch, page]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   async function toggleActive(user: AdminUserRecord) {
     setUpdatingId(user.id);
@@ -44,8 +434,8 @@ export function AdminUsersPanel() {
         changes: { is_active: !user.isActive },
       });
       await refresh();
-    } catch {
-      setError(`The profile for ${user.displayName} could not be updated.`);
+    } catch (caught) {
+      setError(errorMessage(caught, `The profile for ${user.displayName} could not be updated.`));
     } finally {
       setUpdatingId(null);
     }
@@ -60,24 +450,29 @@ export function AdminUsersPanel() {
           </p>
           <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Team access</h1>
         </div>
-        <KisokButton onClick={() => void refresh()} variant="outline">
-          Refresh
-        </KisokButton>
+        <div className="flex gap-2">
+          <KisokButton onClick={() => setCreateOpen(true)} variant="outline">
+            Add team member
+          </KisokButton>
+          <KisokButton onClick={() => void refresh()} variant="outline">
+            Refresh
+          </KisokButton>
+        </div>
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <label className="sr-only" htmlFor="admin-user-search">
+      <div className="mt-6">
+        <Label className="sr-only" htmlFor="admin-user-search">
           Search team
-        </label>
+        </Label>
         <KisokInput
           id="admin-user-search"
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search name or email"
-          value={searchTerm}
+          value={searchInput}
         />
-        <KisokButton onClick={() => void refresh()} variant="outline">
-          Search
-        </KisokButton>
       </div>
 
       {loading ? (
@@ -113,12 +508,26 @@ export function AdminUsersPanel() {
               <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
                 {roleLabel(user.role)}
               </p>
-              <div className="flex items-center justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 <StatusPill
                   className={user.isActive ? undefined : 'border-destructive text-destructive'}
                 >
                   {user.isActive ? 'Active' : 'Paused'}
                 </StatusPill>
+                <KisokButton
+                  onClick={() => setEditState({ open: true, user })}
+                  size="sm"
+                  variant="quiet"
+                >
+                  Edit
+                </KisokButton>
+                <KisokButton
+                  onClick={() => setPasswordState({ open: true, user })}
+                  size="sm"
+                  variant="quiet"
+                >
+                  Reset password
+                </KisokButton>
                 <KisokButton
                   aria-label={`${user.isActive ? 'Deactivate' : 'Activate'} ${user.displayName}`}
                   disabled={updatingId === user.id}
@@ -133,6 +542,43 @@ export function AdminUsersPanel() {
           ))}
         </div>
       )}
+
+      {totalPages > 1 ? (
+        <Pagination className="mt-6 justify-start">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                aria-disabled={page <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <PaginationItem key={pageNumber}>
+                <PaginationLink isActive={pageNumber === page} onClick={() => setPage(pageNumber)}>
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                aria-disabled={page >= totalPages}
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
+
+      <EditAdminUserDialog
+        dialogState={editState}
+        onOpenChange={(open) => setEditState((current) => ({ ...current, open }))}
+        onSaved={refresh}
+      />
+      <CreateAdminUserDialog onCreated={refresh} onOpenChange={setCreateOpen} open={createOpen} />
+      <ResetPasswordDialog
+        dialogState={passwordState}
+        onOpenChange={(open) => setPasswordState((current) => ({ ...current, open }))}
+      />
     </section>
   );
 }

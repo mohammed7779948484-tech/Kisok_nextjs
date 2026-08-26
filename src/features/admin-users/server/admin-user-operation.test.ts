@@ -52,4 +52,32 @@ describe('server-only Admin User mutation boundary', () => {
       changes: { display_name: 'Renamed', role: 'preparation' },
     });
   });
+
+  it('surfaces the DB last-active-administrator invariant cleanly instead of crashing', async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'the last active administrator cannot be changed' },
+    });
+
+    await expect(
+      executeAdminUserUpdate(
+        { targetId: 'admin-2', changes: { is_active: false } },
+        { getSession: async () => activeAdmin, getServiceClient: () => ({ rpc }) },
+      ),
+    ).rejects.toThrow('the last active administrator cannot be changed');
+  });
+
+  it('surfaces the DB self-demotion invariant cleanly instead of crashing', async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'you cannot remove your own administrator access' },
+    });
+
+    await expect(
+      executeAdminUserUpdate(
+        { targetId: 'admin-1', changes: { role: 'preparation' } },
+        { getSession: async () => activeAdmin, getServiceClient: () => ({ rpc }) },
+      ),
+    ).rejects.toThrow('you cannot remove your own administrator access');
+  });
 });
