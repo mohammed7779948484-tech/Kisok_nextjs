@@ -1,10 +1,21 @@
-import type { ValueDataContract } from '@/shared/contracts';
-
-export interface LocalStoreSettings {
-  lowStockThreshold: string;
-  orderReset: string;
-  storeIdentity: string;
-  timezone: string;
+export interface StoreSettingsRecord {
+  id: boolean;
+  storeName: string;
+  globalLowStockThreshold: number;
+  customerSuccessResetSeconds: number;
+  storeTimezone: string;
+  logoMediaAssetId: string | null;
 }
 
-export interface StoreSettingsDataContract extends ValueDataContract<LocalStoreSettings> {}
+export interface StoreSettingsUpdate {
+  storeName?: string;
+  globalLowStockThreshold?: number;
+  customerSuccessResetSeconds?: number;
+  storeTimezone?: string;
+  logoMediaAssetId?: string | null;
+}
+
+export interface StoreSettingsDataContract {
+  get(): Promise<StoreSettingsRecord>;
+  update(input: StoreSettingsUpdate): Promise<StoreSettingsRecord>;
+}

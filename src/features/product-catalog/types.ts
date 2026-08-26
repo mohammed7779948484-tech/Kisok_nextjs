@@ -1,5 +1,29 @@
 export type ProductStockStatus = 'In stock' | 'Low stock' | 'Review stock' | 'Out of stock';
 
+export interface ProductInput {
+  name: string;
+  brandId?: string | null;
+  shortDescription?: string | null;
+  isFeatured?: boolean;
+}
+
+export interface VariantInput {
+  productId: string;
+  barcode?: string | null;
+  titleOverride?: string | null;
+  lowStockThreshold?: number | null;
+}
+
+export interface VariantRecord {
+  id: string;
+  productId: string;
+  sku: string;
+  barcode: string | null;
+  titleOverride: string | null;
+  isActive: boolean;
+  lowStockThreshold: number | null;
+}
+
 export interface ProductRecord {
   id: string;
   name: string;
@@ -13,4 +37,14 @@ export interface ProductRecord {
 
 export interface ProductCatalogDataContract {
   listProducts(): Promise<ProductRecord[]>;
+  createProduct(input: ProductInput): Promise<{
+    id: string;
+    name: string;
+    brandId: string | null;
+    shortDescription: string | null;
+    isActive: boolean;
+    isFeatured: boolean;
+    coverMediaAssetId: string | null;
+  }>;
+  createVariant(input: VariantInput): Promise<VariantRecord>;
 }
