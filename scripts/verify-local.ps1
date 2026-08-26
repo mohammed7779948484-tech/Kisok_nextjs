@@ -22,6 +22,6 @@ pnpm supabase db lint --local --level error --fail-on error
 pnpm supabase test db --local
 
 Write-Host "== Create reproducible local login users =="
-.\scripts\seed-local-auth.ps1
+pnpm exec tsx .\scripts\seed-local-auth.ts
 
 Write-Host "PASS: two clean local rebuild/test cycles completed."

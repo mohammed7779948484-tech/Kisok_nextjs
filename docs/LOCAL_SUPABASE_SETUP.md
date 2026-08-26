@@ -32,12 +32,13 @@ After Supabase starts, populate a local `.env` from `pnpm supabase status -o env
 
 ## Local login credentials
 
-`supabase/seed.sql` inserts `auth.users` rows with `encrypted_password = ''` only so `profiles(id)`'s foreign key is satisfiable during `supabase db reset` — that value is not a real password hash and cannot authenticate. After `supabase db reset` completes, run one of:
+`supabase/seed.sql` inserts `auth.users` rows with `encrypted_password = ''` only so `profiles(id)`'s foreign key is satisfiable during `supabase db reset` — that value is not a real password hash and cannot authenticate. After `supabase db reset` completes, run:
 
-- `bash scripts/seed-local-auth.sh` (Linux/macOS)
-- `pwsh scripts/seed-local-auth.ps1` (Windows)
+```bash
+pnpm seed:local-auth
+```
 
-against the running local instance to create working local logins through the Auth Admin API:
+(cross-platform — this replaced separate `.sh`/`.ps1` scripts) against the running local instance to create working local logins through the Auth Admin API. The script explicitly resets the password on every run, including for a user that already exists (e.g. the one `seed.sql` created with the unusable empty hash above) — it never treats "the user already exists" as "the password is already usable". See `scripts/lib/local-auth-seed.ts` and its test for the exact behavior:
 
 | Role | Email | Password |
 | --- | --- | --- |

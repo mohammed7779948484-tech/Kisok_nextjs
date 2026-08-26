@@ -22,4 +22,7 @@ pnpm supabase db reset --local
 pnpm supabase db lint --local --level error --fail-on error
 pnpm supabase test db --local
 
+echo "== Create reproducible local login users =="
+pnpm seed:local-auth
+
 echo "PASS: two clean local rebuild/test cycles completed."

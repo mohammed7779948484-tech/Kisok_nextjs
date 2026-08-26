@@ -34,6 +34,7 @@
     "supabase:types": "python3 scripts/generate_types.py",
     "supabase": "pnpm dlx supabase",
     "verify:lean-v2": "bash scripts/verify-local.sh",
+    "seed:local-auth": "tsx scripts/seed-local-auth.ts",
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check",
     "prepare": "husky",
