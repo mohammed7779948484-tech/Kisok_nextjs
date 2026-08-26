@@ -10,8 +10,9 @@ This PR integrates the supplied Lean V2 database contract into `Kisok_nextjs` an
 - Added protected localized Admin routes for Overview, Products, Brands, Categories, Option Library, Inventory, Orders, Media, Users, and Settings.
 - Switched Refine to the Supabase data provider when configured and retained the explicit fail-fast fallback when configuration is absent.
 - Replaced financial dashboard and order fixture fields with operational-only metrics and fulfillment identity/status fields.
-- Added a live execution plan, TODO tracker, Supabase SSR research notes, a CI workflow, and archived the stale V1 feature map.
+- Added a live execution plan, TODO tracker, Local Supabase setup guide, Supabase SSR research notes, a CI workflow, and archived the stale V1 feature map.
 - Removed committed debug/build logs and the obsolete single-console demo implementation.
+- Upgraded the development environment to Node 24.19.0 with pnpm 10.4.1, installed Docker Engine 29.7.2 and Compose 5.5.0, and added a TDD-tested inventory adjustment adapter for the Lean `apply_inventory_adjustment` RPC.
 
 ## Validation
 
@@ -19,13 +20,13 @@ This PR integrates the supplied Lean V2 database contract into `Kisok_nextjs` an
 - `pnpm type-check` — passed.
 - `pnpm check:deprecated` — passed with no deprecated API usage.
 - `pnpm check:lean-v2` — passed: 13 migrations, 19 functions, 17 triggers, Orders-only Realtime.
-- `pnpm test` — passed: 24 files, 123 tests.
+- `pnpm test` — passed: 25 files, 124 tests, including the inventory RPC adapter test.
 - `pnpm build` — passed; Next.js generated all protected Admin and login routes.
 - Dev-server route smoke check — public login and protected Admin requests respond through the locale proxy.
-- `pnpm verify:lean-v2` — intentionally blocked at `supabase start` because this environment does not have Docker or Podman. The script resolved Supabase CLI 2.115.0 successfully.
+- `pnpm verify:lean-v2` — Supabase CLI 2.115.0 resolves, but startup is blocked by the sandbox kernel: Docker bridge networking cannot access iptables raw/nftables support, and rootless slirp4netns cannot create a TUN device.
 
 ## Review notes
 
-The database runtime gate remains open until this branch is verified on a Docker-enabled machine with two clean reset/lint/pgTAP cycles, Local Auth bootstrap, and authenticated browser smoke tests. Cloudinary upload/deletion runtime checks also require server-side Cloudinary configuration. The repository requests Node >=24; this sandbox ran checks on Node 22 and emitted only the existing engine warning.
+The database runtime gate remains open until this branch is verified on a Docker host with normal bridge networking through two clean reset/lint/pgTAP cycles, Local Auth bootstrap, and authenticated browser smoke tests. Docker is installed here, but the sandbox kernel prevents the required bridge networking. Cloudinary upload/deletion runtime checks also require server-side Cloudinary configuration. The application checks now run on Node 24.19.0; the remaining warning is the existing Vite CommonJS/ESM configuration warning.
 
 No pricing, currency, revenue, tax, payment, or financial KPI fields are present in the active Admin routes, feature fixtures, or operational dashboard.

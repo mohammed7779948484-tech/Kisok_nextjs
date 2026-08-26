@@ -2,6 +2,11 @@
 
 ## Completed
 
+- Upgraded the development runtime to Node.js `v24.19.0` through the existing `.nvmrc`/nvm setup and activated pnpm `10.4.1` under Node 24.
+- Installed Docker Engine `29.7.2`, Docker Compose `v5.5.0`, `slirp4netns`, `fuse-overlayfs`, `uidmap`, `kmod`, and `iproute2`; added the user to the `docker` group and verified Docker host-network containers.
+- Resolved and downloaded Supabase CLI `2.115.0` through the repository’s `pnpm supabase` script.
+- Added a TDD-tested Lean V2 inventory adjustment adapter that calls the transactional `apply_inventory_adjustment` RPC and validates its returned quantity/ledger ID.
+
 - Recovered `mohammed7779948484-tech/Kisok_nextjs` from GitHub and verified `main` at `1c6538a`.
 - Confirmed no previous-agent feature branch or feature PR contains unmerged work; only Dependabot PRs are open.
 - Created `feat/lean-v2-admin-integration` from the current `main` HEAD.
@@ -34,12 +39,12 @@
 | Check | Status | Evidence |
 | --- | --- | --- |
 | GitHub recovery/ref audit | Passed | `git`/`gh` inspection on 2026-08-26 |
-| Locked dependency install | Passed with engine warning | `pnpm install --frozen-lockfile` |
+| Locked dependency install | Passed | `pnpm install --frozen-lockfile` under Node 24.19.0 and pnpm 10.4.1 |
 | Dependency freshness audit | Completed | `pnpm outdated`, `pnpm why` |
 | Lean V2 static validator | Passed | `pnpm check:lean-v2`; 13 migrations, 19 functions, 17 triggers; orders-only Realtime |
-| Local DB reset/lint/pgTAP | Blocked after CLI check | Supabase CLI 2.115.0 resolved through pnpm; `supabase start` stopped because Docker/Podman is not installed |
-| Unit/component tests | Passed | `pnpm test`; 24 files, 123 tests |
-| Type-check/Biome/build | Passed with Node warning | `pnpm type-check`, `pnpm ci:check`, `pnpm build`; Node 22 warns because project requests Node >=24 |
+| Local DB reset/lint/pgTAP | Blocked by sandbox kernel | Docker Engine and Supabase CLI are installed; bridge networking fails because the host kernel lacks iptables raw/nftables support, and rootless slirp4netns cannot create a TUN device |
+| Unit/component tests | Passed | `pnpm test`; 25 files, 124 tests, including the TDD inventory RPC adapter test |
+| Type-check/Biome/build | Passed under Node 24 | `pnpm ci:check`, `pnpm type-check`, `pnpm build`; Node 24.19.0 with pnpm 10.4.1 |
 | Browser verification | Partial | Dev server smoke check passed for route responses; authenticated login workflow awaits Local Supabase/Auth runtime |
 
 ## Architecture decisions
