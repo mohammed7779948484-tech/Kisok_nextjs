@@ -327,8 +327,8 @@ export function ProductCatalogPanel() {
           <KisokDialogHeader>
             <KisokDialogTitle>New product</KisokDialogTitle>
             <KisokDialogDescription>
-              Create a Product in the hosted catalog. Pricing and payment fields are intentionally
-              not part of KISOK.
+              Create a Product in the hosted catalog. This workspace stores operational catalog data
+              only.
             </KisokDialogDescription>
           </KisokDialogHeader>
           <div className="grid gap-4">
