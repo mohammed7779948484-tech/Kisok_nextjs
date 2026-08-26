@@ -8,6 +8,7 @@ import { CustomThemeProvider } from '@/providers';
 import type { AppState } from '@/store';
 import type { SupportedLocale } from '@/types/i18n';
 
+import { RefineProvider } from './RefineProvider';
 import { StoreProvider } from './StoreProvider';
 
 type RootProviderProps = {
@@ -29,7 +30,9 @@ export const RootProvider = ({
     <StoreProvider preloadedState={preloadedState}>
       <CustomThemeProvider>
         <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
-          <TooltipProvider>{children}</TooltipProvider>
+          <RefineProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </RefineProvider>
         </NextIntlClientProvider>
       </CustomThemeProvider>
     </StoreProvider>

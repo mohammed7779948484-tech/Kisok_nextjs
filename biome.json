@@ -201,6 +201,12 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/components/ui/**"],
+      "linter": {
+        "enabled": false
+      }
     }
   ]
 }

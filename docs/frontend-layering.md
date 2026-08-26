@@ -19,6 +19,12 @@ src/
 
 The local UI phase uses synchronous `data/` implementations. Each Feature exposes that implementation through a dedicated `repositories/` boundary, so components are insulated from fixture files and future persistence adapters.
 
+## Refine preparation boundary
+
+Refine Core is prepared as a client-only orchestration runtime under `src/providers/RefineProvider.tsx`. Its resource manifest and non-network deferred data provider live under `src/infrastructure/refine/`. This setup makes the Refine context and Next.js Router binding available without changing the current local panel navigation or allowing any live query.
+
+When a feature receives approved remote CRUD, its own hook will compose the relevant Refine hooks with its Zod schemas and repository contract. This preserves the component rule above: a product, order, or inventory panel renders hook output and dispatches intent; it never imports the Refine data provider or a Supabase client.
+
 ## Supabase integration target
 
 When the integration phase is explicitly approved, every feature will gain a focused, separate implementation rather than a shared mega-file:
@@ -38,3 +44,5 @@ src/
 ```
 
 `TanStack Query` belongs in feature hooks once the project has real asynchronous reads and mutations. `TanStack Table` belongs only in features that need server-aware sorting, filtering, pagination, selection, or bulk actions. `Zod` belongs at feature input/output boundaries, not as a rendering dependency.
+
+The related Refine and TanStack packages are installed as preparation dependencies. They are not yet active in a feature hook because the workspace remains local until the Supabase schema, credentials, RLS, and role model are explicitly approved.

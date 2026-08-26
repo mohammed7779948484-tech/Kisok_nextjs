@@ -41,3 +41,7 @@
 - [x] استبدال الأزرار الأصلية المتبقية في LocalAccessGate وKisokAdminConsole بـ shadcn Button/KisokButton مع الحفاظ على السلوك والاختبارات.
 - [x] تشغيل بوابة التحقق الكاملة بعد تحويل shadcn: lint وvalidate وbuild على Node.js 24+.
 - [x] تحديث دليل اعتماد shadcn واختبار الواجهة لتأكيد أن كل الأزرار الأساسية تمر عبر Button الرسمي.
+- [x] إعداد جرد موثق لمكوّنات shadcn الرسمية وتحديد مسار إدخالها وتخصيصها عبر رموز Kisok دون كتابة primitives بديلة.
+- [x] البحث في Refine Core وRefine مع Next.js Router وshadcn/ui وSupabase وتقييم ملاءمتها لبنية Features/repositories في Kisok وnext-maker.
+- [x] إعداد مخطط تكامل Refine منفصل عن مكوّنات العرض وتهيئته لاستبدال عقود repositories محليًا بمزوّد Supabase لاحقًا من دون أسرار أو اتصال فعلي.
+- [x] التحقق من أي إعداد Refine جديد عبر اختبارات ووثائق وبوابة الجودة الكاملة في Node.js 24+.

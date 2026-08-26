@@ -14,6 +14,7 @@ import path from 'node:path';
 
 const cwd = process.cwd();
 const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, 'tsconfig.json');
+const generatedUiPath = `${path.join(cwd, 'src', 'components', 'ui')}${path.sep}`;
 
 if (!configPath) {
   console.error('tsconfig.json not found');
@@ -40,6 +41,8 @@ let hits = 0;
 for (const sourceFile of program.getSourceFiles()) {
   if (sourceFile.fileName.includes('node_modules')) continue;
   if (!sourceFile.fileName.startsWith(cwd)) continue;
+  // shadcn/ui is generated registry source, checked separately through upstream updates.
+  if (sourceFile.fileName.startsWith(generatedUiPath)) continue;
 
   const visit = (node: ts.Node): void => {
     if (ts.isIdentifier(node)) {
