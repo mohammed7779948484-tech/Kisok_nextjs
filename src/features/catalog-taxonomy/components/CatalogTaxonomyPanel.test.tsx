@@ -6,6 +6,8 @@ const testContext = vi.hoisted(() => ({
   listBrands: vi.fn(),
   listCategories: vi.fn(),
   createBrand: vi.fn(),
+  createCategory: vi.fn(),
+  updateCategory: vi.fn(),
 }));
 
 vi.mock('../repositories', () => ({
@@ -13,6 +15,8 @@ vi.mock('../repositories', () => ({
     listBrands: testContext.listBrands,
     listCategories: testContext.listCategories,
     createBrand: testContext.createBrand,
+    createCategory: testContext.createCategory,
+    updateCategory: testContext.updateCategory,
   },
 }));
 
@@ -52,6 +56,72 @@ describe('CatalogTaxonomyPanel', () => {
 
     expect(await screen.findByText('Coffee')).toBeInTheDocument();
     expect(screen.queryByText('Brands')).not.toBeInTheDocument();
+  });
+
+  it('persists a new child Category through the hosted repository', async () => {
+    const user = userEvent.setup();
+    testContext.listCategories.mockResolvedValue([
+      {
+        id: 'category-1',
+        name: 'Coffee',
+        parentId: null,
+        isActive: true,
+        displayOrder: 0,
+        imageMediaAssetId: null,
+      },
+    ]);
+    testContext.createCategory.mockResolvedValue({
+      id: 'category-2',
+      name: 'Cold Drinks',
+      parentId: 'category-1',
+      isActive: true,
+      displayOrder: 1,
+      imageMediaAssetId: null,
+    });
+
+    render(<CatalogTaxonomyPanel mode="categories" />);
+    await screen.findByText('Coffee');
+    await user.click(screen.getByRole('button', { name: 'Add category' }));
+    await user.type(screen.getByLabelText('Category name'), 'Cold Drinks');
+    await user.selectOptions(screen.getByLabelText('Parent category'), 'category-1');
+    await user.click(screen.getByRole('button', { name: 'Save category' }));
+
+    await waitFor(() =>
+      expect(testContext.createCategory).toHaveBeenCalledWith({
+        name: 'Cold Drinks',
+        parentId: 'category-1',
+      }),
+    );
+  });
+
+  it('persists Category deactivation through the hosted repository', async () => {
+    const user = userEvent.setup();
+    testContext.listCategories.mockResolvedValue([
+      {
+        id: 'category-1',
+        name: 'Coffee',
+        parentId: null,
+        isActive: true,
+        displayOrder: 0,
+        imageMediaAssetId: null,
+      },
+    ]);
+    testContext.updateCategory.mockResolvedValue({
+      id: 'category-1',
+      name: 'Coffee',
+      parentId: null,
+      isActive: false,
+      displayOrder: 0,
+      imageMediaAssetId: null,
+    });
+
+    render(<CatalogTaxonomyPanel mode="categories" />);
+    await screen.findByText('Coffee');
+    await user.click(screen.getByRole('button', { name: 'Deactivate Coffee' }));
+
+    await waitFor(() =>
+      expect(testContext.updateCategory).toHaveBeenCalledWith('category-1', { isActive: false }),
+    );
   });
 
   it('persists a new Brand through the repository', async () => {

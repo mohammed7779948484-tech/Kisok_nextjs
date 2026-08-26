@@ -8,7 +8,9 @@ import type {
   BrandRecord,
   BrandUpdate,
   CatalogTaxonomyDataContract,
+  CategoryInput,
   CategoryRecord,
+  CategoryUpdate,
   OptionTypeRecord,
 } from '../types';
 
@@ -91,6 +93,52 @@ export function createCatalogTaxonomyRepository(
       return (result.data ?? []).map(mapCategory);
     },
 
+    async createCategory(input: CategoryInput) {
+      const payload: Database['public']['Tables']['categories']['Insert'] = {
+        name: input.name.trim(),
+        parent_id: input.parentId ?? null,
+      };
+      if (input.imageMediaAssetId !== undefined)
+        payload.image_media_asset_id = input.imageMediaAssetId;
+      const result = await client
+        .from('categories')
+        .insert(payload)
+        .select(
+          'id,name,parent_id,is_active,display_order,image_media_asset_id,created_at,updated_at',
+        )
+        .single();
+      if (result.error) throw result.error;
+      return mapCategory(result.data);
+    },
+
+    async updateCategory(id: string, input: CategoryUpdate) {
+      const payload: Database['public']['Tables']['categories']['Update'] = {};
+      if (input.name !== undefined) payload.name = input.name.trim();
+      if (input.parentId !== undefined) payload.parent_id = input.parentId;
+      if (input.isActive !== undefined) payload.is_active = input.isActive;
+      if (input.imageMediaAssetId !== undefined)
+        payload.image_media_asset_id = input.imageMediaAssetId;
+      const result = await client
+        .from('categories')
+        .update(payload)
+        .eq('id', id)
+        .select(
+          'id,name,parent_id,is_active,display_order,image_media_asset_id,created_at,updated_at',
+        )
+        .single();
+      if (result.error) throw result.error;
+      return mapCategory(result.data);
+    },
+
+    async reorderCategories(scopeId: string | null, orderedIds: string[]) {
+      const result = await client.rpc('reorder_items', {
+        resource_name: 'categories',
+        scope_id: scopeId as Database['public']['Functions']['reorder_items']['Args']['scope_id'],
+        ordered_ids: orderedIds,
+      });
+      if (result.error) throw result.error;
+    },
+
     async listBrands(search = '') {
       let query = client
         .from('brands')
@@ -140,6 +188,18 @@ export const catalogTaxonomyRepository: CatalogTaxonomyDataContract = {
   },
   listCategories() {
     return createCatalogTaxonomyRepository(getClientOrThrow()).listCategories();
+  },
+  createCategory(input) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).createCategory(input);
+  },
+  updateCategory(id, input) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).updateCategory(id, input);
+  },
+  reorderCategories(scopeId, orderedIds) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).reorderCategories(
+      scopeId,
+      orderedIds,
+    );
   },
   listOptionTypes() {
     return createCatalogTaxonomyRepository(getClientOrThrow()).listOptionTypes();

@@ -25,6 +25,11 @@ export function CatalogTaxonomyPanel({ mode = 'brands' }: { mode?: CatalogMode }
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [brandName, setBrandName] = useState('');
+  const [categoryCreateOpen, setCategoryCreateOpen] = useState(false);
+  const [categoryBeingEdited, setCategoryBeingEdited] = useState<CategoryRecord | null>(null);
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryParentId, setCategoryParentId] = useState('');
+  const [categorySaving, setCategorySaving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +73,52 @@ export function CatalogTaxonomyPanel({ mode = 'brands' }: { mode?: CatalogMode }
     }
   }
 
+  async function saveCategory() {
+    const name = categoryName.trim();
+    if (!name) return;
+    setCategorySaving(true);
+    setError(null);
+    try {
+      if (categoryBeingEdited) {
+        await catalogTaxonomyRepository.updateCategory(categoryBeingEdited.id, {
+          name,
+          parentId: categoryParentId || null,
+        });
+      } else {
+        await catalogTaxonomyRepository.createCategory({
+          name,
+          parentId: categoryParentId || null,
+        });
+      }
+      setCategoryName('');
+      setCategoryParentId('');
+      setCategoryBeingEdited(null);
+      setCategoryCreateOpen(false);
+      await refresh();
+    } catch {
+      setError('The Category could not be saved. Check the name, parent, and connection.');
+    } finally {
+      setCategorySaving(false);
+    }
+  }
+
+  async function toggleCategory(category: CategoryRecord) {
+    setError(null);
+    try {
+      await catalogTaxonomyRepository.updateCategory(category.id, { isActive: !category.isActive });
+      await refresh();
+    } catch {
+      setError(`The Category ${category.name} could not be updated.`);
+    }
+  }
+
+  function openCategoryEditor(category?: CategoryRecord) {
+    setCategoryBeingEdited(category ?? null);
+    setCategoryName(category?.name ?? '');
+    setCategoryParentId(category?.parentId ?? '');
+    setCategoryCreateOpen(true);
+  }
+
   const isBrands = mode === 'brands';
   const emptyMessage = isBrands ? 'No brands match this search.' : 'No categories are available.';
 
@@ -87,7 +138,11 @@ export function CatalogTaxonomyPanel({ mode = 'brands' }: { mode?: CatalogMode }
             <KisokButton onClick={() => setCreateOpen(true)} variant="outline">
               Add brand
             </KisokButton>
-          ) : null}
+          ) : (
+            <KisokButton onClick={() => openCategoryEditor()} variant="outline">
+              Add category
+            </KisokButton>
+          )}
           <KisokButton onClick={() => void refresh()} variant="outline">
             Refresh
           </KisokButton>
@@ -155,15 +210,101 @@ export function CatalogTaxonomyPanel({ mode = 'brands' }: { mode?: CatalogMode }
                   {category.displayOrder}
                 </p>
               </div>
-              <StatusPill
-                className={category.isActive ? undefined : 'border-destructive text-destructive'}
-              >
-                {category.isActive ? 'Active' : 'Inactive'}
-              </StatusPill>
+              <div className="flex items-center gap-2">
+                <StatusPill
+                  className={category.isActive ? undefined : 'border-destructive text-destructive'}
+                >
+                  {category.isActive ? 'Active' : 'Inactive'}
+                </StatusPill>
+                <KisokButton onClick={() => openCategoryEditor(category)} size="sm" variant="quiet">
+                  Edit
+                </KisokButton>
+                <KisokButton
+                  aria-label={`${category.isActive ? 'Deactivate' : 'Activate'} ${category.name}`}
+                  onClick={() => void toggleCategory(category)}
+                  size="sm"
+                  variant="quiet"
+                >
+                  {category.isActive ? 'Deactivate' : 'Activate'}
+                </KisokButton>
+              </div>
             </article>
           ))}
         </div>
       )}
+
+      {!isBrands ? (
+        <KisokDialog
+          onOpenChange={(open) => {
+            setCategoryCreateOpen(open);
+            if (!open) {
+              setCategoryBeingEdited(null);
+              setCategoryName('');
+              setCategoryParentId('');
+            }
+          }}
+          open={categoryCreateOpen}
+        >
+          <KisokDialogContent>
+            <KisokDialogHeader>
+              <KisokDialogTitle>
+                {categoryBeingEdited ? 'Edit Category' : 'Add Category'}
+              </KisokDialogTitle>
+              <KisokDialogDescription>
+                Categories support one root level and one child level in the hosted Lean V2 catalog.
+              </KisokDialogDescription>
+            </KisokDialogHeader>
+            <label className="grid gap-2" htmlFor="category-name">
+              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                Category name
+              </span>
+              <KisokInput
+                id="category-name"
+                onChange={(event) => setCategoryName(event.target.value)}
+                value={categoryName}
+              />
+            </label>
+            <label className="grid gap-2" htmlFor="category-parent">
+              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                Parent category
+              </span>
+              <select
+                className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                id="category-parent"
+                onChange={(event) => setCategoryParentId(event.target.value)}
+                value={categoryParentId}
+              >
+                <option value="">Root category</option>
+                {categories
+                  .filter(
+                    (category) =>
+                      category.parentId === null && category.id !== categoryBeingEdited?.id,
+                  )
+                  .map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <KisokDialogFooter>
+              <KisokButton
+                disabled={categorySaving}
+                onClick={() => setCategoryCreateOpen(false)}
+                variant="quiet"
+              >
+                Cancel
+              </KisokButton>
+              <KisokButton
+                disabled={categorySaving || !categoryName.trim()}
+                onClick={() => void saveCategory()}
+              >
+                {categorySaving ? 'Saving…' : 'Save category'}
+              </KisokButton>
+            </KisokDialogFooter>
+          </KisokDialogContent>
+        </KisokDialog>
+      ) : null}
 
       {isBrands ? (
         <KisokDialog onOpenChange={setCreateOpen} open={createOpen}>
