@@ -96,6 +96,23 @@ export function createProductCatalogRepository(
         )
         .single();
       if (result.error) throw result.error;
+
+      const categoryIds = [...new Set(input.categoryIds ?? [])];
+      if (categoryIds.length > 0) {
+        const relationResult = await client
+          .from('product_categories')
+          .insert(
+            categoryIds.map((categoryId) => ({
+              product_id: result.data.id,
+              category_id: categoryId,
+            })),
+          );
+        if (relationResult.error) {
+          await client.from('products').delete().eq('id', result.data.id);
+          throw relationResult.error;
+        }
+      }
+
       return mapProduct(result.data);
     },
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { catalogTaxonomyRepository } from '@/features/catalog-taxonomy/repositories';
 import {
   KisokButton,
   KisokDialog,
@@ -24,6 +25,12 @@ export function ProductCatalogPanel() {
   const [productName, setProductName] = useState('');
   const [shortDescription, setShortDescription] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
+  const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string; parentId: string | null }>
+  >([]);
+  const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +39,20 @@ export function ProductCatalogPanel() {
     setLoading(true);
     setError(null);
     try {
-      setProducts(await productCatalogRepository.listProducts());
+      const [productRows, brandRows, categoryRows] = await Promise.all([
+        productCatalogRepository.listProducts(),
+        catalogTaxonomyRepository.listBrands(),
+        catalogTaxonomyRepository.listCategories(),
+      ]);
+      setProducts(productRows);
+      setBrands((brandRows ?? []).map((brand) => ({ id: brand.id, name: brand.name })));
+      setCategories(
+        (categoryRows ?? []).map((category) => ({
+          id: category.id,
+          name: category.name,
+          parentId: category.parentId,
+        })),
+      );
     } catch {
       setError('Products could not be loaded. Check the connection and try again.');
     } finally {
@@ -52,13 +72,16 @@ export function ProductCatalogPanel() {
     try {
       await productCatalogRepository.createProduct({
         name,
-        brandId: null,
+        brandId: selectedBrandId || null,
         shortDescription: shortDescription.trim() || null,
         isFeatured,
+        ...(selectedCategoryIds.length > 0 ? { categoryIds: selectedCategoryIds } : {}),
       });
       setProductName('');
       setShortDescription('');
       setIsFeatured(false);
+      setSelectedBrandId('');
+      setSelectedCategoryIds([]);
       setCreateOpen(false);
       await refresh();
     } catch {
@@ -163,6 +186,48 @@ export function ProductCatalogPanel() {
                 value={productName}
               />
             </label>
+            <label className="grid gap-2" htmlFor="product-brand">
+              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                Brand
+              </span>
+              <select
+                className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                id="product-brand"
+                onChange={(event) => setSelectedBrandId(event.target.value)}
+                value={selectedBrandId}
+              >
+                <option value="">Unassigned</option>
+                {brands.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <fieldset className="grid gap-2">
+              <legend className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                Categories
+              </legend>
+              <div className="grid gap-2">
+                {categories.map((category) => (
+                  <label className="flex items-center gap-2 text-sm" key={category.id}>
+                    <input
+                      aria-label={category.name}
+                      checked={selectedCategoryIds.includes(category.id)}
+                      onChange={(event) =>
+                        setSelectedCategoryIds((current) =>
+                          event.target.checked
+                            ? [...current, category.id]
+                            : current.filter((id) => id !== category.id),
+                        )
+                      }
+                      type="checkbox"
+                    />
+                    <span>{category.parentId ? `↳ ${category.name}` : category.name}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <label className="grid gap-2" htmlFor="product-description">
               <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
                 Description

@@ -5,6 +5,7 @@ export interface ProductInput {
   brandId?: string | null;
   shortDescription?: string | null;
   isFeatured?: boolean;
+  categoryIds?: string[];
 }
 
 export interface VariantInput {
