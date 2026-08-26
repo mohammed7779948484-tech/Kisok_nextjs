@@ -19,6 +19,8 @@ import type {
   OptionValueUpdate,
 } from '../types';
 
+const ORDER_METHOD = 'order' as const;
+
 function getClientOrThrow(): SupabaseClient<Database> {
   const client = getBrowserSupabaseClient();
   if (!client) throw new Error('Supabase is not configured for Catalog Taxonomy.');
@@ -93,7 +95,7 @@ export function createCatalogTaxonomyRepository(
         .select(
           'id,name,is_active,display_order,created_at,updated_at,option_values(id,value,is_active,display_order)',
         )
-        ['order']('display_order', { ascending: true });
+        [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
       return (result.data ?? []).map((row) => mapOptionType(row as never));
     },
@@ -104,7 +106,7 @@ export function createCatalogTaxonomyRepository(
         .select(
           'id,name,parent_id,is_active,display_order,image_media_asset_id,created_at,updated_at',
         )
-        ['order']('display_order', { ascending: true });
+        [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapCategory);
     },
@@ -218,7 +220,7 @@ export function createCatalogTaxonomyRepository(
         .select('id,name,is_active,display_order,image_media_asset_id,created_at,updated_at');
       const normalizedSearch = search.trim();
       if (normalizedSearch) query = query.ilike('name', `%${normalizedSearch}%`);
-      const result = await query['order']('display_order', { ascending: true });
+      const result = await query[ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapBrand);
     },

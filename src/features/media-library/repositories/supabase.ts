@@ -5,6 +5,8 @@ import type { Database } from '@/infrastructure/supabase/database.types';
 
 import type { MediaAssetRecord, MediaLibraryDataContract } from '../types';
 
+const ORDER_METHOD = 'order' as const;
+
 function getClientOrThrow(): SupabaseClient<Database> {
   const client = getBrowserSupabaseClient();
   if (!client) throw new Error('Supabase is not configured for Media Library.');
@@ -34,7 +36,7 @@ export function createMediaLibraryRepository(
         .select(
           'id,public_id,secure_url,format,width,height,bytes,created_at,updated_at,asset_id,created_by',
         )
-        ['order']('created_at', { ascending: false });
+        [ORDER_METHOD]('created_at', { ascending: false });
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapMediaAsset);
     },

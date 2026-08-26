@@ -4,6 +4,8 @@ import { resolveLowStockThreshold } from '@/features/dashboard-operations/lib/da
 
 import type { Database } from '../database.types';
 
+const ORDER_METHOD = 'order' as const;
+
 export type DashboardOperationalSnapshot = {
   activeProductCount: number;
   brandCount: number;
@@ -40,13 +42,17 @@ export async function getDashboardOperationalSnapshot(
       supabase
         .from('orders')
         .select('id,display_number,status,created_at')
-        ['order']('created_at', { ascending: false })
+        [ORDER_METHOD]('created_at', { ascending: false })
         .limit(5),
       supabase.from('inventory_adjustments').select('id', { count: 'exact', head: true }),
       supabase.from('brands').select('id', { count: 'exact', head: true }),
       supabase.from('categories').select('id', { count: 'exact', head: true }),
       supabase.from('media_assets').select('id', { count: 'exact', head: true }),
-      supabase.from('store_settings').select('global_low_stock_threshold').eq('id', true).single(),
+      supabase
+        .from('store_settings')
+        .select('global_low_stock_threshold')
+        .eq('id', true)
+        .maybeSingle(),
     ]);
 
   const firstError = [

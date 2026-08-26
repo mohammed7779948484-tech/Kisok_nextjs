@@ -5,6 +5,8 @@ import type { Database } from '@/infrastructure/supabase/database.types';
 
 import type { OrderItemRecord, OrderRecord, OrdersDataContract } from '../types';
 
+const ORDER_METHOD = 'order' as const;
+
 type OrderItemListRow = {
   id: string;
   product_name: string;
@@ -70,7 +72,7 @@ export function createOrdersRepository(client: SupabaseClient<Database>): Orders
         .select(
           'id,display_number,status,created_at,order_items(id,product_name,variant_name,variant_sku,variant_options,brand_name,image_secure_url,quantity)',
         )
-        ['order']('created_at', { ascending: false });
+        [ORDER_METHOD]('created_at', { ascending: false });
       if (result.error) throw result.error;
       return ((result.data ?? []) as unknown as OrderListRow[]).map((order) => ({
         id: order.id,

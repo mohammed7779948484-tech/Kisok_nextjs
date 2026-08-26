@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { Database } from '../database.types';
 import { getDashboardOperationalSnapshot } from './adapter';
 
-function createClient() {
+function createClient(options?: { missingStoreSettings?: boolean }) {
   const data = {
     products: [
       { id: 'product-active', is_active: true },
@@ -31,7 +31,7 @@ function createClient() {
         created_at: '2026-08-26T12:00:00Z',
       },
     ],
-    store_settings: { global_low_stock_threshold: 7 },
+    store_settings: options?.missingStoreSettings ? null : { global_low_stock_threshold: 7 },
   };
 
   const client = {
@@ -57,8 +57,11 @@ function createClient() {
         eq(_column: string, _value: unknown) {
           return builder;
         },
-        single() {
-          return Promise.resolve({ data: source, error: null });
+        maybeSingle() {
+          return Promise.resolve({
+            data: table === 'store_settings' && options?.missingStoreSettings ? null : source,
+            error: null,
+          });
         },
       };
       return builder;
@@ -83,5 +86,14 @@ describe('Dashboard Supabase adapter', () => {
         recentOrders: [{ id: 'order-new', displayNumber: 'ABC123', status: 'new' }],
       }),
     });
+  });
+
+  it('keeps the overview operational when the optional settings singleton is absent', async () => {
+    const result = await getDashboardOperationalSnapshot(
+      createClient({ missingStoreSettings: true }),
+    );
+
+    expect(result.status).toBe('ready');
+    expect(result.snapshot).toEqual(expect.objectContaining({ lowStockCount: 1 }));
   });
 });

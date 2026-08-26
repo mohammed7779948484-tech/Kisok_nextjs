@@ -14,6 +14,8 @@ import type {
   VariantUpdate,
 } from '../types';
 
+const ORDER_METHOD = 'order' as const;
+
 type ProductListRow = {
   id: string;
   name: string;
@@ -91,7 +93,7 @@ export function createProductCatalogRepository(
           'id,product_id,sku,barcode,title_override,is_active,low_stock_threshold,display_order,search_keywords,created_at,updated_at',
         )
         .eq('product_id', productId)
-        ['order']('display_order', { ascending: true });
+        [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapVariant);
     },
@@ -178,7 +180,7 @@ export function createProductCatalogRepository(
         .select(
           'id,name,is_active,is_featured,brands(name),product_variants(id,inventory(current_quantity))',
         )
-        ['order']('display_order', { ascending: true });
+        [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
 
       return ((result.data ?? []) as unknown as ProductListRow[]).map((product) => {
