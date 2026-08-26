@@ -1,0 +1,36 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": ["server", "db", "user"],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://2W9PFzZKQkkfk66.e18b5913f904:fPDcVF9J93P9Z2SRD1Us@gateway03.us-east-1.prod.aws.tidbcloud.com:4000/PJLWVfSV4bVgt5ZKTDBs9T?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": ["no_db_push"],
+  "git_remote": {
+    "repo_url": "https://7f0548f6b28a1758d9bf7be630d36cb4.artifacts.cloudflare.net/git/prod/PJLWVfSV4bVgt5ZKTDBs9T.git",
+    "expiration": "2026-08-27T03:08:55.858Z",
+    "token": "art_v2_x_4e79efb8514c9d7701c5137691bd613543eba958?expires=1787800135",
+    "backend": "GIT_BACKEND_ARTIFACTS"
+  },
+  "name": "kisok_admin_next",
+  "path": "/home/ubuntu/kisok_admin_next",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "eafiQYBykHtGEiKmLxoTVg",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "AfGKQsKjgPsB6evWmSnj9E",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Mohammed Ali",
+    "OWNER_OPEN_ID": "XuSQXxYouCNVSTQ5JkeQb8",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "102a9a25-b76c-4d04-90a3-9bb5ea74c4b4",
+    "VITE_APP_ID": "PJLWVfSV4bVgt5ZKTDBs9T",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "Kisok Admin Next",
+    "VITE_FRONTEND_FORGE_API_KEY": "AEu7wNUeFKeyAuveoztm5A",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}

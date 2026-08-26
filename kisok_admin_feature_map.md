@@ -88,6 +88,12 @@ No value is copied into the new project until it is supplied securely. The Next.
 5. Before enabling a migrated Feature, require `format`, `type-check`, `test`, and `build` to pass.
 6. Keep destructive operations explicit: deactivation impact, inventory adjustment reasons, order cancellation reason, and media usage protection must remain intact.
 
+## Managed preview runtime note
+
+The managed preview service currently starts `next dev` with Node.js 22.13.0 from the sandbox runtime. That runtime is platform-managed and cannot be changed from the application repository. The preview is operational with Next.js 16.3.3, but it is not the compliance environment for the next-maker engine requirement.
+
+The generator and the complete `pnpm validate` quality gate were executed with Node.js 24.19.0 at `/home/ubuntu/.tools/next-maker-runtime/node_modules/node/bin/node`. The repository also carries `.nvmrc` set to `24` and `package.json` declares `engines.node >=24.0.0`; therefore CI and production must run Node.js 24+ even while the managed preview remains constrained to Node 22.
+
 ## Result
 
 The recommended scope is **9 Features plus shared platform modules**. A strict one-resource-per-folder approach would create 10 route-oriented Features by splitting Brands and Categories, but the recommended `next-maker` architecture uses 9 Features because the two areas are one catalog taxonomy bounded context in the existing codebase.
