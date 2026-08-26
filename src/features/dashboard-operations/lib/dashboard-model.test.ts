@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { summarizeOperations } from './dashboard-model';
+import { resolveLowStockThreshold, summarizeOperations } from './dashboard-model';
 
 describe('summarizeOperations', () => {
   it('counts low stock, open orders, active products, and unavailable variants', () => {
@@ -20,5 +20,10 @@ describe('summarizeOperations', () => {
       openOrderCount: 2,
       unavailableVariantCount: 1,
     });
+  });
+
+  it('resolves an explicit variant threshold before the global threshold', () => {
+    expect(resolveLowStockThreshold(2, 7)).toBe(2);
+    expect(resolveLowStockThreshold(null, 7)).toBe(7);
   });
 });

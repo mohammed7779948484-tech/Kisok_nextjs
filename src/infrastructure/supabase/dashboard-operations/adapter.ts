@@ -1,5 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { resolveLowStockThreshold } from '@/features/dashboard-operations/lib/dashboard-model';
+
+import type { Database } from '../database.types';
+
 export type DashboardOperationalSnapshot = {
   activeProductCount: number;
   brandCount: number;
@@ -19,22 +23,30 @@ export type DashboardSnapshotResult =
   | { status: 'ready'; snapshot: DashboardOperationalSnapshot };
 
 export async function getDashboardOperationalSnapshot(
-  supabase: SupabaseClient | null,
+  supabase: SupabaseClient<Database> | null,
 ): Promise<DashboardSnapshotResult> {
   if (!supabase) {
     return { status: 'unconfigured', snapshot: null };
   }
 
-  const [products, variants, inventory, orders, adjustments, brands, categories, media] =
+  const [products, variants, inventory, orders, adjustments, brands, categories, media, settings] =
     await Promise.all([
-      supabase.from('products').select('id,is_active'),
-      supabase.from('product_variants').select('id,is_active'),
-      supabase.from('inventory').select('variant_id,current_quantity'),
-      supabase.from('orders').select('id,display_number,status,created_at').limit(5),
-      supabase.from('inventory_adjustments').select('id').limit(5),
+      supabase.from('products').select('id,is_active').limit(1000),
+      supabase
+        .from('product_variants')
+        .select('id,product_id,is_active,low_stock_threshold')
+        .limit(1000),
+      supabase.from('inventory').select('variant_id,current_quantity').limit(1000),
+      supabase
+        .from('orders')
+        .select('id,display_number,status,created_at')
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase.from('inventory_adjustments').select('id', { count: 'exact', head: true }),
       supabase.from('brands').select('id', { count: 'exact', head: true }),
       supabase.from('categories').select('id', { count: 'exact', head: true }),
       supabase.from('media_assets').select('id', { count: 'exact', head: true }),
+      supabase.from('store_settings').select('global_low_stock_threshold').eq('id', true).single(),
     ]);
 
   const firstError = [
@@ -46,6 +58,7 @@ export async function getDashboardOperationalSnapshot(
     brands,
     categories,
     media,
+    settings,
   ].find((result) => result.error)?.error;
 
   if (firstError) {
@@ -53,20 +66,32 @@ export async function getDashboardOperationalSnapshot(
   }
 
   const productRows = products.data ?? [];
-  const variantRows = variants.data ?? [];
-  const inventoryRows = inventory.data ?? [];
-  const orderRows = [...(orders.data ?? [])].sort((left, right) =>
-    right.created_at.localeCompare(left.created_at),
+  const activeProductIds = new Set(
+    productRows.filter((product) => product.is_active).map((product) => product.id),
   );
+  const activeVariantRows = (variants.data ?? []).filter(
+    (variant) => variant.is_active && activeProductIds.has(variant.product_id),
+  );
+  const inventoryByVariant = new Map(
+    (inventory.data ?? []).map((item) => [item.variant_id, item.current_quantity]),
+  );
+  const globalThreshold = settings.data?.global_low_stock_threshold ?? 0;
+  const orderRows = orders.data ?? [];
 
   return {
     status: 'ready',
     snapshot: {
-      activeProductCount: productRows.filter((product) => product.is_active).length,
+      activeProductCount: activeProductIds.size,
       brandCount: brands.count ?? 0,
       categoryCount: categories.count ?? 0,
-      inventoryAdjustmentCount: adjustments.data?.length ?? 0,
-      lowStockCount: inventoryRows.filter((item) => item.current_quantity <= 5).length,
+      inventoryAdjustmentCount: adjustments.count ?? 0,
+      lowStockCount: activeVariantRows.filter((variant) => {
+        const quantity = inventoryByVariant.get(variant.id);
+        return (
+          quantity !== undefined &&
+          quantity <= resolveLowStockThreshold(variant.low_stock_threshold, globalThreshold)
+        );
+      }).length,
       mediaAssetCount: media.count ?? 0,
       openOrderCount: orderRows.filter(
         (order) => !['cancelled', 'completed'].includes(order.status),
@@ -76,8 +101,10 @@ export async function getDashboardOperationalSnapshot(
         id: order.id,
         status: order.status,
       })),
-      unavailableVariantCount: inventoryRows.filter((item) => item.current_quantity <= 0).length,
-      variantCount: variantRows.length,
+      unavailableVariantCount: activeVariantRows.filter(
+        (variant) => (inventoryByVariant.get(variant.id) ?? 0) <= 0,
+      ).length,
+      variantCount: activeVariantRows.length,
     },
   };
 }

@@ -16,6 +16,13 @@ export type DashboardVariantRecord = {
   available: number;
 };
 
+export function resolveLowStockThreshold(
+  variantThreshold: number | null,
+  globalThreshold: number,
+): number {
+  return variantThreshold ?? globalThreshold;
+}
+
 export function summarizeOperations(input: {
   inventory: DashboardInventoryRecord[];
   orders: DashboardOrderRecord[];
