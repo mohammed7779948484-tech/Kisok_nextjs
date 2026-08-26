@@ -3,13 +3,11 @@
 import { StatusPill } from '@/components/admin/StatusPill';
 import { KisokButton } from '@/components/kisok-ui';
 
-const catalogRows = [
-  { children: 2, name: 'Arabica House', type: 'Brand', visibility: 'Active' },
-  { children: 3, name: 'Coffee', type: 'Root category', visibility: 'Active' },
-  { children: 0, name: 'Ground coffee', type: 'Child category', visibility: 'Active' },
-];
+import { localCatalogTaxonomyContract } from '../data/local-taxonomy';
 
 export function CatalogTaxonomyPanel({ onAction }: { onAction: (message: string) => void }) {
+  const catalogRows = localCatalogTaxonomyContract.list();
+
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-[#303030] border-b pb-6 sm:flex-row sm:items-end">

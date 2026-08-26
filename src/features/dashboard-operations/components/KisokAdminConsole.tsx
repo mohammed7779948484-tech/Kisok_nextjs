@@ -12,6 +12,7 @@ import { OrdersPanel as OrdersFeaturePanel } from '@/features/orders/components/
 import { ProductCatalogPanel } from '@/features/product-catalog/components/ProductCatalogPanel';
 import { StoreSettingsPanel } from '@/features/store-settings/components/StoreSettingsPanel';
 
+import { localOperationsContract } from '../data/local-operations';
 import { summarizeOperations } from '../lib/dashboard-model';
 
 const navigation = [
@@ -27,19 +28,6 @@ const navigation = [
 
 type PanelId = (typeof navigation)[number]['id'];
 type LocalViewState = 'empty' | 'failure' | 'loading' | 'ready';
-
-const operationalData = {
-  inventory: [
-    { available: 3, lowStockAt: 5, sku: 'ARABICA-250' },
-    { available: 18, lowStockAt: 5, sku: 'CARDAMOM-60' },
-    { available: 7, lowStockAt: 8, sku: 'MATCHA-30' },
-  ],
-  orders: [
-    { amount: 58.5, status: 'preparing' as const },
-    { amount: 42, status: 'completed' as const },
-    { amount: 35, status: 'new' as const },
-  ],
-};
 
 const panelCopy: Record<
   Exclude<PanelId, 'dashboard' | 'products'>,
@@ -78,7 +66,7 @@ const panelCopy: Record<
 };
 
 function OverviewPanel() {
-  const summary = summarizeOperations(operationalData);
+  const summary = summarizeOperations(localOperationsContract.get());
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1.24fr_0.76fr]">
@@ -254,9 +242,9 @@ export function KisokAdminConsole() {
         dashboard: <OverviewPanel />,
         inventory: <InventoryFeaturePanel onAction={setLocalNotice} />,
         media: <MediaLibraryPanel onAction={setLocalNotice} />,
-        orders: <OrdersFeaturePanel />,
+        orders: <OrdersFeaturePanel onAction={setLocalNotice} />,
         products: <ProductCatalogPanel />,
-        settings: <StoreSettingsPanel />,
+        settings: <StoreSettingsPanel onAction={setLocalNotice} />,
         users: <AdminUsersPanel onAction={setLocalNotice} />,
       }[activePanel]
     ) : (

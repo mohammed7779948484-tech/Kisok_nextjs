@@ -1,14 +1,31 @@
 'use client';
 
-import { KisokButton } from '@/components/kisok-ui';
+import { useState } from 'react';
 
-const mediaAssets = [
-  { label: 'origin-dark.png', role: 'Brand mark' },
-  { label: 'arabic-reserve.jpg', role: 'Product cover' },
-  { label: 'matcha-detail.jpg', role: 'Flavor image' },
-];
+import {
+  KisokButton,
+  KisokDialog,
+  KisokDialogContent,
+  KisokDialogDescription,
+  KisokDialogFooter,
+  KisokDialogHeader,
+  KisokDialogTitle,
+} from '@/components/kisok-ui';
+
+import { localMediaLibraryContract } from '../data/local-media-assets';
+import type { LocalMediaAsset } from '../types';
 
 export function MediaLibraryPanel({ onAction }: { onAction: (message: string) => void }) {
+  const [assetForRemoval, setAssetForRemoval] = useState<LocalMediaAsset | null>(null);
+  const mediaAssets = localMediaLibraryContract.list();
+
+  function stageRemovalReview() {
+    if (assetForRemoval) {
+      onAction(`Removal review staged for ${assetForRemoval.label}`);
+    }
+    setAssetForRemoval(null);
+  }
+
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-[#303030] border-b pb-6 sm:flex-row sm:items-end">
@@ -36,9 +53,55 @@ export function MediaLibraryPanel({ onAction }: { onAction: (message: string) =>
             </div>
             <p className="mt-4 truncate font-mono text-[#e5e5e1] text-xs">{asset.label}</p>
             <p className="mt-1 text-[#979794] text-xs">{asset.role}</p>
+            <KisokButton
+              aria-label={`Review removal for ${asset.label}`}
+              className="mt-4 w-full"
+              onClick={() => setAssetForRemoval(asset)}
+              size="compact"
+              variant="quiet"
+            >
+              Review removal
+            </KisokButton>
           </article>
         ))}
       </div>
+      <KisokDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setAssetForRemoval(null);
+          }
+        }}
+        open={Boolean(assetForRemoval)}
+      >
+        <KisokDialogContent>
+          <KisokDialogHeader>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#969694]">
+              Media library / local action
+            </p>
+            <KisokDialogTitle>Review asset removal</KisokDialogTitle>
+            <KisokDialogDescription>
+              {assetForRemoval?.label} is still represented as a local asset. A real deletion must
+              first verify product references through the Cloudinary integration.
+            </KisokDialogDescription>
+          </KisokDialogHeader>
+          <div className="border-l-2 border-[#e7e7e4] bg-[#222222] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#e7e7e4]">
+              Usage check required
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#b7b7b3]">
+              This local review does not delete a file or alter a product record.
+            </p>
+          </div>
+          <KisokDialogFooter>
+            <KisokButton onClick={() => setAssetForRemoval(null)} variant="quiet">
+              Keep asset
+            </KisokButton>
+            <KisokButton onClick={stageRemovalReview} variant="destructive">
+              Stage removal review
+            </KisokButton>
+          </KisokDialogFooter>
+        </KisokDialogContent>
+      </KisokDialog>
     </section>
   );
 }

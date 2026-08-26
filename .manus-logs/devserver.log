@@ -356,3 +356,253 @@
 [2026-08-26T04:24:47.456Z] }
 [2026-08-26T04:24:47.456Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
 [2026-08-26T04:24:55.386Z] GET / 200 in 74ms (next.js: 9ms, proxy.ts: 5ms, generate-params: 10ms, application-code: 50ms)
+[2026-08-26T04:27:00.162Z] GET / 200 in 81ms (next.js: 11ms, proxy.ts: 7ms, generate-params: 10ms, application-code: 52ms)
+[2026-08-26T04:28:09.422Z] GET /?from_webdev=1 200 in 104ms (next.js: 22ms, proxy.ts: 9ms, generate-params: 19ms, application-code: 54ms)
+[2026-08-26T04:28:09.748Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_app_%5Blocale%5D_error_tsx_13h85cb._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.748Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.748Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.748Z] // next.config.js
+[2026-08-26T04:28:09.748Z] module.exports = {
+[2026-08-26T04:28:09.748Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.748Z] }
+[2026-08-26T04:28:09.748Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:09.750Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0sx7sf1._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.750Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.750Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.750Z] // next.config.js
+[2026-08-26T04:28:09.750Z] module.exports = {
+[2026-08-26T04:28:09.750Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.750Z] }
+[2026-08-26T04:28:09.750Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:09.752Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0q4e_next_dist_112rgwv._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.752Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.752Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.752Z] // next.config.js
+[2026-08-26T04:28:09.752Z] module.exports = {
+[2026-08-26T04:28:09.752Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.752Z] }
+[2026-08-26T04:28:09.752Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:09.756Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1-x1-t8._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.756Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.756Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.756Z] // next.config.js
+[2026-08-26T04:28:09.756Z] module.exports = {
+[2026-08-26T04:28:09.756Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.756Z] }
+[2026-08-26T04:28:09.756Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:09.757Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_1d6vo-d._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.757Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.757Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.757Z] // next.config.js
+[2026-08-26T04:28:09.757Z] module.exports = {
+[2026-08-26T04:28:09.757Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.757Z] }
+[2026-08-26T04:28:09.757Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:09.759Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_181vniy._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.759Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.759Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.759Z] // next.config.js
+[2026-08-26T04:28:09.759Z] module.exports = {
+[2026-08-26T04:28:09.760Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.760Z] }
+[2026-08-26T04:28:09.760Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:09.760Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_01j_0ow._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:09.761Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:09.761Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:09.761Z] // next.config.js
+[2026-08-26T04:28:09.761Z] module.exports = {
+[2026-08-26T04:28:09.761Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:09.761Z] }
+[2026-08-26T04:28:09.761Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:11.476Z] GET /?from_webdev=1 200 in 81ms (next.js: 8ms, proxy.ts: 6ms, generate-params: 10ms, application-code: 57ms)
+[2026-08-26T04:28:12.032Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T04:28:12.032Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:28:12.032Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:28:12.032Z] // next.config.js
+[2026-08-26T04:28:12.032Z] module.exports = {
+[2026-08-26T04:28:12.032Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T04:28:12.032Z] }
+[2026-08-26T04:28:12.032Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:28:13.079Z] HEAD / 200 in 63ms (next.js: 6ms, proxy.ts: 6ms, generate-params: 10ms, application-code: 41ms)
+[2026-08-26T04:28:13.762Z] GET /?from_webdev=1 200 in 72ms (next.js: 5ms, proxy.ts: 4ms, generate-params: 9ms, application-code: 54ms)
+[2026-08-26T04:28:14.414Z] GET /?from_webdev=1 200 in 70ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 9ms, application-code: 50ms)
+[2026-08-26T04:28:15.697Z] GET /?from_webdev=1 200 in 65ms (next.js: 5ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 46ms)
+[2026-08-26T04:28:16.344Z] GET /?from_webdev=1 200 in 59ms (next.js: 5ms, proxy.ts: 4ms, generate-params: 9ms, application-code: 42ms)
+[2026-08-26T04:31:58.262Z] ⨯ ./src/features/store-settings/components/StoreSettingsPanel.tsx:15:1
+[2026-08-26T04:31:58.262Z] Error: Module not found: Can't resolve '../data/local-store-settings'
+[2026-08-26T04:31:58.263Z] [90m13 |[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:31:58.263Z] [90m14 |[0m
+[2026-08-26T04:31:58.263Z] [31m[1m>[0m [90m15 |[0m [36mimport[0m { localStoreSettingsContract } [36mfrom[0m [32m'../data/local-store-settings'[0m;
+[2026-08-26T04:31:58.263Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:31:58.263Z] [90m16 |[0m
+[2026-08-26T04:31:58.263Z] [90m17 |[0m [36mexport[0m [36mfunction[0m [33mStoreSettingsPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:31:58.263Z] [90m18 |[0m   [36mconst[0m [editOpen, setEditOpen] = useState([36mfalse[0m);
+[2026-08-26T04:31:58.263Z] Import traces:
+[2026-08-26T04:31:58.263Z] Client Component Browser:
+[2026-08-26T04:31:58.263Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:31:58.263Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:31:58.263Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.263Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.263Z] Client Component SSR:
+[2026-08-26T04:31:58.263Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:31:58.263Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:31:58.263Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.263Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.263Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:31:58.264Z] ⨯ ./src/features/store-settings/components/StoreSettingsPanel.tsx:15:1
+[2026-08-26T04:31:58.264Z] Error: Module not found: Can't resolve '../data/local-store-settings'
+[2026-08-26T04:31:58.264Z] [90m13 |[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:31:58.264Z] [90m14 |[0m
+[2026-08-26T04:31:58.264Z] [31m[1m>[0m [90m15 |[0m [36mimport[0m { localStoreSettingsContract } [36mfrom[0m [32m'../data/local-store-settings'[0m;
+[2026-08-26T04:31:58.264Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:31:58.264Z] [90m16 |[0m
+[2026-08-26T04:31:58.264Z] [90m17 |[0m [36mexport[0m [36mfunction[0m [33mStoreSettingsPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:31:58.264Z] [90m18 |[0m   [36mconst[0m [editOpen, setEditOpen] = useState([36mfalse[0m);
+[2026-08-26T04:31:58.264Z] Import traces:
+[2026-08-26T04:31:58.264Z] Client Component Browser:
+[2026-08-26T04:31:58.264Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:31:58.264Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:31:58.264Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.264Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.264Z] Client Component SSR:
+[2026-08-26T04:31:58.264Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:31:58.264Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:31:58.264Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.264Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.264Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:31:58.264Z] ⨯ ./src/features/store-settings/components/StoreSettingsPanel.tsx:15:1
+[2026-08-26T04:31:58.264Z] Error: Module not found: Can't resolve '../data/local-store-settings'
+[2026-08-26T04:31:58.264Z] [90m13 |[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:31:58.265Z] [90m14 |[0m
+[2026-08-26T04:31:58.265Z] [31m[1m>[0m [90m15 |[0m [36mimport[0m { localStoreSettingsContract } [36mfrom[0m [32m'../data/local-store-settings'[0m;
+[2026-08-26T04:31:58.265Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:31:58.265Z] [90m16 |[0m
+[2026-08-26T04:31:58.265Z] [90m17 |[0m [36mexport[0m [36mfunction[0m [33mStoreSettingsPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:31:58.265Z] [90m18 |[0m   [36mconst[0m [editOpen, setEditOpen] = useState([36mfalse[0m);
+[2026-08-26T04:31:58.265Z] Import traces:
+[2026-08-26T04:31:58.265Z] Client Component Browser:
+[2026-08-26T04:31:58.265Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] Client Component SSR:
+[2026-08-26T04:31:58.265Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:31:58.265Z] ⨯ ./src/features/store-settings/components/StoreSettingsPanel.tsx:15:1
+[2026-08-26T04:31:58.265Z] Error: Module not found: Can't resolve '../data/local-store-settings'
+[2026-08-26T04:31:58.265Z] [90m13 |[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:31:58.265Z] [90m14 |[0m
+[2026-08-26T04:31:58.265Z] [31m[1m>[0m [90m15 |[0m [36mimport[0m { localStoreSettingsContract } [36mfrom[0m [32m'../data/local-store-settings'[0m;
+[2026-08-26T04:31:58.265Z] [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:31:58.265Z] [90m16 |[0m
+[2026-08-26T04:31:58.265Z] [90m17 |[0m [36mexport[0m [36mfunction[0m [33mStoreSettingsPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:31:58.265Z] [90m18 |[0m   [36mconst[0m [editOpen, setEditOpen] = useState([36mfalse[0m);
+[2026-08-26T04:31:58.265Z] Import traces:
+[2026-08-26T04:31:58.265Z] Client Component Browser:
+[2026-08-26T04:31:58.265Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component Browser]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] Client Component SSR:
+[2026-08-26T04:31:58.265Z] ./src/features/store-settings/components/StoreSettingsPanel.tsx [Client Component SSR]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:31:58.265Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:31:58.265Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:34:38.111Z] ⨯ ./src/features/admin-users/components/AdminUsersPanel.tsx:6:1
+[2026-08-26T04:34:38.111Z] Error: Module not found: Can't resolve '../data/local-admin-users'
+[2026-08-26T04:34:38.111Z] [90m4 |[0m [36mimport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:34:38.111Z] [90m5 |[0m
+[2026-08-26T04:34:38.111Z] [31m[1m>[0m [90m6 |[0m [36mimport[0m { localAdminUsersContract } [36mfrom[0m [32m'../data/local-admin-users'[0m;
+[2026-08-26T04:34:38.111Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:34:38.111Z] [90m7 |[0m
+[2026-08-26T04:34:38.111Z] [90m8 |[0m [36mexport[0m [36mfunction[0m [33mAdminUsersPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:34:38.111Z] [90m9 |[0m   [36mconst[0m localUsers = localAdminUsersContract.list();
+[2026-08-26T04:34:38.111Z] Import traces:
+[2026-08-26T04:34:38.111Z] Client Component Browser:
+[2026-08-26T04:34:38.111Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component Browser]
+[2026-08-26T04:34:38.111Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:34:38.111Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.111Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.111Z] Client Component SSR:
+[2026-08-26T04:34:38.111Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component SSR]
+[2026-08-26T04:34:38.112Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:34:38.112Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.112Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.112Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:34:38.118Z] ⨯ ./src/features/admin-users/components/AdminUsersPanel.tsx:6:1
+[2026-08-26T04:34:38.118Z] Error: Module not found: Can't resolve '../data/local-admin-users'
+[2026-08-26T04:34:38.118Z] [90m4 |[0m [36mimport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:34:38.118Z] [90m5 |[0m
+[2026-08-26T04:34:38.118Z] [31m[1m>[0m [90m6 |[0m [36mimport[0m { localAdminUsersContract } [36mfrom[0m [32m'../data/local-admin-users'[0m;
+[2026-08-26T04:34:38.118Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:34:38.118Z] [90m7 |[0m
+[2026-08-26T04:34:38.118Z] [90m8 |[0m [36mexport[0m [36mfunction[0m [33mAdminUsersPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:34:38.118Z] [90m9 |[0m   [36mconst[0m localUsers = localAdminUsersContract.list();
+[2026-08-26T04:34:38.118Z] Import traces:
+[2026-08-26T04:34:38.118Z] Client Component Browser:
+[2026-08-26T04:34:38.118Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component Browser]
+[2026-08-26T04:34:38.118Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:34:38.118Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.118Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.118Z] Client Component SSR:
+[2026-08-26T04:34:38.118Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component SSR]
+[2026-08-26T04:34:38.118Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:34:38.118Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.118Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.118Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:34:38.118Z] ⨯ ./src/features/admin-users/components/AdminUsersPanel.tsx:6:1
+[2026-08-26T04:34:38.118Z] Error: Module not found: Can't resolve '../data/local-admin-users'
+[2026-08-26T04:34:38.118Z] [90m4 |[0m [36mimport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:34:38.118Z] [90m5 |[0m
+[2026-08-26T04:34:38.118Z] [31m[1m>[0m [90m6 |[0m [36mimport[0m { localAdminUsersContract } [36mfrom[0m [32m'../data/local-admin-users'[0m;
+[2026-08-26T04:34:38.118Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:34:38.119Z] [90m7 |[0m
+[2026-08-26T04:34:38.119Z] [90m8 |[0m [36mexport[0m [36mfunction[0m [33mAdminUsersPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:34:38.119Z] [90m9 |[0m   [36mconst[0m localUsers = localAdminUsersContract.list();
+[2026-08-26T04:34:38.119Z] Import traces:
+[2026-08-26T04:34:38.119Z] Client Component Browser:
+[2026-08-26T04:34:38.119Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component Browser]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] Client Component SSR:
+[2026-08-26T04:34:38.119Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component SSR]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:34:38.119Z] ⨯ ./src/features/admin-users/components/AdminUsersPanel.tsx:6:1
+[2026-08-26T04:34:38.119Z] Error: Module not found: Can't resolve '../data/local-admin-users'
+[2026-08-26T04:34:38.119Z] [90m4 |[0m [36mimport[0m { [33mKisokButton[0m } [36mfrom[0m [32m'@/components/kisok-ui'[0m;
+[2026-08-26T04:34:38.119Z] [90m5 |[0m
+[2026-08-26T04:34:38.119Z] [31m[1m>[0m [90m6 |[0m [36mimport[0m { localAdminUsersContract } [36mfrom[0m [32m'../data/local-admin-users'[0m;
+[2026-08-26T04:34:38.119Z] [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[2026-08-26T04:34:38.119Z] [90m7 |[0m
+[2026-08-26T04:34:38.119Z] [90m8 |[0m [36mexport[0m [36mfunction[0m [33mAdminUsersPanel[0m({ onAction }: { onAction: (message: string) => [36mvoid[0m }) {
+[2026-08-26T04:34:38.119Z] [90m9 |[0m   [36mconst[0m localUsers = localAdminUsersContract.list();
+[2026-08-26T04:34:38.119Z] Import traces:
+[2026-08-26T04:34:38.119Z] Client Component Browser:
+[2026-08-26T04:34:38.119Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component Browser]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component Browser]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] Client Component SSR:
+[2026-08-26T04:34:38.119Z] ./src/features/admin-users/components/AdminUsersPanel.tsx [Client Component SSR]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Client Component SSR]
+[2026-08-26T04:34:38.119Z] ./src/features/dashboard-operations/components/KisokAdminConsole.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] ./src/app/[locale]/page.tsx [Server Component]
+[2026-08-26T04:34:38.119Z] https://nextjs.org/docs/messages/module-not-found
+[2026-08-26T04:41:09.103Z] GET / 200 in 108ms (next.js: 23ms, proxy.ts: 4ms, generate-params: 14ms, application-code: 68ms)
+[2026-08-26T04:41:09.179Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_09ij6zr._.js from "127.0.0.1".
+[2026-08-26T04:41:09.179Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T04:41:09.179Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T04:41:09.179Z] // next.config.js
+[2026-08-26T04:41:09.179Z] module.exports = {
+[2026-08-26T04:41:09.179Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T04:41:09.179Z] }
+[2026-08-26T04:41:09.179Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T04:41:18.618Z] GET / 200 in 62ms (next.js: 4ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 44ms)

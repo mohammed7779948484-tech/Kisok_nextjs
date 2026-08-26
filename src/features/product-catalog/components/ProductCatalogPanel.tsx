@@ -5,14 +5,11 @@ import { useState } from 'react';
 import { StatusPill } from '@/components/admin/StatusPill';
 import { KisokButton } from '@/components/kisok-ui';
 
-const products = [
-  { category: 'Coffee / Ground', name: 'Arabic Reserve', stock: 3, status: 'Low stock' },
-  { category: 'Tea / Green', name: 'Ceremony Matcha', stock: 7, status: 'Review stock' },
-  { category: 'Coffee / Pods', name: 'Midnight Roast', stock: 18, status: 'In stock' },
-];
+import { localProductCatalogContract } from '../data/local-products';
 
 export function ProductCatalogPanel() {
   const [draftOpen, setDraftOpen] = useState(false);
+  const products = localProductCatalogContract.list();
 
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">

@@ -1,6 +1,10 @@
 'use client';
 
+import { localAccessContract } from '../data/local-access';
+
 export function LocalAccessGate({ onEnter }: { onEnter: () => void }) {
+  const accessState = localAccessContract.get();
+
   return (
     <main className="grid min-h-dvh place-items-center bg-[#101010] p-5 text-[#f1f1ef] sm:p-8">
       <section className="grid w-full max-w-5xl gap-px border border-[#2d2d2d] bg-[#2d2d2d] lg:grid-cols-[1.15fr_0.85fr]">
@@ -18,7 +22,7 @@ export function LocalAccessGate({ onEnter }: { onEnter: () => void }) {
         </div>
         <div className="flex min-h-80 flex-col justify-between bg-[#e7e7e4] p-7 text-[#141414] sm:p-10">
           <p className="font-mono text-[#575756] text-[10px] uppercase tracking-[0.2em]">
-            Authentication status
+            Authentication status / {accessState.label}
           </p>
           <div>
             <p className="font-black text-5xl tracking-[-0.08em]">LOCAL</p>

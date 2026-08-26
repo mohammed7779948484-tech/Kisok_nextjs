@@ -3,13 +3,11 @@
 import { StatusPill } from '@/components/admin/StatusPill';
 import { KisokButton } from '@/components/kisok-ui';
 
-const localUsers = [
-  { access: 'Administrator', name: 'Mariam Al-Harbi', state: 'Active' },
-  { access: 'Preparation', name: 'Hassan Saleh', state: 'Active' },
-  { access: 'Preparation', name: 'Salem Noor', state: 'Paused' },
-];
+import { localAdminUsersContract } from '../data/local-admin-users';
 
 export function AdminUsersPanel({ onAction }: { onAction: (message: string) => void }) {
+  const localUsers = localAdminUsersContract.list();
+
   return (
     <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-[#303030] border-b pb-6 sm:flex-row sm:items-end">

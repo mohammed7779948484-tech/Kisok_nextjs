@@ -49,6 +49,33 @@ describe('KisokAdminConsole', () => {
     expect(screen.getByText('Loading local workspace')).toBeInTheDocument();
   });
 
+  it('keeps local loading, empty, and failure states consistent across every workspace', () => {
+    render(<KisokAdminConsole />);
+
+    const workspaces = [
+      ['Overview', 'overview'],
+      ['Products', 'products'],
+      ['Catalog', 'catalog'],
+      ['Inventory', 'inventory'],
+      ['Orders', 'orders'],
+      ['Users', 'users'],
+      ['Media', 'media'],
+      ['Settings', 'settings'],
+    ] as const;
+
+    for (const [label, localName] of workspaces) {
+      fireEvent.click(screen.getByRole('button', { name: label }));
+      fireEvent.click(screen.getByRole('button', { name: 'Simulate empty state' }));
+      expect(screen.getByText(`No local ${localName} records`)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Simulate failure state' }));
+      expect(screen.getByText('Local data unavailable')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Simulate loading state' }));
+      expect(screen.getByText('Loading local workspace')).toBeInTheDocument();
+    }
+  });
+
   it('renders local catalog, inventory, and order records through feature navigation', () => {
     render(<KisokAdminConsole />);
 
@@ -93,6 +120,91 @@ describe('KisokAdminConsole', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Inventory adjustment staged locally');
+  });
+
+  it('warns about local asset usage before staging a media removal', () => {
+    render(<KisokAdminConsole />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Media' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review removal for origin-dark.png' }));
+
+    expect(screen.getByRole('dialog', { name: 'Review asset removal' })).toHaveTextContent(
+      'origin-dark.png',
+    );
+    expect(screen.getByText('Usage check required')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Keep asset' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('collects a cancellation reason before staging a local order cancellation', () => {
+    render(<KisokAdminConsole />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review cancellation for #K-1048' }));
+
+    expect(screen.getByRole('dialog', { name: 'Cancel local order' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Cancellation reason'), {
+      target: { value: 'Pickup guest did not arrive' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Stage local cancellation' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Cancellation staged for #K-1048');
+  });
+
+  it('collects a handoff note before staging a local order fulfillment', () => {
+    render(<KisokAdminConsole />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review handoff for #K-1050' }));
+
+    expect(screen.getByRole('dialog', { name: 'Confirm local handoff' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Handoff note'), {
+      target: { value: 'Order handed to the walk-in counter' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Stage local handoff' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Handoff staged for #K-1050');
+  });
+
+  it('edits the local store identity through a confirmed settings dialog', () => {
+    render(<KisokAdminConsole />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit local settings' }));
+
+    expect(screen.getByRole('dialog', { name: 'Edit store settings' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Store identity'), {
+      target: { value: 'Kisok Harbour' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save local settings' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Kisok Harbour')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Local store settings saved');
+  });
+
+  it('edits local operational settings through the same confirmed dialog', () => {
+    render(<KisokAdminConsole />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit local settings' }));
+
+    fireEvent.change(screen.getByLabelText('Low-stock threshold'), {
+      target: { value: '08 units' },
+    });
+    fireEvent.change(screen.getByLabelText('Order reset'), {
+      target: { value: 'Manual approval after completion' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save local settings' }));
+
+    expect(screen.getByText('08 units')).toBeInTheDocument();
+    expect(screen.getByText('Manual approval after completion')).toBeInTheDocument();
   });
 
   it('renders local users, media, and store settings through feature navigation', () => {

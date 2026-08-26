@@ -13,15 +13,12 @@ import {
   KisokDialogTitle,
 } from '@/components/kisok-ui';
 
-const inventoryRows = [
-  { available: 3, lastAction: 'Manual increase', product: 'Arabic Reserve', threshold: 5 },
-  { available: 7, lastAction: 'Stock take', product: 'Ceremony Matcha', threshold: 8 },
-  { available: 18, lastAction: 'Delivery received', product: 'Midnight Roast', threshold: 5 },
-];
+import { localInventoryContract } from '../data/local-inventory';
 
 export function InventoryPanel({ onAction }: { onAction: (message: string) => void }) {
   const [adjustmentOpen, setAdjustmentOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const inventoryRows = localInventoryContract.list();
 
   function stageAdjustment() {
     onAction('Inventory adjustment staged locally');
