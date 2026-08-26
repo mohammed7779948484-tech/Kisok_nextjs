@@ -24,6 +24,7 @@ type ProductListRow = {
   is_featured: boolean;
   brands: { name: string } | null;
   product_variants: Array<{
+    is_active: boolean;
     low_stock_threshold: number | null;
     inventory: Array<{ current_quantity: number }>;
   }>;
@@ -158,35 +159,99 @@ export function createProductCatalogRepository(
       // Diff-based, never delete-then-insert: additions/changes apply first,
       // so a failure here leaves every prior Option Type/Value untouched
       // instead of wiping the whole combination like a blind DELETE would.
-      if (toInsert.length > 0) {
-        const insertResult = await client.from('variant_option_values').insert(
-          toInsert.map((selection) => ({
+      //
+      // PostgREST gives no cross-statement transaction here, so true
+      // atomicity is approximated with a compensating-rollback (saga):
+      // every successful step is tracked, and if ANY later step fails —
+      // insert, update, or delete — every tracked step is undone before the
+      // original error is rethrown. This guarantees the Variant ends up
+      // either fully at the intended new combination or fully back at its
+      // original one; it must never be left half-migrated.
+      const appliedInserts: VariantOptionSelection[] = [];
+      const appliedUpdates: Array<{ optionTypeId: string; previousValueId: string }> = [];
+      const appliedRemovals: Array<{ optionTypeId: string; previousValueId: string }> = [];
+
+      async function rollback(): Promise<void> {
+        for (const removal of [...appliedRemovals].reverse()) {
+          const result = await client.from('variant_option_values').insert({
             variant_id: variantId,
-            option_type_id: selection.optionTypeId,
-            option_value_id: selection.optionValueId,
-          })),
-        );
-        if (insertResult.error) throw insertResult.error;
+            option_type_id: removal.optionTypeId,
+            option_value_id: removal.previousValueId,
+          });
+          if (result.error) throw result.error;
+        }
+        for (const update of [...appliedUpdates].reverse()) {
+          const result = await client
+            .from('variant_option_values')
+            .update({ option_value_id: update.previousValueId })
+            .eq('variant_id', variantId)
+            .eq('option_type_id', update.optionTypeId);
+          if (result.error) throw result.error;
+        }
+        for (const inserted of [...appliedInserts].reverse()) {
+          const result = await client
+            .from('variant_option_values')
+            .delete()
+            .eq('variant_id', variantId)
+            .eq('option_type_id', inserted.optionTypeId);
+          if (result.error) throw result.error;
+        }
       }
 
-      for (const selection of toUpdate) {
-        const updateResult = await client
-          .from('variant_option_values')
-          .update({ option_value_id: selection.optionValueId })
-          .eq('variant_id', variantId)
-          .eq('option_type_id', selection.optionTypeId);
-        if (updateResult.error) throw updateResult.error;
-      }
+      try {
+        if (toInsert.length > 0) {
+          const insertResult = await client.from('variant_option_values').insert(
+            toInsert.map((selection) => ({
+              variant_id: variantId,
+              option_type_id: selection.optionTypeId,
+              option_value_id: selection.optionValueId,
+            })),
+          );
+          if (insertResult.error) throw insertResult.error;
+          appliedInserts.push(...toInsert);
+        }
 
-      // Only drop Option Types explicitly removed from the new selection —
-      // never as a side effect of an insert/update failure elsewhere above.
-      for (const optionTypeId of toRemoveTypeIds) {
-        const deleteResult = await client
-          .from('variant_option_values')
-          .delete()
-          .eq('variant_id', variantId)
-          .eq('option_type_id', optionTypeId);
-        if (deleteResult.error) throw deleteResult.error;
+        for (const selection of toUpdate) {
+          const updateResult = await client
+            .from('variant_option_values')
+            .update({ option_value_id: selection.optionValueId })
+            .eq('variant_id', variantId)
+            .eq('option_type_id', selection.optionTypeId);
+          if (updateResult.error) throw updateResult.error;
+          const previousValueId = existingByType.get(selection.optionTypeId);
+          if (previousValueId !== undefined) {
+            appliedUpdates.push({ optionTypeId: selection.optionTypeId, previousValueId });
+          }
+        }
+
+        // Only drop Option Types explicitly removed from the new selection —
+        // never as a side effect of an insert/update failure elsewhere above.
+        for (const optionTypeId of toRemoveTypeIds) {
+          const deleteResult = await client
+            .from('variant_option_values')
+            .delete()
+            .eq('variant_id', variantId)
+            .eq('option_type_id', optionTypeId);
+          if (deleteResult.error) throw deleteResult.error;
+          const previousValueId = existingByType.get(optionTypeId);
+          if (previousValueId !== undefined) {
+            appliedRemovals.push({ optionTypeId, previousValueId });
+          }
+        }
+      } catch (error) {
+        try {
+          await rollback();
+        } catch (rollbackError) {
+          const originalMessage = error instanceof Error ? error.message : String(error);
+          const rollbackMessage =
+            rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+          throw new Error(
+            `Variant Option replacement failed (${originalMessage}) and automatic rollback also ` +
+              `failed (${rollbackMessage}). This Variant's Option combination may be in a partial, ` +
+              'unintended state and requires manual review.',
+          );
+        }
+        throw error;
       }
     },
 
@@ -233,17 +298,21 @@ export function createProductCatalogRepository(
       const result = await client
         .from('products')
         .select(
-          'id,name,is_active,is_featured,brands(name),product_variants(id,low_stock_threshold,inventory(current_quantity))',
+          'id,name,is_active,is_featured,brands(name),product_variants(id,is_active,low_stock_threshold,inventory(current_quantity))',
         )
         [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
 
       return ((result.data ?? []) as unknown as ProductListRow[]).map((product) => {
-        const availableStock = product.product_variants.reduce(
+        // Mirrors the Dashboard projection: a deactivated/discontinued
+        // Variant's leftover (or zero) stock must never affect the
+        // Product's operational stock status.
+        const activeVariants = product.product_variants.filter((variant) => variant.is_active);
+        const availableStock = activeVariants.reduce(
           (total, variant) => total + (variant.inventory[0]?.current_quantity ?? 0),
           0,
         );
-        const isLowStock = product.product_variants.some((variant) => {
+        const isLowStock = activeVariants.some((variant) => {
           const quantity = variant.inventory[0]?.current_quantity ?? 0;
           const threshold = resolveLowStockThreshold(variant.low_stock_threshold, globalThreshold);
           return quantity <= threshold;
@@ -252,7 +321,7 @@ export function createProductCatalogRepository(
           id: product.id,
           name: product.name,
           brandName: product.brands?.name ?? null,
-          variantCount: product.product_variants.length,
+          variantCount: activeVariants.length,
           availableStock,
           status: getStockStatus(availableStock, isLowStock),
           isActive: product.is_active,
