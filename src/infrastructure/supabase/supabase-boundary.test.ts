@@ -13,29 +13,36 @@ describe('Supabase integration boundaries', () => {
   it('keeps a distributed adapter boundary and presentation components free of data clients', () => {
     const projectRoot = resolve(import.meta.dirname, '../../..');
     expect(
-      existsSync(resolve(projectRoot, 'src/infrastructure/supabase/auth-admin-access/adapter.ts')),
-    ).toBe(true);
-    expect(
       existsSync(
         resolve(projectRoot, 'src/features/auth-admin-access/components/LocalAccessGate.tsx'),
       ),
     ).toBe(false);
-    const adapterFeatures = [
-      'admin-users',
-      'auth-admin-access',
-      'catalog-taxonomy',
-      'dashboard-operations',
-      'inventory',
-      'media-library',
-      'orders',
-      'product-catalog',
-      'store-settings',
+    const hostedBoundaries = [
+      'src/features/admin-users/repositories/supabase.ts',
+      'src/infrastructure/supabase/auth/server.ts',
+      'src/features/catalog-taxonomy/repositories/supabase.ts',
+      'src/infrastructure/supabase/dashboard-operations/adapter.ts',
+      'src/infrastructure/supabase/inventory/adapter.ts',
+      'src/features/media-library/repositories/supabase.ts',
+      'src/features/orders/repositories/supabase.ts',
+      'src/features/product-catalog/repositories/supabase.ts',
+      'src/features/store-settings/repositories/supabase.ts',
     ];
 
-    for (const feature of adapterFeatures) {
-      expect(
-        existsSync(resolve(projectRoot, `src/infrastructure/supabase/${feature}/adapter.ts`)),
-      ).toBe(true);
+    for (const boundary of hostedBoundaries) {
+      expect(existsSync(resolve(projectRoot, boundary))).toBe(true);
+    }
+
+    for (const placeholder of [
+      'src/infrastructure/supabase/admin-users/adapter.ts',
+      'src/infrastructure/supabase/auth-admin-access/adapter.ts',
+      'src/infrastructure/supabase/catalog-taxonomy/adapter.ts',
+      'src/infrastructure/supabase/media-library/adapter.ts',
+      'src/infrastructure/supabase/orders/adapter.ts',
+      'src/infrastructure/supabase/product-catalog/adapter.ts',
+      'src/infrastructure/supabase/store-settings/adapter.ts',
+    ]) {
+      expect(existsSync(resolve(projectRoot, placeholder))).toBe(false);
     }
 
     const componentFiles = [
