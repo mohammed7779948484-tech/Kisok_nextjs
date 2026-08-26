@@ -27,14 +27,13 @@ Single source of truth for this continuation. Starting HEAD: `06cfa8f`. Update c
 
 ## B. Architecture — Refine/TanStack/RHF made load-bearing
 
-- [ ] B1. Decide and document the concrete migration pattern (one worked example) before repeating it
-- [ ] B2. Brands: Refine `useList`/`useCreate`/`useUpdate` + RHF/Zod form
-- [ ] B3. Categories: Refine hooks + RHF/Zod, hierarchy preserved
-- [ ] B4. Option Types / Option Values: Refine hooks + RHF/Zod
+- [x] B1+B2. Reference pattern established on Brands. `useBrandsList` (`@refinedev/core` `useList`: search filter/sort/server pagination, no manual useState/useEffect for list lifecycle) + `useBrandForm` (`@refinedev/react-hook-form` `useForm` + Zod resolver via newly-added `@hookform/resolvers`) + `BrandsPanel` (shadcn Table/Pagination/Checkbox/Label, debounced search). Dead `createBrand`/`updateBrand` repository methods removed (Refine's `useCreate`/`useUpdate` replace them directly); `listBrands` kept (still used by Product's Brand selector). `test/refine-test-utils.tsx` added for testing Refine-orchestrated hooks/components. Commit: `refactor(refine): migrate Brands CRUD onto Refine + RHF/Zod`. Tests: `useBrandsList.test.ts` (4), `useBrandForm.test.ts` (3), `BrandsPanel.test.tsx` (4) — all pass. Full suite 63 files/218 tests green.
+- [ ] B3. Categories: Refine hooks + RHF/Zod, hierarchy preserved (assigned to Subagent B)
+- [ ] B4. Option Types / Option Values: Refine hooks + RHF/Zod (assigned to Subagent B)
 - [ ] B5. Store Settings: Refine singleton pattern + RHF/Zod (wire the existing unused schema)
-- [ ] B6. Media Assets list: Refine `useList` for the read/search path
-- [ ] B7. Products list: TanStack/Refine table state (search/filter/sort/pagination) replacing the hand-rolled `<table>`
-- [ ] B8. Confirm Inventory/Orders/Admin-Users/Cloudinary/Variant-Options remain custom (no regression toward generic CRUD)
+- [ ] B6. Media Assets list: Refine `useList` for the read/search path (assigned to Subagent C)
+- [ ] B7. Products list: TanStack/Refine table state (search/filter/sort/pagination) replacing the hand-rolled `<table>` (assigned to Subagent A/Product Editor)
+- [x] B8. Confirmed: Inventory RPCs, Order status RPC, Admin-Users server actions, Cloudinary server actions, Variant-Options diff+rollback all remain custom — none regressed toward generic Refine CRUD in the Brands migration.
 
 ## C. Catalog CRUD completion
 
