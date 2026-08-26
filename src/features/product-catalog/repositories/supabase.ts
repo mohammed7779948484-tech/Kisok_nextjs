@@ -10,6 +10,7 @@ import type {
   ProductStockStatus,
   VariantInput,
   VariantRecord,
+  VariantUpdate,
 } from '../types';
 
 type ProductListRow = {
@@ -82,6 +83,38 @@ export function createProductCatalogRepository(
       return mapVariant(result.data);
     },
 
+    async listVariants(productId: string) {
+      const result = await client
+        .from('product_variants')
+        .select(
+          'id,product_id,sku,barcode,title_override,is_active,low_stock_threshold,display_order,search_keywords,created_at,updated_at',
+        )
+        .eq('product_id', productId)
+        .order('display_order', { ascending: true });
+      if (result.error) throw result.error;
+      return (result.data ?? []).map(mapVariant);
+    },
+
+    async updateVariant(id: string, input: VariantUpdate) {
+      const payload: Database['public']['Tables']['product_variants']['Update'] = {};
+      if (input.barcode !== undefined) payload.barcode = input.barcode?.trim() || null;
+      if (input.titleOverride !== undefined)
+        payload.title_override = input.titleOverride?.trim() || null;
+      if (input.lowStockThreshold !== undefined)
+        payload.low_stock_threshold = input.lowStockThreshold;
+      if (input.isActive !== undefined) payload.is_active = input.isActive;
+      const result = await client
+        .from('product_variants')
+        .update(payload)
+        .eq('id', id)
+        .select(
+          'id,product_id,sku,barcode,title_override,is_active,low_stock_threshold,display_order,search_keywords,created_at,updated_at',
+        )
+        .single();
+      if (result.error) throw result.error;
+      return mapVariant(result.data);
+    },
+
     async createProduct(input: ProductInput) {
       const result = await client
         .from('products')
@@ -99,14 +132,12 @@ export function createProductCatalogRepository(
 
       const categoryIds = [...new Set(input.categoryIds ?? [])];
       if (categoryIds.length > 0) {
-        const relationResult = await client
-          .from('product_categories')
-          .insert(
-            categoryIds.map((categoryId) => ({
-              product_id: result.data.id,
-              category_id: categoryId,
-            })),
-          );
+        const relationResult = await client.from('product_categories').insert(
+          categoryIds.map((categoryId) => ({
+            product_id: result.data.id,
+            category_id: categoryId,
+          })),
+        );
         if (relationResult.error) {
           await client.from('products').delete().eq('id', result.data.id);
           throw relationResult.error;
@@ -148,6 +179,12 @@ export function createProductCatalogRepository(
 export const productCatalogRepository: ProductCatalogDataContract = {
   createVariant(input) {
     return createProductCatalogRepository(getClientOrThrow()).createVariant(input);
+  },
+  listVariants(productId) {
+    return createProductCatalogRepository(getClientOrThrow()).listVariants(productId);
+  },
+  updateVariant(id, input) {
+    return createProductCatalogRepository(getClientOrThrow()).updateVariant(id, input);
   },
   listProducts() {
     return createProductCatalogRepository(getClientOrThrow()).listProducts();

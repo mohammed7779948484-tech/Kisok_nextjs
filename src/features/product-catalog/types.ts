@@ -15,6 +15,13 @@ export interface VariantInput {
   lowStockThreshold?: number | null;
 }
 
+export interface VariantUpdate {
+  barcode?: string | null;
+  titleOverride?: string | null;
+  lowStockThreshold?: number | null;
+  isActive?: boolean;
+}
+
 export interface VariantRecord {
   id: string;
   productId: string;
@@ -48,4 +55,6 @@ export interface ProductCatalogDataContract {
     coverMediaAssetId: string | null;
   }>;
   createVariant(input: VariantInput): Promise<VariantRecord>;
+  listVariants(productId: string): Promise<VariantRecord[]>;
+  updateVariant(id: string, input: VariantUpdate): Promise<VariantRecord>;
 }
