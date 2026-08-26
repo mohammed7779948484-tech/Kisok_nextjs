@@ -6,6 +6,7 @@
 - Installed Docker Engine `29.7.2`, Docker Compose `v5.5.0`, `slirp4netns`, `fuse-overlayfs`, `uidmap`, `kmod`, and `iproute2`; added the user to the `docker` group and verified Docker host-network containers.
 - Resolved and downloaded Supabase CLI `2.115.0` through the repository’s `pnpm supabase` script.
 - Added a TDD-tested Lean V2 inventory adjustment adapter that calls the transactional `apply_inventory_adjustment` RPC and validates its returned quantity/ledger ID.
+- Fixed the Next.js 16 locale-routing regression by using always-prefixed locale URLs; `/en/login` no longer loops through `/login`, and SEO/sitemap URLs now use the same canonical policy.
 - Connected to the provided hosted Supabase project through its pooler, applied all 13 Lean V2 migrations, and verified the supplied structural and behavioral pgTAP suites with no `not ok` results.
 - Confirmed the hosted project has all 16 Lean application tables, `orders` as the only published application table in Realtime, and the Customer snapshot, checkout, and inventory adjustment RPCs.
 
@@ -20,21 +21,11 @@
 - Confirmed Docker is unavailable; the verification script resolves Supabase CLI 2.115.0 through the repository’s `pnpm supabase` command, but `supabase start` cannot run without Docker/Podman.
 - Wrote `docs/KIOSK_ADMIN_LEAN_V2_EXECUTION_PLAN.md` with evidence-based phases 0–12.
 
-## In progress
+## Remaining verification limits
 
-- Add Lean V2 migrations/tests/scripts without mixing legacy migration sets.
-- Replace the deferred Supabase boundaries with typed SSR/browser clients and local-runtime configuration.
-- Add real Admin login, trusted-profile authorization, protected App Router routes, and logout.
-- Replace pricing/revenue demo content with operational-only Admin surfaces.
-- Wire Refine to the Supabase adapter while keeping feature presentation free of Supabase imports.
-- Add focused tests before each production behavior change.
-
-## Blocked or not yet verified
-
-- Docker-backed Local Supabase start/reset/lint/pgTAP execution is blocked in this environment because Docker and the Supabase CLI are unavailable. Do not claim DB runtime acceptance until the supplied verification scripts pass on a Docker-enabled developer machine.
-- Local Auth bootstrap and browser login cannot be truthfully exercised until Local Supabase is running.
-- Cloudinary upload/deletion cannot be exercised without user-provided server-side Cloudinary configuration; implementation must keep the secret server-only and document the remaining runtime check.
-- The repository requests Node >=24 while the current sandbox provides Node 22. Production CI/build verification may require the project’s configured Node 24 environment.
+- Docker-backed Local Supabase start/reset/lint/pgTAP execution remains blocked in this sandbox because the kernel lacks the bridge-network capabilities required by Supabase; hosted migration and pgTAP verification is complete and must not be conflated with local runtime acceptance.
+- Authenticated browser login cannot be exercised without a configured test user and a reachable Auth runtime; unauthenticated localized route protection and login-page rendering were smoke-tested.
+- Cloudinary upload/deletion cannot be exercised without user-provided server-side Cloudinary configuration; the secret remains server-only and the runtime check is documented.
 
 ## Tests and checks
 
@@ -46,9 +37,9 @@
 | Lean V2 static validator | Passed | `pnpm check:lean-v2`; 13 migrations, 19 functions, 17 triggers; orders-only Realtime |
 | Hosted DB migration/pgTAP | Passed | All 13 Lean V2 migrations applied to the provided Supabase project; structural suite 29/29 and behavioral suite 30/30 passed |
 | Local DB reset/lint/pgTAP | Blocked by sandbox kernel | Local Docker bridge networking fails because the host kernel lacks iptables raw/nftables support; rootless slirp4netns cannot create a TUN device |
-| Unit/component tests | Passed | `pnpm test`; 25 files, 124 tests, including the TDD inventory RPC adapter test |
+| Unit/component tests | Passed | `pnpm test`; 27 files, 126 tests, including TDD inventory, locale-routing, and SEO regression tests |
 | Type-check/Biome/build | Passed under Node 24 | `pnpm ci:check`, `pnpm type-check`, `pnpm build`; Node 24.19.0 with pnpm 10.4.1 |
-| Browser verification | Partial | Dev server smoke check passed for route responses; authenticated login workflow awaits Local Supabase/Auth runtime |
+| Browser/server verification | Passed for unauthenticated flow | `/en/login` returned 200 with login content; `/en/admin` returned the login page without a redirect loop; `/login` safely redirects to `/en/login` |
 
 ## Architecture decisions
 

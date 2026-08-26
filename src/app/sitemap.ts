@@ -6,9 +6,6 @@ import { env } from '@/lib/env';
 const APP_URL = env.NEXT_PUBLIC_APP_URL;
 
 function localizedUrl(path: string, locale: string): string {
-  if (routing.localePrefix === 'never' || locale === routing.defaultLocale) {
-    return `${APP_URL}${path}`;
-  }
   return `${APP_URL}/${locale}${path}`;
 }
 
