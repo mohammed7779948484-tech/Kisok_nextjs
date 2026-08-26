@@ -1,1 +1,1 @@
-export { LocalAccessGate } from './components/LocalAccessGate';
+export { AdminLoginForm } from './components/AdminLoginForm';

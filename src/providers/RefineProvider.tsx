@@ -7,7 +7,6 @@ import nextRouterProvider from '@refinedev/nextjs-router';
 import { dataProvider as supabaseDataProvider } from '@refinedev/supabase';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { deferredDataProvider } from '@/infrastructure/refine/deferred-data-provider';
 import { refineResources } from '@/infrastructure/refine/resources';
 import { getBrowserSupabaseClient } from '@/infrastructure/supabase/client/browser-client';
 
@@ -21,7 +20,9 @@ export const RefineProvider = ({
   routerProvider = nextRouterProvider,
 }: RefineProviderProps) => {
   const supabaseClient = getBrowserSupabaseClient();
-  const dataProvider = supabaseClient ? supabaseDataProvider(supabaseClient) : deferredDataProvider;
+  if (!supabaseClient) {
+    return <>{children}</>;
+  }
 
   return (
     <Suspense
@@ -30,7 +31,7 @@ export const RefineProvider = ({
       }
     >
       <Refine
-        dataProvider={dataProvider}
+        dataProvider={supabaseDataProvider(supabaseClient)}
         options={{ syncWithLocation: true, warnWhenUnsavedChanges: true }}
         resources={refineResources}
         routerProvider={routerProvider}

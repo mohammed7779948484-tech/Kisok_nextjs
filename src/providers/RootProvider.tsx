@@ -1,5 +1,4 @@
 'use client';
-'use client';
 
 import { type AbstractIntlMessages, NextIntlClientProvider } from 'next-intl';
 

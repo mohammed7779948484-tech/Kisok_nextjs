@@ -12,6 +12,14 @@ describe('Supabase integration boundaries', () => {
 
   it('keeps a distributed adapter boundary and presentation components free of data clients', () => {
     const projectRoot = resolve(import.meta.dirname, '../../..');
+    expect(
+      existsSync(resolve(projectRoot, 'src/infrastructure/supabase/auth-admin-access/adapter.ts')),
+    ).toBe(true);
+    expect(
+      existsSync(
+        resolve(projectRoot, 'src/features/auth-admin-access/components/LocalAccessGate.tsx'),
+      ),
+    ).toBe(false);
     const adapterFeatures = [
       'admin-users',
       'auth-admin-access',
@@ -32,7 +40,6 @@ describe('Supabase integration boundaries', () => {
 
     const componentFiles = [
       'src/features/admin-users/components/AdminUsersPanel.tsx',
-      'src/features/auth-admin-access/components/LocalAccessGate.tsx',
       'src/features/auth-admin-access/components/AdminLoginForm.tsx',
       'src/features/catalog-taxonomy/components/CatalogTaxonomyPanel.tsx',
       'src/features/dashboard-operations/components/AdminShell.tsx',
