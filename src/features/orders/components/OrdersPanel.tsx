@@ -21,11 +21,14 @@ function statusLabel(status: OrderRecord['status']) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function nextStatus(status: OrderRecord['status']): OrderRecord['status'] | null {
-  if (status === 'new') return 'preparing';
-  if (status === 'preparing') return 'ready';
-  if (status === 'ready') return 'completed';
-  return null;
+/**
+ * `update_order_status` (Lean V2) restricts each actor role to its own
+ * transitions: Preparation owns new→preparing and preparing→ready; Admin
+ * owns only ready→completed. This panel is the Admin surface, so it must
+ * never offer the Preparation-only advances.
+ */
+function nextStatusForAdmin(status: OrderRecord['status']): OrderRecord['status'] | null {
+  return status === 'ready' ? 'completed' : null;
 }
 
 function canCancel(status: OrderRecord['status']) {
@@ -57,7 +60,7 @@ export function OrdersPanel() {
   }, [refresh]);
 
   async function advanceOrder(order: OrderRecord) {
-    const targetStatus = nextStatus(order.status);
+    const targetStatus = nextStatusForAdmin(order.status);
     if (!targetStatus) return;
     setUpdatingOrderId(order.id);
     setError(null);
@@ -170,7 +173,7 @@ export function OrdersPanel() {
               ) : null}
 
               <div className="mt-6 flex flex-wrap gap-2 border-border border-t pt-4">
-                {nextStatus(order.status) ? (
+                {nextStatusForAdmin(order.status) ? (
                   <KisokButton
                     disabled={updatingOrderId === order.id}
                     onClick={() => void advanceOrder(order)}

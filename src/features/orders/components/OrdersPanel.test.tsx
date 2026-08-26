@@ -91,13 +91,13 @@ describe('OrdersPanel', () => {
     );
   });
 
-  it('advances an active order through the hosted status mutation', async () => {
+  it('advances a ready order to completed through the hosted status mutation', async () => {
     const user = (await import('@testing-library/user-event')).default.setup();
     testContext.listOrders.mockResolvedValue([
       {
         id: 'order-1',
         displayNumber: 'KSK-001',
-        status: 'new',
+        status: 'ready',
         createdAt: '2026-08-26T10:00:00Z',
         itemCount: 2,
         items: [],
@@ -109,6 +109,34 @@ describe('OrdersPanel', () => {
     await screen.findByText('KSK-001');
     await user.click(screen.getByRole('button', { name: 'Advance status' }));
 
-    expect(testContext.updateStatus).toHaveBeenCalledWith('order-1', 'preparing');
+    expect(testContext.updateStatus).toHaveBeenCalledWith('order-1', 'completed');
+  });
+
+  it('does not offer Preparation-only transitions to the Admin actor', async () => {
+    testContext.listOrders.mockResolvedValue([
+      {
+        id: 'order-1',
+        displayNumber: 'KSK-001',
+        status: 'new',
+        createdAt: '2026-08-26T10:00:00Z',
+        itemCount: 2,
+        items: [],
+      },
+      {
+        id: 'order-2',
+        displayNumber: 'KSK-002',
+        status: 'preparing',
+        createdAt: '2026-08-26T10:00:00Z',
+        itemCount: 1,
+        items: [],
+      },
+    ]);
+
+    render(<OrdersPanel />);
+    await screen.findByText('KSK-001');
+
+    // Admin cannot perform new->preparing or preparing->ready; both are
+    // Preparation-only per `update_order_status` role semantics.
+    expect(screen.queryByRole('button', { name: 'Advance status' })).not.toBeInTheDocument();
   });
 });
