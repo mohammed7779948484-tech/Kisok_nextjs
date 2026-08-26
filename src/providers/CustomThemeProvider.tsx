@@ -8,9 +8,9 @@ export const CustomThemeProvider = ({ children }: { children: React.ReactNode })
   return (
     <ThemeProvider
       attribute="class"
-      enableSystem={true}
-      defaultTheme="system"
+      defaultTheme="dark"
       disableTransitionOnChange
+      enableSystem={false}
     >
       {children}
     </ThemeProvider>

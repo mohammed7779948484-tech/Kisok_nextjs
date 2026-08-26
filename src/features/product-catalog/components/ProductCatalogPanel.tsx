@@ -2,6 +2,14 @@
 
 import { useState } from 'react';
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { KisokButton, StatusPill } from '@/shared/ui';
 
 import { productCatalogRepository } from '../repositories';
@@ -38,35 +46,37 @@ export function ProductCatalogPanel() {
         </div>
       ) : null}
       <div className="mt-6 overflow-x-auto">
-        <table className="w-full min-w-[680px] border-collapse text-left">
-          <thead className="border-[#383838] border-b font-mono text-[#858583] text-[10px] uppercase tracking-[0.17em]">
-            <tr>
-              <th className="pr-6 pb-3 font-medium">Product</th>
-              <th className="pr-6 pb-3 font-medium">Category</th>
-              <th className="pr-6 pb-3 font-medium">Available</th>
-              <th className="pb-3 text-right font-medium">Signal</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#2d2d2d]">
+        <Table className="min-w-[680px] text-left">
+          <TableHeader className="border-[#383838] font-mono text-[#858583] text-[10px] uppercase tracking-[0.17em]">
+            <TableRow>
+              <TableHead className="pr-6 pb-3 font-medium">Product</TableHead>
+              <TableHead className="pr-6 pb-3 font-medium">Category</TableHead>
+              <TableHead className="pr-6 pb-3 font-medium">Available</TableHead>
+              <TableHead className="pb-3 text-right font-medium">Signal</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-[#2d2d2d]">
             {products.map((product, index) => (
-              <tr className="group" key={product.name}>
-                <td className="py-5 pr-6">
+              <TableRow className="group" key={product.name}>
+                <TableCell className="py-5 pr-6">
                   <div className="flex items-center gap-4">
                     <div className={`size-9 ${index === 0 ? 'bg-[#e7e7e4]' : 'bg-[#575757]'}`} />
                     <span className="font-bold text-[#eeeeeb]">{product.name}</span>
                   </div>
-                </td>
-                <td className="py-5 pr-6 text-[#9e9e9b] text-sm">{product.category}</td>
-                <td className="py-5 pr-6 font-mono text-[#d6d6d2] text-sm">
+                </TableCell>
+                <TableCell className="py-5 pr-6 text-[#9e9e9b] text-sm">
+                  {product.category}
+                </TableCell>
+                <TableCell className="py-5 pr-6 font-mono text-[#d6d6d2] text-sm">
                   {String(product.stock).padStart(2, '0')}
-                </td>
-                <td className="py-5 text-right">
+                </TableCell>
+                <TableCell className="py-5 text-right">
                   <StatusPill>{product.status}</StatusPill>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </section>
   );

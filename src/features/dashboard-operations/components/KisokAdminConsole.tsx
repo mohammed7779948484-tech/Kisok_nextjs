@@ -10,7 +10,7 @@ import { MediaLibraryPanel } from '@/features/media-library/components/MediaLibr
 import { OrdersPanel as OrdersFeaturePanel } from '@/features/orders/components/OrdersPanel';
 import { ProductCatalogPanel } from '@/features/product-catalog/components/ProductCatalogPanel';
 import { StoreSettingsPanel } from '@/features/store-settings/components/StoreSettingsPanel';
-import { StatusPill } from '@/shared/ui';
+import { KisokButton, StatusPill } from '@/shared/ui';
 
 import { summarizeOperations } from '../lib/dashboard-model';
 import { operationsRepository } from '../repositories';
@@ -275,10 +275,10 @@ export function KisokAdminConsole() {
             {navigation.map((item) => {
               const active = item.id === activePanel;
               return (
-                <button
+                <KisokButton
                   aria-current={active ? 'page' : undefined}
                   aria-label={item.label}
-                  className={`flex min-h-12 items-center justify-between px-3 text-left text-sm transition-colors lg:w-full lg:px-0 ${active ? 'bg-[#e7e7e4] font-bold text-[#111] lg:bg-transparent lg:text-[#f0f0ed]' : 'bg-[#151515] text-[#a1a19f] hover:bg-[#232323] hover:text-[#f0f0ed] lg:hover:bg-transparent'}`}
+                  className={`h-auto min-h-12 w-full justify-between rounded-none px-3 text-left text-sm lg:px-0 ${active ? 'bg-[#e7e7e4] font-bold text-[#111] lg:bg-transparent lg:text-[#f0f0ed]' : 'bg-[#151515] text-[#a1a19f] hover:bg-[#232323] hover:text-[#f0f0ed] lg:hover:bg-transparent'}`}
                   key={item.id}
                   onClick={() => {
                     setActivePanel(item.id);
@@ -286,10 +286,11 @@ export function KisokAdminConsole() {
                     setViewState('ready');
                   }}
                   type="button"
+                  variant="ghost"
                 >
                   <span>{item.label}</span>
                   <span className="font-mono text-[10px] opacity-60">{item.marker}</span>
-                </button>
+                </KisokButton>
               );
             })}
           </nav>
@@ -309,34 +310,38 @@ export function KisokAdminConsole() {
               Workspace / {activeLabel}
             </p>
             <div className="flex items-center gap-2">
-              <button
-                className="hidden border border-[#e7e7e4] px-2 py-1 font-mono text-[#e7e7e4] text-[9px] uppercase tracking-[0.12em] hover:bg-[#e7e7e4] hover:text-[#151515] sm:block"
+              <KisokButton
+                className="hidden h-auto rounded-none border-[#e7e7e4] px-2 py-1 font-mono text-[#e7e7e4] text-[9px] uppercase tracking-[0.12em] hover:bg-[#e7e7e4] hover:text-[#151515] sm:inline-flex"
                 onClick={() => setIsLocalAccessGateOpen(true)}
                 type="button"
+                variant="outline"
               >
                 Open local access gate
-              </button>
-              <button
-                className="hidden border border-[#3a3a3a] px-2 py-1 font-mono text-[#a6a6a4] text-[9px] uppercase tracking-[0.12em] hover:border-[#dcdcd8] hover:text-[#f0f0ed] sm:block"
+              </KisokButton>
+              <KisokButton
+                className="hidden h-auto rounded-none px-2 py-1 font-mono text-[#a6a6a4] text-[9px] uppercase tracking-[0.12em] sm:inline-flex"
                 onClick={() => setViewState('loading')}
                 type="button"
+                variant="quiet"
               >
                 Simulate loading state
-              </button>
-              <button
-                className="hidden border border-[#3a3a3a] px-2 py-1 font-mono text-[#a6a6a4] text-[9px] uppercase tracking-[0.12em] hover:border-[#dcdcd8] hover:text-[#f0f0ed] sm:block"
+              </KisokButton>
+              <KisokButton
+                className="hidden h-auto rounded-none px-2 py-1 font-mono text-[#a6a6a4] text-[9px] uppercase tracking-[0.12em] sm:inline-flex"
                 onClick={() => setViewState('empty')}
                 type="button"
+                variant="quiet"
               >
                 Simulate empty state
-              </button>
-              <button
-                className="hidden border border-[#3a3a3a] px-2 py-1 font-mono text-[#a6a6a4] text-[9px] uppercase tracking-[0.12em] hover:border-[#dcdcd8] hover:text-[#f0f0ed] sm:block"
+              </KisokButton>
+              <KisokButton
+                className="hidden h-auto rounded-none px-2 py-1 font-mono text-[#a6a6a4] text-[9px] uppercase tracking-[0.12em] sm:inline-flex"
                 onClick={() => setViewState('failure')}
                 type="button"
+                variant="quiet"
               >
                 Simulate failure state
-              </button>
+              </KisokButton>
               <span className="size-2 rounded-full bg-[#dcdcd8]" aria-hidden="true" />
               <span className="font-mono text-[#a6a6a4] text-[10px] uppercase tracking-[0.16em]">
                 System ready

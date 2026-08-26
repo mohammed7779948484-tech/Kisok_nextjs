@@ -10,6 +10,7 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
+  KisokTextarea,
   StatusPill,
 } from '@/shared/ui';
 
@@ -80,7 +81,7 @@ export function InventoryPanel({ onAction }: { onAction: (message: string) => vo
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
               Adjustment reason
             </span>
-            <textarea
+            <KisokTextarea
               className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-sm text-[#f0f0ed] outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="inventory-adjustment-reason"
               onChange={(event) => setReason(event.target.value)}

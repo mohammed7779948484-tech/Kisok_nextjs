@@ -10,6 +10,7 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
+  KisokTextarea,
   StatusPill,
 } from '@/shared/ui';
 
@@ -67,7 +68,7 @@ export function OrdersPanel({ onAction }: { onAction: (message: string) => void 
               <KisokButton
                 aria-label={`Review handoff for ${order.id}`}
                 onClick={() => setOrderForHandoff(order)}
-                size="compact"
+                size="sm"
                 variant="outline"
               >
                 Review handoff
@@ -75,7 +76,7 @@ export function OrdersPanel({ onAction }: { onAction: (message: string) => void 
               <KisokButton
                 aria-label={`Review cancellation for ${order.id}`}
                 onClick={() => setOrderForCancellation(order)}
-                size="compact"
+                size="sm"
                 variant="quiet"
               >
                 Review cancellation
@@ -107,7 +108,7 @@ export function OrdersPanel({ onAction }: { onAction: (message: string) => void 
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
               Cancellation reason
             </span>
-            <textarea
+            <KisokTextarea
               className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="order-cancellation-reason"
               onChange={(event) => setCancellationReason(event.target.value)}
@@ -152,7 +153,7 @@ export function OrdersPanel({ onAction }: { onAction: (message: string) => void 
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
               Handoff note
             </span>
-            <textarea
+            <KisokTextarea
               className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="order-handoff-note"
               onChange={(event) => setHandoffNote(event.target.value)}

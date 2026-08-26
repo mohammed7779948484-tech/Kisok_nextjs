@@ -1519,3 +1519,541 @@
 [2026-08-26T04:54:58.586Z] allowedDevOrigins: ['127.0.0.1'],
 [2026-08-26T04:54:58.586Z] }
 [2026-08-26T04:54:58.586Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.540Z] GET / 200 in 117ms (next.js: 39ms, proxy.ts: 7ms, generate-params: 11ms, application-code: 60ms)
+[2026-08-26T05:04:27.596Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0sx7sf1._.js from "127.0.0.1".
+[2026-08-26T05:04:27.597Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.597Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.597Z] // next.config.js
+[2026-08-26T05:04:27.597Z] module.exports = {
+[2026-08-26T05:04:27.597Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.597Z] }
+[2026-08-26T05:04:27.597Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.602Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_181vniy._.js from "127.0.0.1".
+[2026-08-26T05:04:27.602Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.602Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.602Z] // next.config.js
+[2026-08-26T05:04:27.602Z] module.exports = {
+[2026-08-26T05:04:27.602Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.602Z] }
+[2026-08-26T05:04:27.602Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.606Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_app_%5Blocale%5D_error_tsx_13h85cb._.js from "127.0.0.1".
+[2026-08-26T05:04:27.606Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.606Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.606Z] // next.config.js
+[2026-08-26T05:04:27.606Z] module.exports = {
+[2026-08-26T05:04:27.606Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.606Z] }
+[2026-08-26T05:04:27.606Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.607Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0q4e_next_dist_112rgwv._.js from "127.0.0.1".
+[2026-08-26T05:04:27.608Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.608Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.608Z] // next.config.js
+[2026-08-26T05:04:27.608Z] module.exports = {
+[2026-08-26T05:04:27.608Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.608Z] }
+[2026-08-26T05:04:27.608Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.611Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_03z_j-n._.js from "127.0.0.1".
+[2026-08-26T05:04:27.611Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.611Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.611Z] // next.config.js
+[2026-08-26T05:04:27.611Z] module.exports = {
+[2026-08-26T05:04:27.611Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.611Z] }
+[2026-08-26T05:04:27.611Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.620Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_01j_0ow._.js from "127.0.0.1".
+[2026-08-26T05:04:27.621Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.621Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.621Z] // next.config.js
+[2026-08-26T05:04:27.621Z] module.exports = {
+[2026-08-26T05:04:27.621Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.621Z] }
+[2026-08-26T05:04:27.621Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:04:27.761Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1".
+[2026-08-26T05:04:27.761Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:04:27.761Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:04:27.761Z] // next.config.js
+[2026-08-26T05:04:27.761Z] module.exports = {
+[2026-08-26T05:04:27.761Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:04:27.761Z] }
+[2026-08-26T05:04:27.761Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:05.095Z] GET / 200 in 88ms (next.js: 23ms, proxy.ts: 5ms, generate-params: 17ms, application-code: 43ms)
+[2026-08-26T05:05:56.202Z] GET /?from_webdev=1 200 in 110ms (next.js: 31ms, proxy.ts: 13ms, generate-params: 16ms, application-code: 51ms)
+[2026-08-26T05:05:57.256Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1hn7_tailwind-merge_dist_bundle-mjs_mjs_04a_myf._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.256Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.256Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.256Z] // next.config.js
+[2026-08-26T05:05:57.256Z] module.exports = {
+[2026-08-26T05:05:57.256Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.256Z] }
+[2026-08-26T05:05:57.256Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.257Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1-ajsuq._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.257Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.257Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.257Z] // next.config.js
+[2026-08-26T05:05:57.257Z] module.exports = {
+[2026-08-26T05:05:57.257Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.257Z] }
+[2026-08-26T05:05:57.257Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.257Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0q4e_next_dist_112rgwv._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.257Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.257Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.257Z] // next.config.js
+[2026-08-26T05:05:57.257Z] module.exports = {
+[2026-08-26T05:05:57.257Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.257Z] }
+[2026-08-26T05:05:57.257Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.257Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_03z_j-n._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.257Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.257Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.257Z] // next.config.js
+[2026-08-26T05:05:57.257Z] module.exports = {
+[2026-08-26T05:05:57.257Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.257Z] }
+[2026-08-26T05:05:57.257Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.257Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1a7c_zod_v4_0_p_dem._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.257Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.258Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.258Z] // next.config.js
+[2026-08-26T05:05:57.258Z] module.exports = {
+[2026-08-26T05:05:57.258Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.258Z] }
+[2026-08-26T05:05:57.258Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.258Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_1g4t9wq._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.259Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.259Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.259Z] // next.config.js
+[2026-08-26T05:05:57.259Z] module.exports = {
+[2026-08-26T05:05:57.259Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.259Z] }
+[2026-08-26T05:05:57.259Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.260Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_01j_0ow._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.260Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.260Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.260Z] // next.config.js
+[2026-08-26T05:05:57.260Z] module.exports = {
+[2026-08-26T05:05:57.260Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.260Z] }
+[2026-08-26T05:05:57.260Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.260Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0sx7sf1._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.260Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.260Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.260Z] // next.config.js
+[2026-08-26T05:05:57.260Z] module.exports = {
+[2026-08-26T05:05:57.260Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.260Z] }
+[2026-08-26T05:05:57.260Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:57.279Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_app_%5Blocale%5D_error_tsx_13h85cb._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:57.279Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:57.279Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:57.279Z] // next.config.js
+[2026-08-26T05:05:57.279Z] module.exports = {
+[2026-08-26T05:05:57.279Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:57.279Z] }
+[2026-08-26T05:05:57.279Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:58.565Z] HEAD / 200 in 59ms (next.js: 5ms, proxy.ts: 5ms, generate-params: 12ms, application-code: 37ms)
+[2026-08-26T05:05:59.000Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:59.000Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:59.000Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:59.000Z] // next.config.js
+[2026-08-26T05:05:59.000Z] module.exports = {
+[2026-08-26T05:05:59.000Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:59.000Z] }
+[2026-08-26T05:05:59.000Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:59.063Z] GET /?from_webdev=1 200 in 65ms (next.js: 5ms, proxy.ts: 5ms, generate-params: 11ms, application-code: 44ms)
+[2026-08-26T05:05:59.209Z] GET /?from_webdev=1 200 in 45ms (next.js: 4ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 35ms)
+[2026-08-26T05:05:59.524Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_181vniy._.js from "3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer".
+[2026-08-26T05:05:59.524Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:05:59.524Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:05:59.524Z] // next.config.js
+[2026-08-26T05:05:59.524Z] module.exports = {
+[2026-08-26T05:05:59.524Z] allowedDevOrigins: ['3000-inw0huaebtiwqn6qz4286-c80963d5.us4.manus.computer'],
+[2026-08-26T05:05:59.524Z] }
+[2026-08-26T05:05:59.524Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:05:59.918Z] GET /?from_webdev=1 200 in 54ms (next.js: 4ms, proxy.ts: 3ms, generate-params: 10ms, application-code: 37ms)
+[2026-08-26T05:06:01.139Z] GET /?from_webdev=1 200 in 57ms (next.js: 4ms, proxy.ts: 4ms, generate-params: 11ms, application-code: 38ms)
+[2026-08-26T05:06:02.069Z] GET /?from_webdev=1 200 in 67ms (next.js: 5ms, proxy.ts: 3ms, generate-params: 11ms, application-code: 48ms)
+[2026-08-26T05:07:22.537Z] GET / 200 in 69ms (next.js: 10ms, proxy.ts: 3ms, generate-params: 12ms, application-code: 44ms)
+[2026-08-26T05:08:23.948Z] GET / 200 in 83ms (next.js: 18ms, proxy.ts: 6ms, generate-params: 14ms, application-code: 45ms)
+[2026-08-26T05:08:24.049Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_1g4t9wq._.js from "127.0.0.1".
+[2026-08-26T05:08:24.049Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:08:24.049Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:08:24.049Z] // next.config.js
+[2026-08-26T05:08:24.049Z] module.exports = {
+[2026-08-26T05:08:24.049Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:08:24.049Z] }
+[2026-08-26T05:08:24.049Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:08:24.049Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1hn7_tailwind-merge_dist_bundle-mjs_mjs_04a_myf._.js from "127.0.0.1".
+[2026-08-26T05:08:24.049Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:08:24.049Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:08:24.049Z] // next.config.js
+[2026-08-26T05:08:24.049Z] module.exports = {
+[2026-08-26T05:08:24.049Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:08:24.049Z] }
+[2026-08-26T05:08:24.049Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:08:24.052Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1a7c_zod_v4_0_p_dem._.js from "127.0.0.1".
+[2026-08-26T05:08:24.052Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:08:24.052Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:08:24.052Z] // next.config.js
+[2026-08-26T05:08:24.052Z] module.exports = {
+[2026-08-26T05:08:24.052Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:08:24.052Z] }
+[2026-08-26T05:08:24.052Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:08:24.057Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1-ajsuq._.js from "127.0.0.1".
+[2026-08-26T05:08:24.057Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:08:24.057Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:08:24.057Z] // next.config.js
+[2026-08-26T05:08:24.057Z] module.exports = {
+[2026-08-26T05:08:24.057Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:08:24.057Z] }
+[2026-08-26T05:08:24.057Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.069Z] GET / 200 in 101ms (next.js: 12ms, proxy.ts: 23ms, generate-params: 18ms, application-code: 47ms)
+[2026-08-26T05:09:05.155Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0sx7sf1._.js from "127.0.0.1".
+[2026-08-26T05:09:05.156Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.156Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.156Z] // next.config.js
+[2026-08-26T05:09:05.156Z] module.exports = {
+[2026-08-26T05:09:05.156Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.156Z] }
+[2026-08-26T05:09:05.156Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.156Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_181vniy._.js from "127.0.0.1".
+[2026-08-26T05:09:05.156Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.156Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.156Z] // next.config.js
+[2026-08-26T05:09:05.156Z] module.exports = {
+[2026-08-26T05:09:05.156Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.156Z] }
+[2026-08-26T05:09:05.156Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.158Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0q4e_next_dist_112rgwv._.js from "127.0.0.1".
+[2026-08-26T05:09:05.158Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.158Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.158Z] // next.config.js
+[2026-08-26T05:09:05.158Z] module.exports = {
+[2026-08-26T05:09:05.158Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.158Z] }
+[2026-08-26T05:09:05.158Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.165Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_03z_j-n._.js from "127.0.0.1".
+[2026-08-26T05:09:05.165Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.165Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.165Z] // next.config.js
+[2026-08-26T05:09:05.165Z] module.exports = {
+[2026-08-26T05:09:05.165Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.165Z] }
+[2026-08-26T05:09:05.165Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.171Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_app_%5Blocale%5D_error_tsx_13h85cb._.js from "127.0.0.1".
+[2026-08-26T05:09:05.171Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.171Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.171Z] // next.config.js
+[2026-08-26T05:09:05.171Z] module.exports = {
+[2026-08-26T05:09:05.171Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.171Z] }
+[2026-08-26T05:09:05.171Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.173Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_01j_0ow._.js from "127.0.0.1".
+[2026-08-26T05:09:05.173Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.173Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.173Z] // next.config.js
+[2026-08-26T05:09:05.173Z] module.exports = {
+[2026-08-26T05:09:05.173Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.173Z] }
+[2026-08-26T05:09:05.173Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:09:05.938Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1".
+[2026-08-26T05:09:05.938Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:09:05.938Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:09:05.938Z] // next.config.js
+[2026-08-26T05:09:05.938Z] module.exports = {
+[2026-08-26T05:09:05.938Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:09:05.938Z] }
+[2026-08-26T05:09:05.938Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:10:26.153Z] GET / 200 in 73ms (next.js: 7ms, proxy.ts: 5ms, generate-params: 12ms, application-code: 49ms)
+[2026-08-26T05:11:34.545Z] GET / 200 in 76ms (next.js: 6ms, proxy.ts: 9ms, generate-params: 17ms, application-code: 44ms)
+[2026-08-26T05:12:23.098Z] GET / 200 in 93ms (next.js: 27ms, proxy.ts: 8ms, generate-params: 16ms, application-code: 42ms)
+[2026-08-26T05:12:47.406Z] ✓ Compiled in 4.7s
+[2026-08-26T05:12:49.279Z] ELIFECYCLE  Command failed.
+[2026-08-26T05:12:49.394Z] [?25h
+[2026-08-26T05:12:50.259Z] WARN  Unsupported engine: wanted: {"node":">=24.0.0"} (current: {"node":"v22.13.0","pnpm":"10.4.1"})
+[2026-08-26T05:12:50.355Z] Lockfile is up to date, resolution step is skipped
+[2026-08-26T05:12:50.430Z] Already up to date
+[2026-08-26T05:12:50.833Z] . prepare$ husky
+[2026-08-26T05:12:50.901Z] . prepare: Done
+[2026-08-26T05:12:50.905Z] Done in 977ms using pnpm v10.4.1
+[2026-08-26T05:12:50.951Z] Dev server exited with code -1
+[2026-08-26T05:12:52.019Z] Starting dev server with command: pnpm run dev
+[2026-08-26T05:12:52.938Z] WARN  Unsupported engine: wanted: {"node":">=24.0.0"} (current: {"node":"v22.13.0","pnpm":"10.4.1"})
+[2026-08-26T05:12:52.941Z] > kisok-admin-next@0.1.0 dev /home/ubuntu/kisok_admin_next
+[2026-08-26T05:12:52.941Z] > next dev
+[2026-08-26T05:12:53.657Z] ▲ Next.js 16.3.3 (Turbopack)
+[2026-08-26T05:12:53.657Z] - Local:         http://localhost:3000
+[2026-08-26T05:12:53.657Z] - Network:       http://169.254.0.21:3000
+[2026-08-26T05:12:53.657Z] ✓ Ready in 588ms
+[2026-08-26T05:12:53.740Z] ✓ Running next.config.ts took 81ms
+[2026-08-26T05:12:55.524Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1".
+[2026-08-26T05:12:55.524Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:12:55.524Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:12:55.524Z] // next.config.js
+[2026-08-26T05:12:55.524Z] module.exports = {
+[2026-08-26T05:12:55.524Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:12:55.524Z] }
+[2026-08-26T05:12:55.524Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:12:58.832Z] ○ Compiling /[locale] ...
+[2026-08-26T05:13:00.042Z] GET / 200 in 4.5s (next.js: 3.3s, proxy.ts: 265ms, generate-params: 481ms, application-code: 466ms)
+[2026-08-26T05:13:00.188Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1ijqvzg._.js from "127.0.0.1".
+[2026-08-26T05:13:00.188Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.188Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.188Z] // next.config.js
+[2026-08-26T05:13:00.188Z] module.exports = {
+[2026-08-26T05:13:00.188Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.188Z] }
+[2026-08-26T05:13:00.188Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.198Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0eit_next_dist_1ccgt_z._.js from "127.0.0.1".
+[2026-08-26T05:13:00.198Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.198Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.198Z] // next.config.js
+[2026-08-26T05:13:00.198Z] module.exports = {
+[2026-08-26T05:13:00.198Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.198Z] }
+[2026-08-26T05:13:00.198Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.201Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0sx7sf1._.js from "127.0.0.1".
+[2026-08-26T05:13:00.201Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.201Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.201Z] // next.config.js
+[2026-08-26T05:13:00.201Z] module.exports = {
+[2026-08-26T05:13:00.201Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.201Z] }
+[2026-08-26T05:13:00.201Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.204Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_app_%5Blocale%5D_error_tsx_13h85cb._.js from "127.0.0.1".
+[2026-08-26T05:13:00.204Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.204Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.204Z] // next.config.js
+[2026-08-26T05:13:00.204Z] module.exports = {
+[2026-08-26T05:13:00.204Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.204Z] }
+[2026-08-26T05:13:00.204Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.209Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_03z_j-n._.js from "127.0.0.1".
+[2026-08-26T05:13:00.209Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.209Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.209Z] // next.config.js
+[2026-08-26T05:13:00.209Z] module.exports = {
+[2026-08-26T05:13:00.209Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.209Z] }
+[2026-08-26T05:13:00.209Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.211Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_1g4t9wq._.js from "127.0.0.1".
+[2026-08-26T05:13:00.211Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.211Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.211Z] // next.config.js
+[2026-08-26T05:13:00.211Z] module.exports = {
+[2026-08-26T05:13:00.211Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.211Z] }
+[2026-08-26T05:13:00.211Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.213Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1ssxcl1._.js from "127.0.0.1".
+[2026-08-26T05:13:00.213Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.213Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.213Z] // next.config.js
+[2026-08-26T05:13:00.213Z] module.exports = {
+[2026-08-26T05:13:00.213Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.213Z] }
+[2026-08-26T05:13:00.213Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.213Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1hn7_tailwind-merge_dist_bundle-mjs_mjs_04a_myf._.js from "127.0.0.1".
+[2026-08-26T05:13:00.213Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.213Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.213Z] // next.config.js
+[2026-08-26T05:13:00.213Z] module.exports = {
+[2026-08-26T05:13:00.213Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.213Z] }
+[2026-08-26T05:13:00.213Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.215Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1a7c_zod_v4_0_p_dem._.js from "127.0.0.1".
+[2026-08-26T05:13:00.215Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.215Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.215Z] // next.config.js
+[2026-08-26T05:13:00.215Z] module.exports = {
+[2026-08-26T05:13:00.215Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.215Z] }
+[2026-08-26T05:13:00.215Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:00.217Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1-ajsuq._.js from "127.0.0.1".
+[2026-08-26T05:13:00.217Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:13:00.217Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:13:00.217Z] // next.config.js
+[2026-08-26T05:13:00.217Z] module.exports = {
+[2026-08-26T05:13:00.217Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:13:00.217Z] }
+[2026-08-26T05:13:00.217Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:13:34.762Z] GET / 200 in 98ms (next.js: 10ms, proxy.ts: 8ms, generate-params: 21ms, application-code: 58ms)
+[2026-08-26T05:14:20.639Z] GET / 200 in 87ms (next.js: 8ms, proxy.ts: 6ms, generate-params: 13ms, application-code: 60ms)
+[2026-08-26T05:15:36.585Z] GET / 200 in 100ms (next.js: 20ms, proxy.ts: 11ms, generate-params: 18ms, application-code: 51ms)
+[2026-08-26T05:16:22.440Z] GET / 200 in 81ms (next.js: 11ms, proxy.ts: 6ms, generate-params: 12ms, application-code: 51ms)
+[2026-08-26T05:17:36.772Z] GET / 200 in 118ms (next.js: 33ms, proxy.ts: 9ms, generate-params: 15ms, application-code: 61ms)
+[2026-08-26T05:17:36.879Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0wdpp7o._.js from "127.0.0.1".
+[2026-08-26T05:17:36.879Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:17:36.879Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:17:36.879Z] // next.config.js
+[2026-08-26T05:17:36.879Z] module.exports = {
+[2026-08-26T05:17:36.879Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:17:36.879Z] }
+[2026-08-26T05:17:36.879Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:17:36.890Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1if-o2d._.js from "127.0.0.1".
+[2026-08-26T05:17:36.890Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:17:36.890Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:17:36.890Z] // next.config.js
+[2026-08-26T05:17:36.890Z] module.exports = {
+[2026-08-26T05:17:36.890Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:17:36.890Z] }
+[2026-08-26T05:17:36.890Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:18:23.977Z] GET / 200 in 126ms (next.js: 35ms, proxy.ts: 13ms, generate-params: 23ms, application-code: 56ms)
+[2026-08-26T05:19:36.166Z] GET / 200 in 126ms (next.js: 35ms, proxy.ts: 13ms, generate-params: 20ms, application-code: 59ms)
+[2026-08-26T05:19:36.265Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_1h1-0om._.js from "127.0.0.1".
+[2026-08-26T05:19:36.265Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:19:36.265Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:19:36.265Z] // next.config.js
+[2026-08-26T05:19:36.265Z] module.exports = {
+[2026-08-26T05:19:36.265Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:19:36.265Z] }
+[2026-08-26T05:19:36.265Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:20:19.518Z] GET / 200 in 95ms (next.js: 9ms, proxy.ts: 12ms, generate-params: 18ms, application-code: 56ms)
+[2026-08-26T05:21:35.946Z] GET / 200 in 138ms (next.js: 16ms, proxy.ts: 13ms, generate-params: 16ms, application-code: 93ms)
+[2026-08-26T05:21:36.061Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_1onlr_p._.js from "127.0.0.1".
+[2026-08-26T05:21:36.061Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:21:36.061Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:21:36.061Z] // next.config.js
+[2026-08-26T05:21:36.061Z] module.exports = {
+[2026-08-26T05:21:36.061Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:21:36.061Z] }
+[2026-08-26T05:21:36.061Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:21:36.067Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0-xq_%40base-ui_utils_08dyfw-._.js from "127.0.0.1".
+[2026-08-26T05:21:36.067Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:21:36.068Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:21:36.068Z] // next.config.js
+[2026-08-26T05:21:36.068Z] module.exports = {
+[2026-08-26T05:21:36.068Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:21:36.068Z] }
+[2026-08-26T05:21:36.068Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:21:36.071Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_1g27dxf._.js from "127.0.0.1".
+[2026-08-26T05:21:36.072Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:21:36.072Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:21:36.072Z] // next.config.js
+[2026-08-26T05:21:36.072Z] module.exports = {
+[2026-08-26T05:21:36.072Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:21:36.072Z] }
+[2026-08-26T05:21:36.072Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:21:36.079Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_0zhtu-p._.js from "127.0.0.1".
+[2026-08-26T05:21:36.079Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:21:36.079Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:21:36.079Z] // next.config.js
+[2026-08-26T05:21:36.079Z] module.exports = {
+[2026-08-26T05:21:36.079Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:21:36.079Z] }
+[2026-08-26T05:21:36.079Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:22:17.338Z] GET / 200 in 107ms (next.js: 29ms, proxy.ts: 7ms, generate-params: 18ms, application-code: 54ms)
+[2026-08-26T05:23:30.262Z] GET / 200 in 108ms (next.js: 34ms, proxy.ts: 10ms, generate-params: 17ms, application-code: 46ms)
+[2026-08-26T05:24:51.043Z] GET / 200 in 101ms (next.js: 17ms, proxy.ts: 12ms, generate-params: 19ms, application-code: 54ms)
+[2026-08-26T05:24:51.243Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_1bdvk-3._.js from "127.0.0.1".
+[2026-08-26T05:24:51.243Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:24:51.243Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:24:51.243Z] // next.config.js
+[2026-08-26T05:24:51.243Z] module.exports = {
+[2026-08-26T05:24:51.243Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:24:51.243Z] }
+[2026-08-26T05:24:51.243Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.468Z] GET / 200 in 198ms (next.js: 18ms, proxy.ts: 13ms, generate-params: 18ms, application-code: 149ms)
+[2026-08-26T05:25:57.537Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_0me73up._.js from "127.0.0.1".
+[2026-08-26T05:25:57.537Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.537Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.537Z] // next.config.js
+[2026-08-26T05:25:57.537Z] module.exports = {
+[2026-08-26T05:25:57.537Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.537Z] }
+[2026-08-26T05:25:57.537Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.544Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_07zk_n3._.js from "127.0.0.1".
+[2026-08-26T05:25:57.544Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.544Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.544Z] // next.config.js
+[2026-08-26T05:25:57.544Z] module.exports = {
+[2026-08-26T05:25:57.544Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.544Z] }
+[2026-08-26T05:25:57.544Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.548Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1pyvbkf._.js from "127.0.0.1".
+[2026-08-26T05:25:57.548Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.548Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.548Z] // next.config.js
+[2026-08-26T05:25:57.548Z] module.exports = {
+[2026-08-26T05:25:57.548Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.548Z] }
+[2026-08-26T05:25:57.548Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.560Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1".
+[2026-08-26T05:25:57.561Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.561Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.561Z] // next.config.js
+[2026-08-26T05:25:57.561Z] module.exports = {
+[2026-08-26T05:25:57.561Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.561Z] }
+[2026-08-26T05:25:57.561Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.563Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_05l6ix2._.js from "127.0.0.1".
+[2026-08-26T05:25:57.563Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.563Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.563Z] // next.config.js
+[2026-08-26T05:25:57.563Z] module.exports = {
+[2026-08-26T05:25:57.563Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.563Z] }
+[2026-08-26T05:25:57.563Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.564Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0eit_next_dist_1ccgt_z._.js from "127.0.0.1".
+[2026-08-26T05:25:57.564Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.564Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.564Z] // next.config.js
+[2026-08-26T05:25:57.564Z] module.exports = {
+[2026-08-26T05:25:57.564Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.564Z] }
+[2026-08-26T05:25:57.564Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.570Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/0tll_%40base-ui_react_1d-d5r7._.js from "127.0.0.1".
+[2026-08-26T05:25:57.571Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.571Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.571Z] // next.config.js
+[2026-08-26T05:25:57.571Z] module.exports = {
+[2026-08-26T05:25:57.571Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.571Z] }
+[2026-08-26T05:25:57.571Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:25:57.575Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_0tb1ko5._.js from "127.0.0.1".
+[2026-08-26T05:25:57.575Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:25:57.575Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:25:57.575Z] // next.config.js
+[2026-08-26T05:25:57.575Z] module.exports = {
+[2026-08-26T05:25:57.575Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:25:57.575Z] }
+[2026-08-26T05:25:57.575Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:26:51.839Z] GET / 200 in 127ms (next.js: 25ms, proxy.ts: 11ms, generate-params: 29ms, application-code: 62ms)
+[2026-08-26T05:26:51.912Z] GET / 200 in 60ms (next.js: 8ms, proxy.ts: 4ms, generate-params: 0.0ms, application-code: 47ms)
+[2026-08-26T05:26:51.975Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/src_app_%5Blocale%5D_error_tsx_13h85cb._.js from "127.0.0.1".
+[2026-08-26T05:26:51.975Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:26:51.975Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:26:51.975Z] // next.config.js
+[2026-08-26T05:26:51.975Z] module.exports = {
+[2026-08-26T05:26:51.975Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:26:51.975Z] }
+[2026-08-26T05:26:51.975Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:26:51.997Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/node_modules__pnpm_1ssxcl1._.js from "127.0.0.1".
+[2026-08-26T05:26:51.997Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:26:51.997Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:26:51.997Z] // next.config.js
+[2026-08-26T05:26:51.997Z] module.exports = {
+[2026-08-26T05:26:51.997Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:26:51.997Z] }
+[2026-08-26T05:26:51.997Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:26:52.065Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1hn7_tailwind-merge_dist_bundle-mjs_mjs_04a_myf._.js from "127.0.0.1".
+[2026-08-26T05:26:52.065Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:26:52.065Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:26:52.065Z] // next.config.js
+[2026-08-26T05:26:52.065Z] module.exports = {
+[2026-08-26T05:26:52.065Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:26:52.065Z] }
+[2026-08-26T05:26:52.065Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:26:52.086Z] ⚠ Blocked cross-origin request to Next.js dev resource /_next/static/chunks/1a7c_zod_v4_0_p_dem._.js from "127.0.0.1".
+[2026-08-26T05:26:52.086Z] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[2026-08-26T05:26:52.087Z] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[2026-08-26T05:26:52.087Z] // next.config.js
+[2026-08-26T05:26:52.087Z] module.exports = {
+[2026-08-26T05:26:52.087Z] allowedDevOrigins: ['127.0.0.1'],
+[2026-08-26T05:26:52.087Z] }
+[2026-08-26T05:26:52.087Z] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[2026-08-26T05:27:00.040Z] GET / 200 in 66ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 13ms, application-code: 43ms)
+[2026-08-26T05:27:57.354Z] GET / 200 in 121ms (next.js: 31ms, proxy.ts: 11ms, generate-params: 24ms, application-code: 55ms)
+[2026-08-26T05:28:48.555Z] GET / 200 in 99ms (next.js: 12ms, proxy.ts: 8ms, generate-params: 20ms, application-code: 59ms)
+[2026-08-26T05:29:59.478Z] GET / 200 in 90ms (next.js: 10ms, proxy.ts: 5ms, generate-params: 22ms, application-code: 53ms)
+[2026-08-26T05:30:08.437Z] GET / 200 in 68ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 15ms, application-code: 42ms)
+[2026-08-26T05:30:16.908Z] GET / 200 in 77ms (next.js: 7ms, proxy.ts: 4ms, generate-params: 15ms, application-code: 51ms)
+[2026-08-26T05:30:52.061Z] GET / 200 in 80ms (next.js: 6ms, proxy.ts: 6ms, generate-params: 22ms, application-code: 47ms)

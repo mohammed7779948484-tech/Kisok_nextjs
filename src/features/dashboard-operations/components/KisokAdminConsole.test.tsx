@@ -14,6 +14,22 @@ describe('KisokAdminConsole', () => {
     expect(screen.getByText('Operations control')).toBeInTheDocument();
   });
 
+  it('renders navigation and local controls through the official shadcn button primitive', () => {
+    render(<KisokAdminConsole />);
+
+    expect(screen.getByRole('button', { name: 'Overview' })).toHaveAttribute('data-slot', 'button');
+    expect(screen.getByRole('button', { name: 'Open local access gate' })).toHaveAttribute(
+      'data-slot',
+      'button',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open local access gate' }));
+    expect(screen.getByRole('button', { name: 'Enter local workspace' })).toHaveAttribute(
+      'data-slot',
+      'button',
+    );
+  });
+
   it('shows the operational summary and switches to the local products feature', () => {
     render(<KisokAdminConsole />);
 
@@ -205,6 +221,33 @@ describe('KisokAdminConsole', () => {
 
     expect(screen.getByText('08 units')).toBeInTheDocument();
     expect(screen.getByText('Manual approval after completion')).toBeInTheDocument();
+  });
+
+  it('renders local tables and dialog fields through official shadcn primitives', () => {
+    render(<KisokAdminConsole />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Products' }));
+    expect(screen.getByText('Arabic Reserve').closest('table')).toHaveAttribute(
+      'data-slot',
+      'table',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Inventory' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Record adjustment' }));
+    expect(screen.getByLabelText('Adjustment reason')).toHaveAttribute('data-slot', 'textarea');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review cancellation for #K-1048' }));
+    expect(screen.getByLabelText('Cancellation reason')).toHaveAttribute('data-slot', 'textarea');
+    expect(screen.queryByLabelText('Handoff note')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Keep order' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit local settings' }));
+    expect(screen.getByLabelText('Store identity')).toHaveAttribute('data-slot', 'input');
+    expect(screen.getByLabelText('Low-stock threshold')).toHaveAttribute('data-slot', 'input');
+    expect(screen.getByLabelText('Order reset')).toHaveAttribute('data-slot', 'input');
   });
 
   it('renders local users, media, and store settings through feature navigation', () => {

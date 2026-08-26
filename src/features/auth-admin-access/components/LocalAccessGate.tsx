@@ -1,5 +1,7 @@
 'use client';
 
+import { KisokButton } from '@/shared/ui';
+
 import { adminAccessRepository } from '../repositories';
 
 export function LocalAccessGate({ onEnter }: { onEnter: () => void }) {
@@ -30,13 +32,14 @@ export function LocalAccessGate({ onEnter }: { onEnter: () => void }) {
               Supabase Auth and role enforcement are deliberately deferred to the integration phase.
             </p>
           </div>
-          <button
-            className="border border-[#151515] px-4 py-3 text-left font-bold text-xs uppercase tracking-[0.14em] transition-colors hover:bg-[#151515] hover:text-[#e7e7e4]"
+          <KisokButton
+            className="h-auto justify-start rounded-none border-[#151515] px-4 py-3 text-left font-bold text-xs uppercase tracking-[0.14em] hover:bg-[#151515] hover:text-[#e7e7e4]"
             onClick={onEnter}
             type="button"
+            variant="outline"
           >
             Enter local workspace
-          </button>
+          </KisokButton>
         </div>
       </section>
     </main>

@@ -10,6 +10,7 @@ import {
   KisokDialogFooter,
   KisokDialogHeader,
   KisokDialogTitle,
+  KisokInput,
 } from '@/shared/ui';
 
 import { storeSettingsRepository } from '../repositories';
@@ -108,7 +109,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
               Store identity
             </span>
-            <input
+            <KisokInput
               className="w-full border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="store-identity"
               onChange={(event) => setStoreIdentityDraft(event.target.value)}
@@ -119,7 +120,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
               Low-stock threshold
             </span>
-            <input
+            <KisokInput
               className="w-full border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="low-stock-threshold"
               onChange={(event) => setLowStockThresholdDraft(event.target.value)}
@@ -130,7 +131,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
               Order reset
             </span>
-            <input
+            <KisokInput
               className="w-full border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="order-reset"
               onChange={(event) => setOrderResetDraft(event.target.value)}

@@ -57,7 +57,7 @@ export function MediaLibraryPanel({ onAction }: { onAction: (message: string) =>
               aria-label={`Review removal for ${asset.label}`}
               className="mt-4 w-full"
               onClick={() => setAssetForRemoval(asset)}
-              size="compact"
+              size="sm"
               variant="quiet"
             >
               Review removal

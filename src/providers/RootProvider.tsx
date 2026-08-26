@@ -3,6 +3,7 @@
 
 import { type AbstractIntlMessages, NextIntlClientProvider } from 'next-intl';
 
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { CustomThemeProvider } from '@/providers';
 import type { AppState } from '@/store';
 import type { SupportedLocale } from '@/types/i18n';
@@ -28,7 +29,7 @@ export const RootProvider = ({
     <StoreProvider preloadedState={preloadedState}>
       <CustomThemeProvider>
         <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </NextIntlClientProvider>
       </CustomThemeProvider>
     </StoreProvider>
