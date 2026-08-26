@@ -1,7 +1,35 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useUpdate } from '@refinedev/core';
+import { Controller } from 'react-hook-form';
+
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   KisokButton,
   KisokDialog,
@@ -14,223 +42,327 @@ import {
   StatusPill,
 } from '@/shared/ui';
 
-import { catalogTaxonomyRepository } from '../repositories';
+import { CATEGORIES_PAGE_SIZE, useCategoriesList } from '../hooks/useCategoriesList';
+import { useCategoryForm } from '../hooks/useCategoryForm';
+import { useCategoryReorder } from '../hooks/useCategoryReorder';
+import { type CategoryFormValues, categoryFormDefaultValues } from '../schemas/category.schema';
 import type { CategoryRecord } from '../types';
 
-/**
- * Brands moved to `BrandsPanel`, a Refine + RHF/Zod reference
- * implementation (see `hooks/useBrandsList.ts`, `hooks/useBrandForm.ts`).
- * Categories remain on the manual repository pattern pending the same
- * migration (tracked in docs/PR6_COMPLETION_TODO.md).
- */
-export function CatalogTaxonomyPanel() {
-  const [categories, setCategories] = useState<CategoryRecord[]>([]);
-  const [categoryCreateOpen, setCategoryCreateOpen] = useState(false);
-  const [categoryBeingEdited, setCategoryBeingEdited] = useState<CategoryRecord | null>(null);
-  const [categoryName, setCategoryName] = useState('');
-  const [categoryParentId, setCategoryParentId] = useState('');
-  const [categorySaving, setCategorySaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+/** Debounced-as-you-type search — same pattern as `BrandsPanel`. */
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setCategories(await catalogTaxonomyRepository.listCategories());
-    } catch {
-      setError('Categories could not be loaded. Check the connection and try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+const ROOT_PARENT_VALUE = '__root__';
+
+type DialogState = { open: boolean; mode: 'create' | 'edit'; category?: CategoryRecord };
+
+function CategoryFormDialog({
+  dialogState,
+  onOpenChange,
+  rootCategories,
+}: {
+  dialogState: DialogState;
+  onOpenChange: (open: boolean) => void;
+  rootCategories: CategoryRecord[];
+}) {
+  const { mode, category, open } = dialogState;
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+    refineCore: { onFinish },
+  } = useCategoryForm({ id: category?.id, mode });
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (!open) return;
+    reset(
+      category
+        ? { name: category.name, parent_id: category.parentId, is_active: category.isActive }
+        : categoryFormDefaultValues,
+    );
+  }, [open, category, reset]);
 
-  async function saveCategory() {
-    const name = categoryName.trim();
-    if (!name) return;
-    setCategorySaving(true);
-    setError(null);
-    try {
-      if (categoryBeingEdited) {
-        await catalogTaxonomyRepository.updateCategory(categoryBeingEdited.id, {
-          name,
-          parentId: categoryParentId || null,
-        });
-      } else {
-        await catalogTaxonomyRepository.createCategory({
-          name,
-          parentId: categoryParentId || null,
-        });
-      }
-      setCategoryName('');
-      setCategoryParentId('');
-      setCategoryBeingEdited(null);
-      setCategoryCreateOpen(false);
-      await refresh();
-    } catch {
-      setError('The Category could not be saved. Check the name, parent, and connection.');
-    } finally {
-      setCategorySaving(false);
-    }
+  async function onSubmit(values: CategoryFormValues) {
+    await onFinish(values);
+    onOpenChange(false);
   }
 
-  async function toggleCategory(category: CategoryRecord) {
-    setError(null);
-    try {
-      await catalogTaxonomyRepository.updateCategory(category.id, { isActive: !category.isActive });
-      await refresh();
-    } catch {
-      setError(`The Category ${category.name} could not be updated.`);
-    }
-  }
+  const parentOptions = rootCategories.filter((candidate) => candidate.id !== category?.id);
 
-  function openCategoryEditor(category?: CategoryRecord) {
-    setCategoryBeingEdited(category ?? null);
-    setCategoryName(category?.name ?? '');
-    setCategoryParentId(category?.parentId ?? '');
-    setCategoryCreateOpen(true);
+  return (
+    <KisokDialog onOpenChange={onOpenChange} open={open}>
+      <KisokDialogContent>
+        <KisokDialogHeader>
+          <KisokDialogTitle>
+            {mode === 'create' ? 'Add Category' : 'Edit Category'}
+          </KisokDialogTitle>
+          <KisokDialogDescription>
+            Categories support one root level and one child level in the hosted Lean V2 catalog.
+          </KisokDialogDescription>
+        </KisokDialogHeader>
+        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-2">
+            <Label htmlFor="category-name">Category name</Label>
+            <KisokInput
+              aria-invalid={Boolean(errors.name)}
+              id="category-name"
+              {...register('name')}
+            />
+            {errors.name ? <p className="text-destructive text-sm">{errors.name.message}</p> : null}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="category-parent">Parent category</Label>
+            <Controller
+              control={control}
+              name="parent_id"
+              render={({ field }) => (
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === ROOT_PARENT_VALUE ? null : value)
+                  }
+                  value={field.value ?? ROOT_PARENT_VALUE}
+                >
+                  <SelectTrigger id="category-parent">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ROOT_PARENT_VALUE}>Root category</SelectItem>
+                    {parentOptions.map((option) => (
+                      <SelectItem key={option.id} value={option.id}>
+                        {option.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <Controller
+            control={control}
+            name="is_active"
+            render={({ field }) => (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={field.value}
+                  id="category-active"
+                  onCheckedChange={(checked) => field.onChange(checked === true)}
+                />
+                <Label htmlFor="category-active">Active</Label>
+              </div>
+            )}
+          />
+          <KisokDialogFooter>
+            <KisokButton
+              disabled={isSubmitting}
+              onClick={() => onOpenChange(false)}
+              type="button"
+              variant="quiet"
+            >
+              Cancel
+            </KisokButton>
+            <KisokButton disabled={isSubmitting} type="submit">
+              {isSubmitting ? 'Saving…' : 'Save category'}
+            </KisokButton>
+          </KisokDialogFooter>
+        </form>
+      </KisokDialogContent>
+    </KisokDialog>
+  );
+}
+
+export function CatalogTaxonomyPanel() {
+  const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+  const { categories, total, isLoading, isError, refetch } = useCategoriesList({
+    page,
+    search: debouncedSearch,
+  });
+  const { categories: rootCategories } = useCategoriesList({
+    page: 1,
+    search: '',
+    parentId: null,
+    pageSize: 200,
+  });
+  const { mutate: updateCategory } = useUpdate();
+  const { move: moveCategory } = useCategoryReorder(() => void refetch());
+  const [dialogState, setDialogState] = useState<DialogState>({ mode: 'create', open: false });
+
+  const totalPages = Math.max(1, Math.ceil(total / CATEGORIES_PAGE_SIZE));
+
+  function toggleActive(category: CategoryRecord) {
+    updateCategory({
+      id: category.id,
+      resource: 'categories',
+      values: { is_active: !category.isActive },
+    });
   }
 
   return (
     <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
             Catalog taxonomy / hosted data
           </p>
           <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Categories</h1>
         </div>
         <div className="flex gap-2">
-          <KisokButton onClick={() => openCategoryEditor()} variant="outline">
+          <KisokButton
+            onClick={() => setDialogState({ mode: 'create', open: true })}
+            variant="outline"
+          >
             Add category
           </KisokButton>
-          <KisokButton onClick={() => void refresh()} variant="outline">
+          <KisokButton onClick={() => void refetch()} variant="outline">
             Refresh
           </KisokButton>
         </div>
       </div>
 
-      {loading ? (
+      <div className="mt-6">
+        <Label className="sr-only" htmlFor="category-search">
+          Search categories
+        </Label>
+        <KisokInput
+          id="category-search"
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search categories"
+          value={searchInput}
+        />
+      </div>
+
+      {isLoading ? (
         <p className="mt-6 text-muted-foreground text-sm" role="status">
           Loading categories…
         </p>
-      ) : error ? (
+      ) : isError ? (
         <div className="mt-6 grid gap-3" role="alert">
-          <p className="text-destructive text-sm">{error}</p>
-          <KisokButton onClick={() => void refresh()} variant="outline">
+          <p className="text-destructive text-sm">
+            Categories could not be loaded. Check the connection and try again.
+          </p>
+          <KisokButton onClick={() => void refetch()} variant="outline">
             Try again
           </KisokButton>
         </div>
       ) : categories.length === 0 ? (
-        <p className="mt-6 text-muted-foreground text-sm">No categories are available.</p>
+        <p className="mt-6 text-muted-foreground text-sm">No categories match this search.</p>
       ) : (
-        <div className="mt-6 divide-y divide-border border-border border-y">
-          {categories.map((category) => (
-            <article className="flex items-center justify-between gap-4 py-5" key={category.id}>
-              <div>
-                <p className="font-bold">{category.name}</p>
-                <p className="mt-1 font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                  {category.parentId ? 'Child category' : 'Root category'} · Order{' '}
+        <Table className="mt-6">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Order</TableHead>
+              <TableHead className="text-right">Reorder</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {categories.map((category) => (
+              <TableRow key={category.id}>
+                <TableCell className={category.parentId ? 'pl-8 font-medium' : 'font-medium'}>
+                  {category.name}
+                </TableCell>
+                <TableCell className="text-muted-foreground text-xs">
+                  {category.parentId ? 'Child' : 'Root'}
+                </TableCell>
+                <TableCell>
+                  <StatusPill
+                    className={
+                      category.isActive ? undefined : 'border-destructive text-destructive'
+                    }
+                  >
+                    {category.isActive ? 'Active' : 'Inactive'}
+                  </StatusPill>
+                </TableCell>
+                <TableCell className="text-right font-mono text-muted-foreground text-xs">
                   {category.displayOrder}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <StatusPill
-                  className={category.isActive ? undefined : 'border-destructive text-destructive'}
-                >
-                  {category.isActive ? 'Active' : 'Inactive'}
-                </StatusPill>
-                <KisokButton onClick={() => openCategoryEditor(category)} size="sm" variant="quiet">
-                  Edit
-                </KisokButton>
-                <KisokButton
-                  aria-label={`${category.isActive ? 'Deactivate' : 'Activate'} ${category.name}`}
-                  onClick={() => void toggleCategory(category)}
-                  size="sm"
-                  variant="quiet"
-                >
-                  {category.isActive ? 'Deactivate' : 'Activate'}
-                </KisokButton>
-              </div>
-            </article>
-          ))}
-        </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <KisokButton
+                    aria-label={`Move ${category.name} up`}
+                    onClick={() => void moveCategory(category, 'up')}
+                    size="sm"
+                    variant="quiet"
+                  >
+                    ▲
+                  </KisokButton>
+                  <KisokButton
+                    aria-label={`Move ${category.name} down`}
+                    onClick={() => void moveCategory(category, 'down')}
+                    size="sm"
+                    variant="quiet"
+                  >
+                    ▼
+                  </KisokButton>
+                </TableCell>
+                <TableCell className="text-right">
+                  <KisokButton
+                    onClick={() => setDialogState({ category, mode: 'edit', open: true })}
+                    size="sm"
+                    variant="quiet"
+                  >
+                    Edit
+                  </KisokButton>
+                  <KisokButton
+                    aria-label={`${category.isActive ? 'Deactivate' : 'Activate'} ${category.name}`}
+                    onClick={() => toggleActive(category)}
+                    size="sm"
+                    variant="quiet"
+                  >
+                    {category.isActive ? 'Deactivate' : 'Activate'}
+                  </KisokButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
-      <KisokDialog
-        onOpenChange={(open) => {
-          setCategoryCreateOpen(open);
-          if (!open) {
-            setCategoryBeingEdited(null);
-            setCategoryName('');
-            setCategoryParentId('');
-          }
-        }}
-        open={categoryCreateOpen}
-      >
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <KisokDialogTitle>
-              {categoryBeingEdited ? 'Edit Category' : 'Add Category'}
-            </KisokDialogTitle>
-            <KisokDialogDescription>
-              Categories support one root level and one child level in the hosted Lean V2 catalog.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          <label className="grid gap-2" htmlFor="category-name">
-            <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-              Category name
-            </span>
-            <KisokInput
-              id="category-name"
-              onChange={(event) => setCategoryName(event.target.value)}
-              value={categoryName}
-            />
-          </label>
-          <label className="grid gap-2" htmlFor="category-parent">
-            <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-              Parent category
-            </span>
-            <select
-              className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              id="category-parent"
-              onChange={(event) => setCategoryParentId(event.target.value)}
-              value={categoryParentId}
-            >
-              <option value="">Root category</option>
-              {categories
-                .filter(
-                  (category) =>
-                    category.parentId === null && category.id !== categoryBeingEdited?.id,
-                )
-                .map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <KisokDialogFooter>
-            <KisokButton
-              disabled={categorySaving}
-              onClick={() => setCategoryCreateOpen(false)}
-              variant="quiet"
-            >
-              Cancel
-            </KisokButton>
-            <KisokButton
-              disabled={categorySaving || !categoryName.trim()}
-              onClick={() => void saveCategory()}
-            >
-              {categorySaving ? 'Saving…' : 'Save category'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
+      {totalPages > 1 ? (
+        <Pagination className="mt-6 justify-start">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                aria-disabled={page <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <PaginationItem key={pageNumber}>
+                <PaginationLink isActive={pageNumber === page} onClick={() => setPage(pageNumber)}>
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                aria-disabled={page >= totalPages}
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
+
+      <CategoryFormDialog
+        dialogState={dialogState}
+        onOpenChange={(open) => setDialogState((current) => ({ ...current, open }))}
+        rootCategories={rootCategories}
+      />
     </section>
   );
 }

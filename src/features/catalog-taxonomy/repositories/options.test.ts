@@ -120,4 +120,10 @@ describe('Option Library Supabase repository', () => {
       ]),
     ).resolves.toBeUndefined();
   });
+
+  it('reorders Option Types in their global scope through the hosted RPC', async () => {
+    await expect(
+      catalogTaxonomyRepository.reorderOptionTypes(['option-type-2', 'option-type-1']),
+    ).resolves.toBeUndefined();
+  });
 });

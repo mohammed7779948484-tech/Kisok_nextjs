@@ -77,6 +77,7 @@ export interface CatalogTaxonomyDataContract {
   listOptionTypes(): Promise<OptionTypeRecord[]>;
   createOptionType(input: OptionTypeInput): Promise<OptionTypeRecord>;
   updateOptionType(id: string, input: OptionTypeUpdate): Promise<OptionTypeRecord>;
+  reorderOptionTypes(orderedIds: string[]): Promise<void>;
   createOptionValue(input: OptionValueInput): Promise<OptionValueRecord>;
   updateOptionValue(id: string, input: OptionValueUpdate): Promise<OptionValueRecord>;
   reorderOptionValues(scopeId: string, orderedIds: string[]): Promise<void>;

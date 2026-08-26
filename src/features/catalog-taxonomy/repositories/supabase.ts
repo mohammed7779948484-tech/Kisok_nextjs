@@ -179,6 +179,16 @@ export function createCatalogTaxonomyRepository(
       return mapOptionType({ ...result.data, option_values: [] });
     },
 
+    async reorderOptionTypes(orderedIds: string[]) {
+      const result = await client.rpc('reorder_items', {
+        resource_name: 'option_types',
+        scope_id:
+          null as unknown as Database['public']['Functions']['reorder_items']['Args']['scope_id'],
+        ordered_ids: orderedIds,
+      });
+      if (result.error) throw result.error;
+    },
+
     async createOptionValue(input: OptionValueInput) {
       const result = await client
         .from('option_values')
@@ -252,6 +262,9 @@ export const catalogTaxonomyRepository: CatalogTaxonomyDataContract = {
   },
   updateOptionType(id, input) {
     return createCatalogTaxonomyRepository(getClientOrThrow()).updateOptionType(id, input);
+  },
+  reorderOptionTypes(orderedIds) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).reorderOptionTypes(orderedIds);
   },
   createOptionValue(input) {
     return createCatalogTaxonomyRepository(getClientOrThrow()).createOptionValue(input);
