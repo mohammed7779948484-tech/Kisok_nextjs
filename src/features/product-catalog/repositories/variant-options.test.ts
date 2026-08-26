@@ -7,11 +7,15 @@ type ExistingRow = { option_type_id: string; option_value_id: string };
 
 function createClient(options: {
   existing: ExistingRow[];
-  insertError?: Error;
-  updateError?: Error;
-  deleteError?: Error;
+  insertErrors?: Array<Error | null>;
+  updateErrors?: Array<Error | null>;
+  deleteErrors?: Array<Error | null>;
 }) {
   const calls: Array<{ operation: string; payload?: unknown }> = [];
+  let insertCallIndex = 0;
+  let updateCallIndex = 0;
+  let deleteCallIndex = 0;
+
   const client = {
     from(table: string) {
       calls.push({ operation: `from:${table}` });
@@ -27,7 +31,9 @@ function createClient(options: {
         },
         insert(payload: unknown) {
           calls.push({ operation: 'insert', payload });
-          return Promise.resolve({ error: options.insertError ?? null });
+          const error = options.insertErrors?.[insertCallIndex] ?? null;
+          insertCallIndex += 1;
+          return Promise.resolve({ error });
         },
         update(payload: unknown) {
           calls.push({ operation: 'update', payload });
@@ -37,7 +43,9 @@ function createClient(options: {
               return {
                 eq(column2: string, value2: string) {
                   calls.push({ operation: `update-eq:${column2}:${value2}` });
-                  return Promise.resolve({ error: options.updateError ?? null });
+                  const error = options.updateErrors?.[updateCallIndex] ?? null;
+                  updateCallIndex += 1;
+                  return Promise.resolve({ error });
                 },
               };
             },
@@ -51,7 +59,9 @@ function createClient(options: {
               return {
                 eq(column2: string, value2: string) {
                   calls.push({ operation: `delete-eq:${column2}:${value2}` });
-                  return Promise.resolve({ error: options.deleteError ?? null });
+                  const error = options.deleteErrors?.[deleteCallIndex] ?? null;
+                  deleteCallIndex += 1;
+                  return Promise.resolve({ error });
                 },
               };
             },
@@ -141,18 +151,13 @@ describe('Variant option relation repository', () => {
     expect(calls.filter((call) => call.operation === 'insert')).toEqual([]);
   });
 
-  it('never loses the prior combination when a mid-way write fails', async () => {
-    // Existing: flavor=berry, size=large. Desired: flavor=cherry (update),
-    // color=red (new insert), size dropped (delete). The insert is made to
-    // fail; the diff-based order runs insert first, so update/delete for the
-    // surviving types must never be attempted, and the size row that would
-    // have been deleted last is never touched.
+  it('never loses the prior combination when the first write (insert) fails', async () => {
     const { client, calls } = createClient({
       existing: [
         { option_type_id: 'type-flavor', option_value_id: 'value-berry' },
         { option_type_id: 'type-size', option_value_id: 'value-large' },
       ],
-      insertError: new Error('option_value_id violates foreign key constraint'),
+      insertErrors: [new Error('option_value_id violates foreign key constraint')],
     });
     testContext.client = client;
 
@@ -163,9 +168,89 @@ describe('Variant option relation repository', () => {
       ]),
     ).rejects.toThrow('option_value_id violates foreign key constraint');
 
-    // The failed insert must be the only mutating call — no update for
-    // flavor and no delete for size, so the old combination survives intact.
     expect(calls.filter((call) => call.operation === 'update')).toEqual([]);
     expect(calls.filter((call) => call.operation === 'delete')).toEqual([]);
+  });
+
+  it('rolls back a successful insert when a later update fails, restoring the original combination', async () => {
+    // Existing: flavor=berry, size=large. Desired: flavor=cherry (update,
+    // will fail), color=red (insert, succeeds since inserts run first).
+    // The insert must be undone (deleted back out) once the update fails —
+    // otherwise the Variant is left with the new color but not the intended
+    // flavor change: an unintended partial mixture.
+    const { client, calls } = createClient({
+      existing: [
+        { option_type_id: 'type-flavor', option_value_id: 'value-berry' },
+        { option_type_id: 'type-size', option_value_id: 'value-large' },
+      ],
+      updateErrors: [new Error('option_value_id violates foreign key constraint')],
+    });
+    testContext.client = client;
+
+    await expect(
+      productCatalogRepository.replaceVariantOptionValues('variant-1', [
+        { optionTypeId: 'type-flavor', optionValueId: 'value-cherry' },
+        { optionTypeId: 'type-color', optionValueId: 'value-red' },
+        { optionTypeId: 'type-size', optionValueId: 'value-large' },
+      ]),
+    ).rejects.toThrow('option_value_id violates foreign key constraint');
+
+    // The successful insert of type-color must be rolled back (deleted).
+    expect(calls).toContainEqual({ operation: 'delete-eq:option_type_id:type-color' });
+    // type-size was never part of the delete/removal set (still selected),
+    // so it must never be touched, forward or rollback.
+    expect(calls.filter((call) => call.operation === 'delete-eq:option_type_id:type-size')).toEqual(
+      [],
+    );
+  });
+
+  it('rolls back a successful insert and update when a later delete fails', async () => {
+    // Existing: flavor=berry, size=large. Desired: flavor=cherry (update,
+    // succeeds), color=red (insert, succeeds), size dropped (delete, fails).
+    // Both the insert and the update must be undone so the Variant ends up
+    // exactly where it started, not half-migrated.
+    const { client, calls } = createClient({
+      existing: [
+        { option_type_id: 'type-flavor', option_value_id: 'value-berry' },
+        { option_type_id: 'type-size', option_value_id: 'value-large' },
+      ],
+      deleteErrors: [new Error('unexpected constraint violation')],
+    });
+    testContext.client = client;
+
+    await expect(
+      productCatalogRepository.replaceVariantOptionValues('variant-1', [
+        { optionTypeId: 'type-flavor', optionValueId: 'value-cherry' },
+        { optionTypeId: 'type-color', optionValueId: 'value-red' },
+      ]),
+    ).rejects.toThrow('unexpected constraint violation');
+
+    // Rollback of the insert: delete the newly-added type-color row.
+    expect(calls).toContainEqual({ operation: 'delete-eq:option_type_id:type-color' });
+    // Rollback of the update: revert type-flavor back to its original value.
+    expect(calls).toContainEqual({
+      operation: 'update',
+      payload: { option_value_id: 'value-berry' },
+    });
+  });
+
+  it('surfaces a combined error, not a silent single-sided one, when rollback itself also fails', async () => {
+    // The update fails (main failure). Rollback must undo the successful
+    // insert of type-color via delete — but that delete ALSO fails. Both
+    // failures must be visible; neither may be silently swallowed.
+    const { client } = createClient({
+      existing: [{ option_type_id: 'type-flavor', option_value_id: 'value-berry' }],
+      updateErrors: [new Error('original update failure')],
+      deleteErrors: [new Error('rollback delete also failed')],
+    });
+    testContext.client = client;
+
+    const rejection = productCatalogRepository.replaceVariantOptionValues('variant-1', [
+      { optionTypeId: 'type-flavor', optionValueId: 'value-cherry' },
+      { optionTypeId: 'type-color', optionValueId: 'value-red' },
+    ]);
+
+    await expect(rejection).rejects.toThrow(/original update failure/);
+    await expect(rejection).rejects.toThrow(/rollback delete also failed/);
   });
 });
