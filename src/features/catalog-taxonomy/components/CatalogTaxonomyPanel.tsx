@@ -15,10 +15,13 @@ import {
 } from '@/shared/ui';
 
 import { catalogTaxonomyRepository } from '../repositories';
-import type { BrandRecord } from '../types';
+import type { BrandRecord, CategoryRecord } from '../types';
 
-export function CatalogTaxonomyPanel() {
+type CatalogMode = 'brands' | 'categories';
+
+export function CatalogTaxonomyPanel({ mode = 'brands' }: { mode?: CatalogMode }) {
   const [brands, setBrands] = useState<BrandRecord[]>([]);
+  const [categories, setCategories] = useState<CategoryRecord[]>([]);
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [brandName, setBrandName] = useState('');
@@ -30,13 +33,19 @@ export function CatalogTaxonomyPanel() {
     setLoading(true);
     setError(null);
     try {
-      setBrands(await catalogTaxonomyRepository.listBrands(search));
+      if (mode === 'brands') {
+        setBrands(await catalogTaxonomyRepository.listBrands(search));
+      } else {
+        setCategories(await catalogTaxonomyRepository.listCategories());
+      }
     } catch {
-      setError('Brands could not be loaded. Check the connection and try again.');
+      setError(
+        `${mode === 'brands' ? 'Brands' : 'Categories'} could not be loaded. Check the connection and try again.`,
+      );
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [mode, search]);
 
   useEffect(() => {
     void refresh();
@@ -59,6 +68,9 @@ export function CatalogTaxonomyPanel() {
     }
   }
 
+  const isBrands = mode === 'brands';
+  const emptyMessage = isBrands ? 'No brands match this search.' : 'No categories are available.';
+
   return (
     <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
@@ -66,36 +78,42 @@ export function CatalogTaxonomyPanel() {
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             Catalog taxonomy / hosted data
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Brands</h1>
+          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">
+            {isBrands ? 'Brands' : 'Categories'}
+          </h1>
         </div>
         <div className="flex gap-2">
-          <KisokButton onClick={() => setCreateOpen(true)} variant="outline">
-            Add brand
-          </KisokButton>
+          {isBrands ? (
+            <KisokButton onClick={() => setCreateOpen(true)} variant="outline">
+              Add brand
+            </KisokButton>
+          ) : null}
           <KisokButton onClick={() => void refresh()} variant="outline">
             Refresh
           </KisokButton>
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <label className="sr-only" htmlFor="brand-search">
-          Search brands
-        </label>
-        <KisokInput
-          id="brand-search"
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search brands"
-          value={search}
-        />
-        <KisokButton onClick={() => void refresh()} variant="outline">
-          Search
-        </KisokButton>
-      </div>
+      {isBrands ? (
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <label className="sr-only" htmlFor="brand-search">
+            Search brands
+          </label>
+          <KisokInput
+            id="brand-search"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search brands"
+            value={search}
+          />
+          <KisokButton onClick={() => void refresh()} variant="outline">
+            Search
+          </KisokButton>
+        </div>
+      ) : null}
 
       {loading ? (
         <p className="mt-6 text-muted-foreground text-sm" role="status">
-          Loading brands…
+          Loading {isBrands ? 'brands' : 'categories'}…
         </p>
       ) : error ? (
         <div className="mt-6 grid gap-3" role="alert">
@@ -104,9 +122,11 @@ export function CatalogTaxonomyPanel() {
             Try again
           </KisokButton>
         </div>
-      ) : brands.length === 0 ? (
-        <p className="mt-6 text-muted-foreground text-sm">No brands match this search.</p>
-      ) : (
+      ) : isBrands && brands.length === 0 ? (
+        <p className="mt-6 text-muted-foreground text-sm">{emptyMessage}</p>
+      ) : !isBrands && categories.length === 0 ? (
+        <p className="mt-6 text-muted-foreground text-sm">{emptyMessage}</p>
+      ) : isBrands ? (
         <div className="mt-6 divide-y divide-border border-border border-y">
           {brands.map((brand) => (
             <article className="flex items-center justify-between gap-4 py-5" key={brand.id}>
@@ -124,39 +144,60 @@ export function CatalogTaxonomyPanel() {
             </article>
           ))}
         </div>
+      ) : (
+        <div className="mt-6 divide-y divide-border border-border border-y">
+          {categories.map((category) => (
+            <article className="flex items-center justify-between gap-4 py-5" key={category.id}>
+              <div>
+                <p className="font-bold">{category.name}</p>
+                <p className="mt-1 font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                  {category.parentId ? 'Child category' : 'Root category'} · Order{' '}
+                  {category.displayOrder}
+                </p>
+              </div>
+              <StatusPill
+                className={category.isActive ? undefined : 'border-destructive text-destructive'}
+              >
+                {category.isActive ? 'Active' : 'Inactive'}
+              </StatusPill>
+            </article>
+          ))}
+        </div>
       )}
 
-      <KisokDialog onOpenChange={setCreateOpen} open={createOpen}>
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <KisokDialogTitle>Add Brand</KisokDialogTitle>
-            <KisokDialogDescription>
-              Create a reusable Brand in the hosted catalog.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          <label className="grid gap-2" htmlFor="brand-name">
-            <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-              Brand name
-            </span>
-            <KisokInput
-              id="brand-name"
-              onChange={(event) => setBrandName(event.target.value)}
-              value={brandName}
-            />
-          </label>
-          <KisokDialogFooter>
-            <KisokButton disabled={creating} onClick={() => setCreateOpen(false)} variant="quiet">
-              Cancel
-            </KisokButton>
-            <KisokButton
-              disabled={creating || !brandName.trim()}
-              onClick={() => void createBrand()}
-            >
-              {creating ? 'Saving…' : 'Save brand'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
+      {isBrands ? (
+        <KisokDialog onOpenChange={setCreateOpen} open={createOpen}>
+          <KisokDialogContent>
+            <KisokDialogHeader>
+              <KisokDialogTitle>Add Brand</KisokDialogTitle>
+              <KisokDialogDescription>
+                Create a reusable Brand in the hosted catalog.
+              </KisokDialogDescription>
+            </KisokDialogHeader>
+            <label className="grid gap-2" htmlFor="brand-name">
+              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                Brand name
+              </span>
+              <KisokInput
+                id="brand-name"
+                onChange={(event) => setBrandName(event.target.value)}
+                value={brandName}
+              />
+            </label>
+            <KisokDialogFooter>
+              <KisokButton disabled={creating} onClick={() => setCreateOpen(false)} variant="quiet">
+                Cancel
+              </KisokButton>
+              <KisokButton
+                disabled={creating || !brandName.trim()}
+                onClick={() => void createBrand()}
+              >
+                {creating ? 'Saving…' : 'Save brand'}
+              </KisokButton>
+            </KisokDialogFooter>
+          </KisokDialogContent>
+        </KisokDialog>
+      ) : null}
     </section>
   );
 }

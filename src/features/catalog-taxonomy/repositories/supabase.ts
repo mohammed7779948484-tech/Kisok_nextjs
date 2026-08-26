@@ -3,12 +3,56 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getBrowserSupabaseClient } from '@/infrastructure/supabase/client/browser-client';
 import type { Database } from '@/infrastructure/supabase/database.types';
 
-import type { BrandInput, BrandRecord, BrandUpdate, CatalogTaxonomyDataContract } from '../types';
+import type {
+  BrandInput,
+  BrandRecord,
+  BrandUpdate,
+  CatalogTaxonomyDataContract,
+  CategoryRecord,
+  OptionTypeRecord,
+} from '../types';
 
 function getClientOrThrow(): SupabaseClient<Database> {
   const client = getBrowserSupabaseClient();
   if (!client) throw new Error('Supabase is not configured for Catalog Taxonomy.');
   return client;
+}
+
+function mapOptionType(row: {
+  id: string;
+  name: string;
+  is_active: boolean;
+  display_order: number;
+  option_values: Array<{
+    id: string;
+    value: string;
+    is_active: boolean;
+    display_order: number;
+  }>;
+}): OptionTypeRecord {
+  return {
+    id: row.id,
+    name: row.name,
+    isActive: row.is_active,
+    displayOrder: row.display_order,
+    values: row.option_values.map((value) => ({
+      id: value.id,
+      value: value.value,
+      isActive: value.is_active,
+      displayOrder: value.display_order,
+    })),
+  };
+}
+
+function mapCategory(row: Database['public']['Tables']['categories']['Row']): CategoryRecord {
+  return {
+    id: row.id,
+    name: row.name,
+    parentId: row.parent_id,
+    isActive: row.is_active,
+    displayOrder: row.display_order,
+    imageMediaAssetId: row.image_media_asset_id,
+  };
 }
 
 function mapBrand(row: Database['public']['Tables']['brands']['Row']): BrandRecord {
@@ -25,6 +69,28 @@ export function createCatalogTaxonomyRepository(
   client: SupabaseClient<Database>,
 ): CatalogTaxonomyDataContract {
   return {
+    async listOptionTypes() {
+      const result = await client
+        .from('option_types')
+        .select(
+          'id,name,is_active,display_order,created_at,updated_at,option_values(id,value,is_active,display_order)',
+        )
+        .order('display_order', { ascending: true });
+      if (result.error) throw result.error;
+      return (result.data ?? []).map((row) => mapOptionType(row as never));
+    },
+
+    async listCategories() {
+      const result = await client
+        .from('categories')
+        .select(
+          'id,name,parent_id,is_active,display_order,image_media_asset_id,created_at,updated_at',
+        )
+        .order('display_order', { ascending: true });
+      if (result.error) throw result.error;
+      return (result.data ?? []).map(mapCategory);
+    },
+
     async listBrands(search = '') {
       let query = client
         .from('brands')
@@ -71,5 +137,11 @@ export const catalogTaxonomyRepository: CatalogTaxonomyDataContract = {
   },
   updateBrand(id, input) {
     return createCatalogTaxonomyRepository(getClientOrThrow()).updateBrand(id, input);
+  },
+  listCategories() {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).listCategories();
+  },
+  listOptionTypes() {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).listOptionTypes();
   },
 };

@@ -4,12 +4,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 const testContext = vi.hoisted(() => ({
   listBrands: vi.fn(),
+  listCategories: vi.fn(),
   createBrand: vi.fn(),
 }));
 
 vi.mock('../repositories', () => ({
   catalogTaxonomyRepository: {
     listBrands: testContext.listBrands,
+    listCategories: testContext.listCategories,
     createBrand: testContext.createBrand,
   },
 }));
@@ -32,6 +34,24 @@ describe('CatalogTaxonomyPanel', () => {
 
     expect(await screen.findByText('Northline')).toBeInTheDocument();
     expect(screen.queryByText(/local workspace/i)).not.toBeInTheDocument();
+  });
+
+  it('renders hosted Categories when the categories view is selected', async () => {
+    testContext.listCategories.mockResolvedValue([
+      {
+        id: 'category-1',
+        name: 'Coffee',
+        parentId: null,
+        isActive: true,
+        displayOrder: 0,
+        imageMediaAssetId: null,
+      },
+    ]);
+
+    render(<CatalogTaxonomyPanel mode="categories" />);
+
+    expect(await screen.findByText('Coffee')).toBeInTheDocument();
+    expect(screen.queryByText('Brands')).not.toBeInTheDocument();
   });
 
   it('persists a new Brand through the repository', async () => {
