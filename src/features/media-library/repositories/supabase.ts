@@ -23,6 +23,7 @@ function mapMediaAsset(row: Database['public']['Tables']['media_assets']['Row'])
     height: row.height,
     bytes: row.bytes,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
     assetId: row.asset_id,
     createdBy: row.created_by,
   };

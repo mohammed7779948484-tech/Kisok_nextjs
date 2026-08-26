@@ -67,7 +67,10 @@ describe('Media Library delete-restore metadata integrity', () => {
         height: 480,
         bytes: 1234,
         created_at: '2026-08-26T00:00:00Z',
-        updated_at: '2026-08-26T00:00:00Z',
+        // Deliberately distinct from created_at, so the assertion below
+        // proves the restore preserves the ORIGINAL updated_at rather than
+        // a fresh now() value from the identity column default.
+        updated_at: '2026-08-26T05:30:00Z',
         asset_id: 'cloudinary-asset-id-123',
         created_by: 'profile-original-owner',
       },
@@ -95,6 +98,7 @@ describe('Media Library delete-restore metadata integrity', () => {
       public_id: 'kisok/test/asset',
       asset_id: 'cloudinary-asset-id-123',
       created_by: 'profile-original-owner',
+      updated_at: '2026-08-26T05:30:00Z',
     });
   });
 });

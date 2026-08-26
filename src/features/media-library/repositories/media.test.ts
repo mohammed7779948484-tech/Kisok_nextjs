@@ -55,6 +55,7 @@ describe('Media Library Supabase repository', () => {
         height: 480,
         bytes: 1234,
         createdAt: '2026-08-26T00:00:00Z',
+        updatedAt: '2026-08-26T00:00:00Z',
         assetId: 'kisok-cloudinary-asset-1',
         createdBy: 'profile-1',
       },

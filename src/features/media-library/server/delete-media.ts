@@ -26,7 +26,23 @@ export async function executeMediaAssetDelete(
   try {
     await dependencies.deleteCloudinary(asset);
   } catch (error) {
-    await dependencies.restoreMetadata(asset);
+    try {
+      await dependencies.restoreMetadata(asset);
+    } catch (restoreError) {
+      // The worst case: the Cloudinary asset survives (delete failed) but its
+      // Supabase metadata row is now also gone (restore failed). Neither
+      // failure may be silently dropped behind the other — this is a real
+      // orphaned-asset state that needs manual reconciliation, and the
+      // message must say so.
+      const originalMessage = error instanceof Error ? error.message : String(error);
+      const restoreMessage =
+        restoreError instanceof Error ? restoreError.message : String(restoreError);
+      throw new Error(
+        `Media Asset deletion failed (${originalMessage}) and metadata restoration also failed ` +
+          `(${restoreMessage}). The Cloudinary asset was not deleted, but its Supabase metadata ` +
+          'row is missing — this requires manual reconciliation.',
+      );
+    }
     throw error;
   }
 }

@@ -19,6 +19,7 @@ function mapAsset(row: Database['public']['Tables']['media_assets']['Row']): Med
     height: row.height,
     bytes: row.bytes,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
     assetId: row.asset_id,
     createdBy: row.created_by,
   };
@@ -103,6 +104,7 @@ export async function deleteMediaAsset(id: string): Promise<void> {
         height: asset.height,
         bytes: asset.bytes,
         created_at: asset.createdAt,
+        updated_at: asset.updatedAt,
         asset_id: asset.assetId,
         created_by: asset.createdBy,
       });

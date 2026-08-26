@@ -7,6 +7,7 @@ export interface MediaAssetRecord {
   height: number | null;
   bytes: number | null;
   createdAt: string;
+  updatedAt: string;
   assetId: string | null;
   createdBy: string | null;
 }
