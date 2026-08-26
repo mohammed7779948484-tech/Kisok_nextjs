@@ -7,6 +7,8 @@ export interface MediaAssetRecord {
   height: number | null;
   bytes: number | null;
   createdAt: string;
+  assetId: string | null;
+  createdBy: string | null;
 }
 
 export interface MediaLibraryDataContract {

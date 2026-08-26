@@ -11,6 +11,8 @@ const asset = {
   height: 480,
   bytes: 1234,
   createdAt: '2026-08-26T00:00:00Z',
+  assetId: 'kisok-cloudinary-asset-1',
+  createdBy: 'profile-1',
 };
 
 describe('Media Asset deletion boundary', () => {
