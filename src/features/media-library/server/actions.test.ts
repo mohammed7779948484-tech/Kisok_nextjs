@@ -20,7 +20,7 @@ vi.mock('@/lib/env', () => ({
   },
 }));
 
-import { deleteMediaAsset } from './actions';
+import { deleteMediaAsset, getMediaUploadSignature } from './actions';
 
 describe('Media Library server action', () => {
   it('delegates deletion to the server-only usage and Cloudinary operation', async () => {
@@ -37,6 +37,14 @@ describe('Media Library server action', () => {
         restoreMetadata: expect.any(Function),
         deleteCloudinary: expect.any(Function),
       }),
+    );
+  });
+
+  it('refuses to sign an upload when Cloudinary server configuration is unavailable, instead of faking success', async () => {
+    testContext.getTrustedAdminSession.mockResolvedValue({ userId: 'admin-1' });
+
+    await expect(getMediaUploadSignature()).rejects.toThrow(
+      'Cloudinary server configuration is unavailable.',
     );
   });
 });

@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { KisokButton, StatusPill } from '@/shared/ui';
 
+import { useMediaUpload } from '../hooks/useMediaUpload';
 import { mediaLibraryRepository } from '../repositories';
 import { deleteMediaAsset } from '../server/actions';
 import type { MediaAssetRecord } from '../types';
@@ -13,6 +14,8 @@ export function MediaLibraryPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { upload, uploading, error: uploadError } = useMediaUpload();
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -29,6 +32,14 @@ export function MediaLibraryPanel() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  async function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const uploaded = await upload(file);
+    if (uploaded) await refresh();
+  }
 
   async function removeAsset(asset: MediaAssetRecord) {
     setDeletingId(asset.id);
@@ -54,10 +65,34 @@ export function MediaLibraryPanel() {
             Asset register
           </h1>
         </div>
-        <KisokButton onClick={() => void refresh()} variant="outline">
-          Refresh
-        </KisokButton>
+        <div className="flex items-center gap-3">
+          <input
+            aria-label="Upload media"
+            accept="image/*"
+            className="sr-only"
+            disabled={uploading}
+            onChange={(event) => void handleFileSelected(event)}
+            ref={fileInputRef}
+            type="file"
+          />
+          <KisokButton
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
+            variant="outline"
+          >
+            {uploading ? 'Uploading…' : 'Upload'}
+          </KisokButton>
+          <KisokButton onClick={() => void refresh()} variant="outline">
+            Refresh
+          </KisokButton>
+        </div>
       </div>
+
+      {uploadError ? (
+        <p className="mt-4 text-destructive text-sm" role="alert">
+          {uploadError}
+        </p>
+      ) : null}
 
       {loading ? (
         <p className="mt-6 text-muted-foreground text-sm" role="status">

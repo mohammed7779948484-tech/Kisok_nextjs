@@ -54,6 +54,7 @@ describe('Supabase integration boundaries', () => {
       'src/features/dashboard-operations/components/OperationalDashboard.tsx',
       'src/features/inventory/components/InventoryPanel.tsx',
       'src/features/media-library/components/MediaLibraryPanel.tsx',
+      'src/features/media-library/components/VariantMediaPicker.tsx',
       'src/features/orders/components/OrdersPanel.tsx',
       'src/features/product-catalog/components/ProductCatalogPanel.tsx',
       'src/features/store-settings/components/StoreSettingsPanel.tsx',

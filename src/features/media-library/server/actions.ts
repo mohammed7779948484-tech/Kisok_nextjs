@@ -67,6 +67,40 @@ async function destroyCloudinaryAsset(asset: MediaAssetRecord): Promise<void> {
   }
 }
 
+export type MediaUploadSignaturePayload = {
+  timestamp: number;
+  signature: string;
+  apiKey: string;
+  cloudName: string;
+};
+
+/**
+ * Signs a Cloudinary direct-to-browser upload. Only `timestamp` is signed —
+ * the browser sends no other Cloudinary-side parameters — so the signature
+ * this returns is valid for exactly the multipart fields the upload flow in
+ * `../client/upload-media.ts` sends (`file`, `api_key`, `timestamp`,
+ * `signature`). The API secret never leaves this function.
+ */
+export async function getMediaUploadSignature(): Promise<MediaUploadSignaturePayload> {
+  if (!(await getTrustedAdminSession())) {
+    throw new Error('An active Admin session is required.');
+  }
+  if (!(env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET)) {
+    throw new Error('Cloudinary server configuration is unavailable.');
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const parameters: CloudinaryUploadParameters = { timestamp };
+  const signature = createCloudinaryUploadSignature(parameters, env.CLOUDINARY_API_SECRET);
+
+  return {
+    timestamp,
+    signature,
+    apiKey: env.CLOUDINARY_API_KEY,
+    cloudName: env.CLOUDINARY_CLOUD_NAME,
+  };
+}
+
 export async function deleteMediaAsset(id: string): Promise<void> {
   if (!(await getTrustedAdminSession())) {
     throw new Error('An active Admin session is required.');
