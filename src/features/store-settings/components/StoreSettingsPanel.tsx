@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { mediaLibraryRepository } from '@/features/media-library/repositories';
 import {
   KisokButton,
   KisokDialog,
@@ -24,6 +25,10 @@ export function StoreSettingsPanel() {
   const [threshold, setThreshold] = useState('');
   const [resetSeconds, setResetSeconds] = useState('');
   const [timezone, setTimezone] = useState('');
+  const [logoMediaAssetId, setLogoMediaAssetId] = useState('');
+  const [mediaAssets, setMediaAssets] = useState<
+    Array<{ id: string; publicId: string; secureUrl: string }>
+  >([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +43,7 @@ export function StoreSettingsPanel() {
       setThreshold(String(next.globalLowStockThreshold));
       setResetSeconds(String(next.customerSuccessResetSeconds));
       setTimezone(next.storeTimezone);
+      setLogoMediaAssetId(next.logoMediaAssetId ?? '');
     } catch {
       setError('Store Settings could not be loaded. Check the connection and try again.');
     } finally {
@@ -48,6 +54,15 @@ export function StoreSettingsPanel() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  async function openEditor() {
+    setEditOpen(true);
+    try {
+      setMediaAssets(await mediaLibraryRepository.listAssets());
+    } catch {
+      setError('Logo Media Assets could not be loaded.');
+    }
+  }
 
   async function saveSettings() {
     const globalLowStockThreshold = Number(threshold);
@@ -69,6 +84,7 @@ export function StoreSettingsPanel() {
         globalLowStockThreshold,
         customerSuccessResetSeconds,
         storeTimezone: timezone.trim(),
+        logoMediaAssetId: logoMediaAssetId || null,
       });
       setSettings(next);
       setEditOpen(false);
@@ -91,7 +107,7 @@ export function StoreSettingsPanel() {
               Store defaults
             </h1>
           </div>
-          <KisokButton disabled={!settings} onClick={() => setEditOpen(true)} variant="outline">
+          <KisokButton disabled={!settings} onClick={() => void openEditor()} variant="outline">
             Edit settings
           </KisokButton>
         </div>
@@ -114,6 +130,7 @@ export function StoreSettingsPanel() {
               ['Timezone', settings.storeTimezone],
               ['Low-stock threshold', settings.globalLowStockThreshold],
               ['Customer success reset', settings.customerSuccessResetSeconds],
+              ['Logo Media Asset', settings.logoMediaAssetId ?? 'Not selected'],
             ].map(([label, value]) => (
               <div
                 className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
@@ -184,6 +201,25 @@ export function StoreSettingsPanel() {
                 type="number"
                 value={resetSeconds}
               />
+            </label>
+            <label className="grid gap-2" htmlFor="logo-media-asset">
+              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
+                Logo media asset
+              </span>
+              <select
+                aria-label="Logo media asset"
+                className="h-10 border border-border bg-background px-3 text-sm"
+                id="logo-media-asset"
+                onChange={(event) => setLogoMediaAssetId(event.target.value)}
+                value={logoMediaAssetId}
+              >
+                <option value="">No logo selected</option>
+                {mediaAssets.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.publicId}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="grid gap-2" htmlFor="store-timezone">
               <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
