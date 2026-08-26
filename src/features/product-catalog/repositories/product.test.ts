@@ -114,7 +114,9 @@ describe('Product Catalog Supabase repository', () => {
       {
         id: 'product-1',
         name: 'Berry Spark',
+        brandId: 'brand-1',
         brandName: 'Northline',
+        shortDescription: 'Single origin',
         variantCount: 2,
         availableStock: 7,
         status: 'In stock',

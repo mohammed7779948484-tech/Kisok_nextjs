@@ -57,6 +57,10 @@ describe('Supabase integration boundaries', () => {
       'src/features/media-library/components/VariantMediaPicker.tsx',
       'src/features/orders/components/OrdersPanel.tsx',
       'src/features/product-catalog/components/ProductCatalogPanel.tsx',
+      'src/features/product-catalog/components/ProductFormDialog.tsx',
+      'src/features/product-catalog/components/VariantFormDialog.tsx',
+      'src/features/product-catalog/components/VariantManagerDialog.tsx',
+      'src/features/product-catalog/components/VariantOptionsDialog.tsx',
       'src/features/store-settings/components/StoreSettingsPanel.tsx',
     ];
 

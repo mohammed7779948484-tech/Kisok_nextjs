@@ -9,8 +9,11 @@ import type {
   ProductInput,
   ProductRecord,
   ProductStockStatus,
+  ProductUpdate,
+  ProductWriteResult,
   VariantInput,
   VariantOptionSelection,
+  VariantOptionValueRecord,
   VariantRecord,
   VariantUpdate,
 } from '../types';
@@ -20,6 +23,8 @@ const ORDER_METHOD = 'order' as const;
 type ProductListRow = {
   id: string;
   name: string;
+  brand_id: string | null;
+  short_description: string | null;
   is_active: boolean;
   is_featured: boolean;
   brands: { name: string } | null;
@@ -48,7 +53,7 @@ function mapVariant(row: Database['public']['Tables']['product_variants']['Row']
   };
 }
 
-function mapProduct(row: Database['public']['Tables']['products']['Row']) {
+function mapProduct(row: Database['public']['Tables']['products']['Row']): ProductWriteResult {
   return {
     id: row.id,
     name: row.name,
@@ -57,6 +62,20 @@ function mapProduct(row: Database['public']['Tables']['products']['Row']) {
     isActive: row.is_active,
     isFeatured: row.is_featured,
     coverMediaAssetId: row.cover_media_asset_id,
+  };
+}
+
+function mapVariantOptionValue(row: {
+  option_type_id: string;
+  option_value_id: string;
+  option_types: { name: string } | null;
+  option_values: { value: string } | null;
+}): VariantOptionValueRecord {
+  return {
+    optionTypeId: row.option_type_id,
+    optionTypeName: row.option_types?.name ?? '',
+    optionValueId: row.option_value_id,
+    optionValueName: row.option_values?.value ?? '',
   };
 }
 
@@ -126,6 +145,15 @@ export function createProductCatalogRepository(
         .single();
       if (result.error) throw result.error;
       return mapVariant(result.data);
+    },
+
+    async listVariantOptionValues(variantId: string) {
+      const result = await client
+        .from('variant_option_values')
+        .select('option_type_id,option_value_id,option_types(name),option_values(value)')
+        .eq('variant_id', variantId);
+      if (result.error) throw result.error;
+      return (result.data ?? []).map((row) => mapVariantOptionValue(row as never));
     },
 
     async replaceVariantOptionValues(variantId: string, selections: VariantOptionSelection[]) {
@@ -287,6 +315,76 @@ export function createProductCatalogRepository(
       return mapProduct(result.data);
     },
 
+    async updateProduct(id: string, input: ProductUpdate) {
+      const payload: Database['public']['Tables']['products']['Update'] = {};
+      if (input.name !== undefined) payload.name = input.name.trim();
+      if (input.brandId !== undefined) payload.brand_id = input.brandId;
+      if (input.shortDescription !== undefined)
+        payload.short_description = input.shortDescription?.trim() || null;
+      if (input.isFeatured !== undefined) payload.is_featured = input.isFeatured;
+      if (input.isActive !== undefined) payload.is_active = input.isActive;
+      if (input.coverMediaAssetId !== undefined)
+        payload.cover_media_asset_id = input.coverMediaAssetId;
+
+      const result = await client
+        .from('products')
+        .update(payload)
+        .eq('id', id)
+        .select(
+          'id,name,brand_id,short_description,is_active,is_featured,cover_media_asset_id,display_order,search_keywords,created_at,updated_at',
+        )
+        .single();
+      if (result.error) throw result.error;
+      return mapProduct(result.data);
+    },
+
+    async listProductCategoryIds(productId: string) {
+      const result = await client
+        .from('product_categories')
+        .select('category_id')
+        .eq('product_id', productId);
+      if (result.error) throw result.error;
+      return (result.data ?? []).map((row) => row.category_id);
+    },
+
+    // Direct diff-based insert/delete on the join table — Lean V2 keeps this
+    // relation ranking-free (see the schema comment on `product_categories`),
+    // so there is no ordering/primary-category invariant a transactional RPC
+    // would need to protect. Unlike `replaceVariantOptionValues`, a partial
+    // failure here just leaves some Categories unchanged; it never corrupts
+    // a required combination, so no compensating rollback is warranted.
+    async setProductCategories(productId: string, categoryIds: string[]) {
+      const desired = new Set(categoryIds);
+      const existingResult = await client
+        .from('product_categories')
+        .select('category_id')
+        .eq('product_id', productId);
+      if (existingResult.error) throw existingResult.error;
+      const existing = new Set((existingResult.data ?? []).map((row) => row.category_id));
+
+      const toRemove = [...existing].filter((categoryId) => !desired.has(categoryId));
+      const toAdd = [...desired].filter((categoryId) => !existing.has(categoryId));
+
+      if (toRemove.length > 0) {
+        const deleteResult = await client
+          .from('product_categories')
+          .delete()
+          .eq('product_id', productId)
+          .in('category_id', toRemove);
+        if (deleteResult.error) throw deleteResult.error;
+      }
+
+      if (toAdd.length > 0) {
+        const insertResult = await client.from('product_categories').insert(
+          toAdd.map((categoryId) => ({
+            product_id: productId,
+            category_id: categoryId,
+          })),
+        );
+        if (insertResult.error) throw insertResult.error;
+      }
+    },
+
     async listProducts(): Promise<ProductRecord[]> {
       const settingsResult = await client
         .from('store_settings')
@@ -298,7 +396,7 @@ export function createProductCatalogRepository(
       const result = await client
         .from('products')
         .select(
-          'id,name,is_active,is_featured,brands(name),product_variants(id,is_active,low_stock_threshold,inventory(current_quantity))',
+          'id,name,brand_id,short_description,is_active,is_featured,brands(name),product_variants(id,is_active,low_stock_threshold,inventory(current_quantity))',
         )
         [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
@@ -320,7 +418,9 @@ export function createProductCatalogRepository(
         return {
           id: product.id,
           name: product.name,
+          brandId: product.brand_id,
           brandName: product.brands?.name ?? null,
+          shortDescription: product.short_description,
           variantCount: activeVariants.length,
           availableStock,
           status: getStockStatus(availableStock, isLowStock),
@@ -342,6 +442,9 @@ export const productCatalogRepository: ProductCatalogDataContract = {
   updateVariant(id, input) {
     return createProductCatalogRepository(getClientOrThrow()).updateVariant(id, input);
   },
+  listVariantOptionValues(variantId) {
+    return createProductCatalogRepository(getClientOrThrow()).listVariantOptionValues(variantId);
+  },
   replaceVariantOptionValues(variantId, selections) {
     return createProductCatalogRepository(getClientOrThrow()).replaceVariantOptionValues(
       variantId,
@@ -353,5 +456,17 @@ export const productCatalogRepository: ProductCatalogDataContract = {
   },
   createProduct(input) {
     return createProductCatalogRepository(getClientOrThrow()).createProduct(input);
+  },
+  updateProduct(id, input) {
+    return createProductCatalogRepository(getClientOrThrow()).updateProduct(id, input);
+  },
+  listProductCategoryIds(productId) {
+    return createProductCatalogRepository(getClientOrThrow()).listProductCategoryIds(productId);
+  },
+  setProductCategories(productId, categoryIds) {
+    return createProductCatalogRepository(getClientOrThrow()).setProductCategories(
+      productId,
+      categoryIds,
+    );
   },
 };

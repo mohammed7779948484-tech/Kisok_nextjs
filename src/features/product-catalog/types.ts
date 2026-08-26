@@ -8,6 +8,25 @@ export interface ProductInput {
   categoryIds?: string[];
 }
 
+export interface ProductUpdate {
+  name?: string;
+  brandId?: string | null;
+  shortDescription?: string | null;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  coverMediaAssetId?: string | null;
+}
+
+export interface ProductWriteResult {
+  id: string;
+  name: string;
+  brandId: string | null;
+  shortDescription: string | null;
+  isActive: boolean;
+  isFeatured: boolean;
+  coverMediaAssetId: string | null;
+}
+
 export interface VariantInput {
   productId: string;
   barcode?: string | null;
@@ -27,6 +46,13 @@ export interface VariantOptionSelection {
   optionValueId: string;
 }
 
+export interface VariantOptionValueRecord {
+  optionTypeId: string;
+  optionTypeName: string;
+  optionValueId: string;
+  optionValueName: string;
+}
+
 export interface VariantRecord {
   id: string;
   productId: string;
@@ -40,7 +66,9 @@ export interface VariantRecord {
 export interface ProductRecord {
   id: string;
   name: string;
+  brandId: string | null;
   brandName: string | null;
+  shortDescription: string | null;
   variantCount: number;
   availableStock: number;
   status: ProductStockStatus;
@@ -50,18 +78,14 @@ export interface ProductRecord {
 
 export interface ProductCatalogDataContract {
   listProducts(): Promise<ProductRecord[]>;
-  createProduct(input: ProductInput): Promise<{
-    id: string;
-    name: string;
-    brandId: string | null;
-    shortDescription: string | null;
-    isActive: boolean;
-    isFeatured: boolean;
-    coverMediaAssetId: string | null;
-  }>;
+  createProduct(input: ProductInput): Promise<ProductWriteResult>;
+  updateProduct(id: string, input: ProductUpdate): Promise<ProductWriteResult>;
+  listProductCategoryIds(productId: string): Promise<string[]>;
+  setProductCategories(productId: string, categoryIds: string[]): Promise<void>;
   createVariant(input: VariantInput): Promise<VariantRecord>;
   listVariants(productId: string): Promise<VariantRecord[]>;
   updateVariant(id: string, input: VariantUpdate): Promise<VariantRecord>;
+  listVariantOptionValues(variantId: string): Promise<VariantOptionValueRecord[]>;
   replaceVariantOptionValues(
     variantId: string,
     selections: VariantOptionSelection[],

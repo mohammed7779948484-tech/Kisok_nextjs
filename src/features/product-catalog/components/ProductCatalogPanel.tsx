@@ -2,145 +2,99 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { catalogTaxonomyRepository } from '@/features/catalog-taxonomy/repositories';
 import {
-  KisokButton,
-  KisokDialog,
-  KisokDialogContent,
-  KisokDialogDescription,
-  KisokDialogFooter,
-  KisokDialogHeader,
-  KisokDialogTitle,
-  KisokInput,
-  KisokTextarea,
-  StatusPill,
-} from '@/shared/ui';
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { catalogTaxonomyRepository } from '@/features/catalog-taxonomy/repositories';
+import type { OptionTypeRecord } from '@/features/catalog-taxonomy/types';
+import { KisokButton, KisokInput, StatusPill } from '@/shared/ui';
 
+import { useProductsList } from '../hooks/useProductsList';
 import { productCatalogRepository } from '../repositories';
-import type { ProductRecord, VariantRecord } from '../types';
+import type { ProductRecord } from '../types';
+import { ProductFormDialog } from './ProductFormDialog';
+import { VariantManagerDialog } from './VariantManagerDialog';
+
+/** Debounced-as-you-type search: one deliberate pattern, not a live-effect
+ * search plus a redundant "Search" button. Mirrors `BrandsPanel`. */
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
+type ProductDialogState = { open: boolean; mode: 'create' | 'edit'; product?: ProductRecord };
 
 export function ProductCatalogPanel() {
-  const [products, setProducts] = useState<ProductRecord[]>([]);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [productName, setProductName] = useState('');
-  const [shortDescription, setShortDescription] = useState('');
-  const [isFeatured, setIsFeatured] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+  const { products, total, pageSize, isLoading, isError, refetch } = useProductsList({
+    page,
+    search: debouncedSearch,
+  });
+
   const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([]);
   const [categories, setCategories] = useState<
     Array<{ id: string; name: string; parentId: string | null }>
   >([]);
-  const [selectedBrandId, setSelectedBrandId] = useState('');
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
-  const [variantProduct, setVariantProduct] = useState<ProductRecord | null>(null);
-  const [variants, setVariants] = useState<VariantRecord[]>([]);
-  const [variantCreateOpen, setVariantCreateOpen] = useState(false);
-  const [variantTitle, setVariantTitle] = useState('');
-  const [variantBarcode, setVariantBarcode] = useState('');
-  const [variantThreshold, setVariantThreshold] = useState('5');
-  const [variantLoading, setVariantLoading] = useState(false);
-  const [variantSaving, setVariantSaving] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [optionTypes, setOptionTypes] = useState<OptionTypeRecord[]>([]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [productRows, brandRows, categoryRows] = await Promise.all([
-        productCatalogRepository.listProducts(),
-        catalogTaxonomyRepository.listBrands(),
-        catalogTaxonomyRepository.listCategories(),
-      ]);
-      setProducts(productRows);
-      setBrands((brandRows ?? []).map((brand) => ({ id: brand.id, name: brand.name })));
-      setCategories(
-        (categoryRows ?? []).map((category) => ({
-          id: category.id,
-          name: category.name,
-          parentId: category.parentId,
-        })),
-      );
-    } catch {
-      setError('Products could not be loaded. Check the connection and try again.');
-    } finally {
-      setLoading(false);
-    }
+  const [productDialog, setProductDialog] = useState<ProductDialogState>({
+    mode: 'create',
+    open: false,
+  });
+  const [variantManagerProduct, setVariantManagerProduct] = useState<ProductRecord | null>(null);
+
+  const loadReferenceData = useCallback(async () => {
+    const [brandRows, categoryRows, optionTypeRows] = await Promise.all([
+      catalogTaxonomyRepository.listBrands(),
+      catalogTaxonomyRepository.listCategories(),
+      catalogTaxonomyRepository.listOptionTypes(),
+    ]);
+    setBrands((brandRows ?? []).map((brand) => ({ id: brand.id, name: brand.name })));
+    setCategories(
+      (categoryRows ?? []).map((category) => ({
+        id: category.id,
+        name: category.name,
+        parentId: category.parentId,
+      })),
+    );
+    setOptionTypes(optionTypeRows ?? []);
   }, []);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    void loadReferenceData();
+  }, [loadReferenceData]);
 
-  async function openVariantManager(product: ProductRecord) {
-    setVariantProduct(product);
-    setVariantLoading(true);
-    setError(null);
-    try {
-      setVariants(await productCatalogRepository.listVariants(product.id));
-    } catch {
-      setError(`Variants for ${product.name} could not be loaded.`);
-    } finally {
-      setVariantLoading(false);
-    }
+  async function toggleActive(product: ProductRecord) {
+    await productCatalogRepository.updateProduct(product.id, { isActive: !product.isActive });
+    await refetch();
   }
 
-  async function createVariant() {
-    if (!variantProduct) return;
-    setVariantSaving(true);
-    setError(null);
-    try {
-      await productCatalogRepository.createVariant({
-        productId: variantProduct.id,
-        ...(variantTitle.trim() ? { titleOverride: variantTitle.trim() } : {}),
-        ...(variantBarcode.trim() ? { barcode: variantBarcode.trim() } : {}),
-        lowStockThreshold: Number(variantThreshold),
-      });
-      setVariantTitle('');
-      setVariantBarcode('');
-      setVariantThreshold('5');
-      setVariantCreateOpen(false);
-      setVariants(await productCatalogRepository.listVariants(variantProduct.id));
-      await refresh();
-    } catch {
-      setError(`The Variant for ${variantProduct.name} could not be created.`);
-    } finally {
-      setVariantSaving(false);
-    }
-  }
-
-  async function createProduct() {
-    const name = productName.trim();
-    if (!name) return;
-    setCreating(true);
-    setError(null);
-    try {
-      await productCatalogRepository.createProduct({
-        name,
-        brandId: selectedBrandId || null,
-        shortDescription: shortDescription.trim() || null,
-        isFeatured,
-        ...(selectedCategoryIds.length > 0 ? { categoryIds: selectedCategoryIds } : {}),
-      });
-      setProductName('');
-      setShortDescription('');
-      setIsFeatured(false);
-      setSelectedBrandId('');
-      setSelectedCategoryIds([]);
-      setCreateOpen(false);
-      await refresh();
-    } catch {
-      setError('The Product could not be created. Check for duplicate or invalid data.');
-    } finally {
-      setCreating(false);
-    }
-  }
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
             Product catalog / hosted data
           </p>
           <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">
@@ -148,23 +102,43 @@ export function ProductCatalogPanel() {
           </h1>
         </div>
         <div className="flex gap-2">
-          <KisokButton onClick={() => setCreateOpen(true)} variant="outline">
+          <KisokButton
+            onClick={() => setProductDialog({ mode: 'create', open: true })}
+            variant="outline"
+          >
             New product
           </KisokButton>
-          <KisokButton onClick={() => void refresh()} variant="outline">
+          <KisokButton onClick={() => void refetch()} variant="outline">
             Refresh
           </KisokButton>
         </div>
       </div>
 
-      {loading ? (
+      <div className="mt-6">
+        <label className="sr-only" htmlFor="product-search">
+          Search products
+        </label>
+        <KisokInput
+          id="product-search"
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search products"
+          value={searchInput}
+        />
+      </div>
+
+      {isLoading ? (
         <p className="mt-6 text-muted-foreground text-sm" role="status">
           Loading products…
         </p>
-      ) : error ? (
+      ) : isError ? (
         <div className="mt-6 grid gap-3" role="alert">
-          <p className="text-destructive text-sm">{error}</p>
-          <KisokButton onClick={() => void refresh()} variant="outline">
+          <p className="text-destructive text-sm">
+            Products could not be loaded. Check the connection and try again.
+          </p>
+          <KisokButton onClick={() => void refetch()} variant="outline">
             Try again
           </KisokButton>
         </div>
@@ -172,251 +146,119 @@ export function ProductCatalogPanel() {
         <p className="mt-6 text-muted-foreground text-sm">No products are available.</p>
       ) : (
         <div className="mt-6 overflow-x-auto">
-          <table className="min-w-[680px] w-full text-left">
-            <thead className="border-border border-b font-mono text-muted-foreground text-[10px] uppercase tracking-[0.17em]">
-              <tr>
-                <th className="pr-6 pb-3 font-medium">Product</th>
-                <th className="pr-6 pb-3 font-medium">Brand</th>
-                <th className="pr-6 pb-3 font-medium">Variants</th>
-                <th className="pr-6 pb-3 font-medium">Available</th>
-                <th className="pb-3 text-right font-medium">Signal</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>Brand</TableHead>
+                <TableHead>Variants</TableHead>
+                <TableHead>Available</TableHead>
+                <TableHead>Signal</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {products.map((product) => (
-                <tr className="group" key={product.id}>
-                  <td className="py-5 pr-6 font-bold">{product.name}</td>
-                  <td className="py-5 pr-6 text-muted-foreground text-sm">
+                <TableRow key={product.id}>
+                  <TableCell className="font-bold">{product.name}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
                     {product.brandName ?? 'Unassigned'}
-                  </td>
-                  <td className="py-5 pr-6 font-mono text-muted-foreground text-sm">
+                  </TableCell>
+                  <TableCell className="font-mono text-muted-foreground text-sm">
                     {product.variantCount}
-                  </td>
-                  <td className="py-5 pr-6 font-mono text-sm">{product.availableStock}</td>
-                  <td className="py-5 text-right">
+                  </TableCell>
+                  <TableCell className="font-mono text-sm">{product.availableStock}</TableCell>
+                  <TableCell>
+                    <StatusPill
+                      className={
+                        product.status === 'Out of stock'
+                          ? 'border-destructive text-destructive'
+                          : undefined
+                      }
+                    >
+                      {product.status}
+                    </StatusPill>
+                  </TableCell>
+                  <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <KisokButton
                         aria-label={`Manage variants for ${product.name}`}
-                        onClick={() => void openVariantManager(product)}
+                        onClick={() => setVariantManagerProduct(product)}
                         size="sm"
                         variant="quiet"
                       >
                         Variants
                       </KisokButton>
-                      <StatusPill
-                        className={
-                          product.status === 'Out of stock'
-                            ? 'border-destructive text-destructive'
-                            : undefined
-                        }
+                      <KisokButton
+                        aria-label={`Edit ${product.name}`}
+                        onClick={() => setProductDialog({ mode: 'edit', open: true, product })}
+                        size="sm"
+                        variant="quiet"
                       >
-                        {product.status}
-                      </StatusPill>
+                        Edit
+                      </KisokButton>
+                      <KisokButton
+                        aria-label={`${product.isActive ? 'Deactivate' : 'Activate'} ${product.name}`}
+                        onClick={() => void toggleActive(product)}
+                        size="sm"
+                        variant="quiet"
+                      >
+                        {product.isActive ? 'Deactivate' : 'Activate'}
+                      </KisokButton>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
-      <KisokDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setVariantProduct(null);
-            setVariantCreateOpen(false);
-          }
-        }}
-        open={variantProduct !== null}
-      >
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <KisokDialogTitle>Variants · {variantProduct?.name}</KisokDialogTitle>
-            <KisokDialogDescription>
-              Variant SKUs are generated by Lean V2. Maintain only operational identifiers and stock
-              thresholds here.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          {variantLoading ? (
-            <p className="text-muted-foreground text-sm" role="status">
-              Loading variants…
-            </p>
-          ) : variants.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              No variants are assigned to this Product.
-            </p>
-          ) : (
-            <div className="divide-y divide-border border-border border-y">
-              {variants.map((variant) => (
-                <div className="flex items-center justify-between gap-3 py-3" key={variant.id}>
-                  <div>
-                    <p className="font-mono text-sm">{variant.sku}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {variant.titleOverride ?? 'Default title'}
-                    </p>
-                  </div>
-                  <StatusPill
-                    className={variant.isActive ? undefined : 'border-destructive text-destructive'}
-                  >
-                    {variant.isActive ? 'Active' : 'Inactive'}
-                  </StatusPill>
-                </div>
-              ))}
-            </div>
-          )}
-          {variantCreateOpen ? (
-            <div className="grid gap-3">
-              <label className="grid gap-2" htmlFor="variant-title">
-                <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                  Variant title
-                </span>
-                <KisokInput
-                  id="variant-title"
-                  onChange={(event) => setVariantTitle(event.target.value)}
-                  value={variantTitle}
-                />
-              </label>
-              <label className="grid gap-2" htmlFor="variant-barcode">
-                <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                  Barcode
-                </span>
-                <KisokInput
-                  id="variant-barcode"
-                  onChange={(event) => setVariantBarcode(event.target.value)}
-                  value={variantBarcode}
-                />
-              </label>
-              <label className="grid gap-2" htmlFor="variant-threshold">
-                <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                  Low-stock threshold
-                </span>
-                <KisokInput
-                  id="variant-threshold"
-                  inputMode="numeric"
-                  onChange={(event) => setVariantThreshold(event.target.value)}
-                  value={variantThreshold}
-                />
-              </label>
-            </div>
-          ) : null}
-          <KisokDialogFooter>
-            <KisokButton
-              disabled={variantSaving}
-              onClick={() => setVariantProduct(null)}
-              variant="quiet"
-            >
-              Close
-            </KisokButton>
-            {variantCreateOpen ? (
-              <KisokButton
-                disabled={variantSaving || !variantProduct}
-                onClick={() => void createVariant()}
-              >
-                {variantSaving ? 'Saving…' : 'Save variant'}
-              </KisokButton>
-            ) : (
-              <KisokButton onClick={() => setVariantCreateOpen(true)}>Add variant</KisokButton>
-            )}
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
+      {totalPages > 1 ? (
+        <Pagination className="mt-6 justify-start">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                aria-disabled={page <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <PaginationItem key={pageNumber}>
+                <PaginationLink isActive={pageNumber === page} onClick={() => setPage(pageNumber)}>
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                aria-disabled={page >= totalPages}
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
 
-      <KisokDialog onOpenChange={setCreateOpen} open={createOpen}>
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <KisokDialogTitle>New product</KisokDialogTitle>
-            <KisokDialogDescription>
-              Create a Product in the hosted catalog. This workspace stores operational catalog data
-              only.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          <div className="grid gap-4">
-            <label className="grid gap-2" htmlFor="product-name">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Product name
-              </span>
-              <KisokInput
-                id="product-name"
-                onChange={(event) => setProductName(event.target.value)}
-                value={productName}
-              />
-            </label>
-            <label className="grid gap-2" htmlFor="product-brand">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Brand
-              </span>
-              <select
-                className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                id="product-brand"
-                onChange={(event) => setSelectedBrandId(event.target.value)}
-                value={selectedBrandId}
-              >
-                <option value="">Unassigned</option>
-                {brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>
-                    {brand.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <fieldset className="grid gap-2">
-              <legend className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Categories
-              </legend>
-              <div className="grid gap-2">
-                {categories.map((category) => (
-                  <label className="flex items-center gap-2 text-sm" key={category.id}>
-                    <input
-                      aria-label={category.name}
-                      checked={selectedCategoryIds.includes(category.id)}
-                      onChange={(event) =>
-                        setSelectedCategoryIds((current) =>
-                          event.target.checked
-                            ? [...current, category.id]
-                            : current.filter((id) => id !== category.id),
-                        )
-                      }
-                      type="checkbox"
-                    />
-                    <span>{category.parentId ? `↳ ${category.name}` : category.name}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            <label className="grid gap-2" htmlFor="product-description">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Description
-              </span>
-              <KisokTextarea
-                id="product-description"
-                onChange={(event) => setShortDescription(event.target.value)}
-                value={shortDescription}
-              />
-            </label>
-            <label className="flex items-center gap-2 text-sm" htmlFor="product-featured">
-              <input
-                checked={isFeatured}
-                id="product-featured"
-                onChange={(event) => setIsFeatured(event.target.checked)}
-                type="checkbox"
-              />
-              Feature this product
-            </label>
-          </div>
-          <KisokDialogFooter>
-            <KisokButton disabled={creating} onClick={() => setCreateOpen(false)} variant="quiet">
-              Cancel
-            </KisokButton>
-            <KisokButton
-              disabled={creating || !productName.trim()}
-              onClick={() => void createProduct()}
-            >
-              {creating ? 'Saving…' : 'Save product'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
+      <ProductFormDialog
+        brands={brands}
+        categories={categories}
+        mode={productDialog.mode}
+        onOpenChange={(open) => setProductDialog((current) => ({ ...current, open }))}
+        onSaved={() => void refetch()}
+        open={productDialog.open}
+        product={productDialog.product}
+      />
+
+      <VariantManagerDialog
+        onOpenChange={(open) => {
+          if (!open) setVariantManagerProduct(null);
+        }}
+        onVariantsChanged={() => void refetch()}
+        open={variantManagerProduct !== null}
+        optionTypes={optionTypes}
+        product={variantManagerProduct}
+      />
     </section>
   );
 }
