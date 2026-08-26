@@ -9,6 +9,7 @@ import {
   type SetInventoryQuantityInput,
   setInventoryQuantity,
 } from '@/infrastructure/supabase/inventory/adapter';
+import { resolveLowStockThreshold } from '@/lib/utils/inventory/low-stock-threshold';
 
 import type { InventoryDataContract, InventoryRecord } from '../types';
 
@@ -57,7 +58,10 @@ export function createInventoryRepository(client: SupabaseClient<Database>): Inv
       const globalThreshold = settingsResult.data.global_low_stock_threshold;
       return ((inventoryResult.data ?? []) as unknown as InventoryJoinedRow[]).map((row) => {
         const variant = row.product_variants;
-        const lowStockThreshold = variant.low_stock_threshold ?? globalThreshold;
+        const lowStockThreshold = resolveLowStockThreshold(
+          variant.low_stock_threshold,
+          globalThreshold,
+        );
         return {
           variantId: row.variant_id,
           productId: variant.products.id,

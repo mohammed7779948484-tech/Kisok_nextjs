@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { getBrowserSupabaseClient } from '@/infrastructure/supabase/client/browser-client';
 import type { Database } from '@/infrastructure/supabase/database.types';
+import { resolveLowStockThreshold } from '@/lib/utils/inventory/low-stock-threshold';
 
 import type {
   ProductCatalogDataContract,
@@ -22,7 +23,10 @@ type ProductListRow = {
   is_active: boolean;
   is_featured: boolean;
   brands: { name: string } | null;
-  product_variants: Array<{ inventory: Array<{ current_quantity: number }> }>;
+  product_variants: Array<{
+    low_stock_threshold: number | null;
+    inventory: Array<{ current_quantity: number }>;
+  }>;
 };
 
 function getClientOrThrow(): SupabaseClient<Database> {
@@ -55,9 +59,14 @@ function mapProduct(row: Database['public']['Tables']['products']['Row']) {
   };
 }
 
-function getStockStatus(stock: number): ProductStockStatus {
-  if (stock <= 0) return 'Out of stock';
-  if (stock <= 5) return 'Low stock';
+/**
+ * Mirrors Inventory/Dashboard: a Product is "Low stock" when any of its
+ * active Variants is at or below its effective threshold (variant override,
+ * falling back to the store-wide default) — never a hardcoded cutoff.
+ */
+function getStockStatus(availableStock: number, isLowStock: boolean): ProductStockStatus {
+  if (availableStock <= 0) return 'Out of stock';
+  if (isLowStock) return 'Low stock';
   return 'In stock';
 }
 
@@ -124,22 +133,61 @@ export function createProductCatalogRepository(
         throw new Error('A Variant can have at most one Value per Option Type.');
       }
 
-      const deleteResult = await client
+      const existingResult = await client
         .from('variant_option_values')
-        .delete()
+        .select('option_type_id,option_value_id')
         .eq('variant_id', variantId);
-      if (deleteResult.error) throw deleteResult.error;
+      if (existingResult.error) throw existingResult.error;
 
-      if (selections.length === 0) return;
-
-      const insertResult = await client.from('variant_option_values').insert(
-        selections.map((selection) => ({
-          variant_id: variantId,
-          option_type_id: selection.optionTypeId,
-          option_value_id: selection.optionValueId,
-        })),
+      const existingByType = new Map(
+        (existingResult.data ?? []).map((row) => [row.option_type_id, row.option_value_id]),
       );
-      if (insertResult.error) throw insertResult.error;
+      const nextTypeIds = new Set(selections.map((selection) => selection.optionTypeId));
+
+      const toInsert = selections.filter(
+        (selection) => !existingByType.has(selection.optionTypeId),
+      );
+      const toUpdate = selections.filter((selection) => {
+        const currentValueId = existingByType.get(selection.optionTypeId);
+        return currentValueId !== undefined && currentValueId !== selection.optionValueId;
+      });
+      const toRemoveTypeIds = [...existingByType.keys()].filter(
+        (optionTypeId) => !nextTypeIds.has(optionTypeId),
+      );
+
+      // Diff-based, never delete-then-insert: additions/changes apply first,
+      // so a failure here leaves every prior Option Type/Value untouched
+      // instead of wiping the whole combination like a blind DELETE would.
+      if (toInsert.length > 0) {
+        const insertResult = await client.from('variant_option_values').insert(
+          toInsert.map((selection) => ({
+            variant_id: variantId,
+            option_type_id: selection.optionTypeId,
+            option_value_id: selection.optionValueId,
+          })),
+        );
+        if (insertResult.error) throw insertResult.error;
+      }
+
+      for (const selection of toUpdate) {
+        const updateResult = await client
+          .from('variant_option_values')
+          .update({ option_value_id: selection.optionValueId })
+          .eq('variant_id', variantId)
+          .eq('option_type_id', selection.optionTypeId);
+        if (updateResult.error) throw updateResult.error;
+      }
+
+      // Only drop Option Types explicitly removed from the new selection —
+      // never as a side effect of an insert/update failure elsewhere above.
+      for (const optionTypeId of toRemoveTypeIds) {
+        const deleteResult = await client
+          .from('variant_option_values')
+          .delete()
+          .eq('variant_id', variantId)
+          .eq('option_type_id', optionTypeId);
+        if (deleteResult.error) throw deleteResult.error;
+      }
     },
 
     async createProduct(input: ProductInput) {
@@ -175,10 +223,17 @@ export function createProductCatalogRepository(
     },
 
     async listProducts(): Promise<ProductRecord[]> {
+      const settingsResult = await client
+        .from('store_settings')
+        .select('global_low_stock_threshold')
+        .maybeSingle();
+      if (settingsResult.error) throw settingsResult.error;
+      const globalThreshold = settingsResult.data?.global_low_stock_threshold ?? 0;
+
       const result = await client
         .from('products')
         .select(
-          'id,name,is_active,is_featured,brands(name),product_variants(id,inventory(current_quantity))',
+          'id,name,is_active,is_featured,brands(name),product_variants(id,low_stock_threshold,inventory(current_quantity))',
         )
         [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
@@ -188,13 +243,18 @@ export function createProductCatalogRepository(
           (total, variant) => total + (variant.inventory[0]?.current_quantity ?? 0),
           0,
         );
+        const isLowStock = product.product_variants.some((variant) => {
+          const quantity = variant.inventory[0]?.current_quantity ?? 0;
+          const threshold = resolveLowStockThreshold(variant.low_stock_threshold, globalThreshold);
+          return quantity <= threshold;
+        });
         return {
           id: product.id,
           name: product.name,
           brandName: product.brands?.name ?? null,
           variantCount: product.product_variants.length,
           availableStock,
-          status: getStockStatus(availableStock),
+          status: getStockStatus(availableStock, isLowStock),
           isActive: product.is_active,
           isFeatured: product.is_featured,
         };
