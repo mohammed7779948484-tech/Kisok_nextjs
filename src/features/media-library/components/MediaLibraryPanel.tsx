@@ -5,12 +5,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { KisokButton, StatusPill } from '@/shared/ui';
 
 import { mediaLibraryRepository } from '../repositories';
+import { deleteMediaAsset } from '../server/actions';
 import type { MediaAssetRecord } from '../types';
 
 export function MediaLibraryPanel() {
   const [assets, setAssets] = useState<MediaAssetRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -27,6 +29,19 @@ export function MediaLibraryPanel() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  async function removeAsset(asset: MediaAssetRecord) {
+    setDeletingId(asset.id);
+    setError(null);
+    try {
+      await deleteMediaAsset(asset.id);
+      await refresh();
+    } catch {
+      setError(`The Media Asset ${asset.publicId} could not be deleted.`);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
@@ -74,7 +89,18 @@ export function MediaLibraryPanel() {
               <p className="mt-1 text-muted-foreground text-xs">
                 {asset.format ?? 'unknown'} · {asset.width ?? '?'}×{asset.height ?? '?'}
               </p>
-              <StatusPill className="mt-3">Hosted asset</StatusPill>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <StatusPill>Hosted asset</StatusPill>
+                <KisokButton
+                  aria-label={`Delete ${asset.publicId}`}
+                  disabled={deletingId === asset.id}
+                  onClick={() => void removeAsset(asset)}
+                  size="sm"
+                  variant="quiet"
+                >
+                  {deletingId === asset.id ? 'Deleting…' : 'Delete'}
+                </KisokButton>
+              </div>
             </article>
           ))}
         </div>
