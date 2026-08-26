@@ -11,7 +11,12 @@ import type {
   CategoryInput,
   CategoryRecord,
   CategoryUpdate,
+  OptionTypeInput,
   OptionTypeRecord,
+  OptionTypeUpdate,
+  OptionValueInput,
+  OptionValueRecord,
+  OptionValueUpdate,
 } from '../types';
 
 function getClientOrThrow(): SupabaseClient<Database> {
@@ -43,6 +48,17 @@ function mapOptionType(row: {
       isActive: value.is_active,
       displayOrder: value.display_order,
     })),
+  };
+}
+
+function mapOptionValue(
+  row: Database['public']['Tables']['option_values']['Row'],
+): OptionValueRecord {
+  return {
+    id: row.id,
+    value: row.value,
+    isActive: row.is_active,
+    displayOrder: row.display_order,
   };
 }
 
@@ -139,6 +155,63 @@ export function createCatalogTaxonomyRepository(
       if (result.error) throw result.error;
     },
 
+    async createOptionType(input: OptionTypeInput) {
+      const result = await client
+        .from('option_types')
+        .insert({ name: input.name.trim() })
+        .select('id,name,is_active,display_order,created_at,updated_at')
+        .single();
+      if (result.error) throw result.error;
+      return mapOptionType({ ...result.data, option_values: [] });
+    },
+
+    async updateOptionType(id: string, input: OptionTypeUpdate) {
+      const payload: Database['public']['Tables']['option_types']['Update'] = {};
+      if (input.name !== undefined) payload.name = input.name.trim();
+      if (input.isActive !== undefined) payload.is_active = input.isActive;
+      const result = await client
+        .from('option_types')
+        .update(payload)
+        .eq('id', id)
+        .select('id,name,is_active,display_order,created_at,updated_at')
+        .single();
+      if (result.error) throw result.error;
+      return mapOptionType({ ...result.data, option_values: [] });
+    },
+
+    async createOptionValue(input: OptionValueInput) {
+      const result = await client
+        .from('option_values')
+        .insert({ option_type_id: input.optionTypeId, value: input.value.trim() })
+        .select('id,value,is_active,display_order,option_type_id,created_at,updated_at')
+        .single();
+      if (result.error) throw result.error;
+      return mapOptionValue(result.data);
+    },
+
+    async updateOptionValue(id: string, input: OptionValueUpdate) {
+      const payload: Database['public']['Tables']['option_values']['Update'] = {};
+      if (input.value !== undefined) payload.value = input.value.trim();
+      if (input.isActive !== undefined) payload.is_active = input.isActive;
+      const result = await client
+        .from('option_values')
+        .update(payload)
+        .eq('id', id)
+        .select('id,value,is_active,display_order,option_type_id,created_at,updated_at')
+        .single();
+      if (result.error) throw result.error;
+      return mapOptionValue(result.data);
+    },
+
+    async reorderOptionValues(scopeId: string, orderedIds: string[]) {
+      const result = await client.rpc('reorder_items', {
+        resource_name: 'option_values',
+        scope_id: scopeId,
+        ordered_ids: orderedIds,
+      });
+      if (result.error) throw result.error;
+    },
+
     async listBrands(search = '') {
       let query = client
         .from('brands')
@@ -203,5 +276,23 @@ export const catalogTaxonomyRepository: CatalogTaxonomyDataContract = {
   },
   listOptionTypes() {
     return createCatalogTaxonomyRepository(getClientOrThrow()).listOptionTypes();
+  },
+  createOptionType(input) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).createOptionType(input);
+  },
+  updateOptionType(id, input) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).updateOptionType(id, input);
+  },
+  createOptionValue(input) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).createOptionValue(input);
+  },
+  updateOptionValue(id, input) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).updateOptionValue(id, input);
+  },
+  reorderOptionValues(scopeId, orderedIds) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).reorderOptionValues(
+      scopeId,
+      orderedIds,
+    );
   },
 };

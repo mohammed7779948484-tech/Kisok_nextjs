@@ -25,6 +25,25 @@ export interface OptionTypeRecord {
   values: OptionValueRecord[];
 }
 
+export interface OptionTypeInput {
+  name: string;
+}
+
+export interface OptionTypeUpdate {
+  name?: string;
+  isActive?: boolean;
+}
+
+export interface OptionValueInput {
+  optionTypeId: string;
+  value: string;
+}
+
+export interface OptionValueUpdate {
+  value?: string;
+  isActive?: boolean;
+}
+
 export interface CategoryRecord {
   id: string;
   name: string;
@@ -61,4 +80,9 @@ export interface CatalogTaxonomyDataContract {
   updateCategory(id: string, input: CategoryUpdate): Promise<CategoryRecord>;
   reorderCategories(scopeId: string | null, orderedIds: string[]): Promise<void>;
   listOptionTypes(): Promise<OptionTypeRecord[]>;
+  createOptionType(input: OptionTypeInput): Promise<OptionTypeRecord>;
+  updateOptionType(id: string, input: OptionTypeUpdate): Promise<OptionTypeRecord>;
+  createOptionValue(input: OptionValueInput): Promise<OptionValueRecord>;
+  updateOptionValue(id: string, input: OptionValueUpdate): Promise<OptionValueRecord>;
+  reorderOptionValues(scopeId: string, orderedIds: string[]): Promise<void>;
 }
