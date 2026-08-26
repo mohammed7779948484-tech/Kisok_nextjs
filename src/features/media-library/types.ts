@@ -1,8 +1,14 @@
-import type { ListDataContract } from '@/shared/contracts';
-
-export interface LocalMediaAsset {
-  label: string;
-  role: 'Brand mark' | 'Flavor image' | 'Product cover';
+export interface MediaAssetRecord {
+  id: string;
+  publicId: string;
+  secureUrl: string;
+  format: string | null;
+  width: number | null;
+  height: number | null;
+  bytes: number | null;
+  createdAt: string;
 }
 
-export interface MediaLibraryDataContract extends ListDataContract<LocalMediaAsset> {}
+export interface MediaLibraryDataContract {
+  listAssets(): Promise<MediaAssetRecord[]>;
+}
