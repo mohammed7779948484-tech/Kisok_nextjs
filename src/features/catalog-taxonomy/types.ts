@@ -6,10 +6,6 @@ export interface BrandRecord {
   imageMediaAssetId: string | null;
 }
 
-export interface BrandInput {
-  name: string;
-}
-
 export interface OptionValueRecord {
   id: string;
   value: string;
@@ -66,15 +62,14 @@ export interface CategoryUpdate {
   imageMediaAssetId?: string | null;
 }
 
-export interface BrandUpdate {
-  name?: string;
-  isActive?: boolean;
-}
-
 export interface CatalogTaxonomyDataContract {
+  /**
+   * Brand create/update now go through Refine's `useCreate`/`useUpdate`
+   * directly against the `brands` resource (see `BrandsPanel` and
+   * `hooks/useBrandForm.ts`) — this repository keeps only the read path,
+   * still used by the Product editor's Brand selector.
+   */
   listBrands(search?: string): Promise<BrandRecord[]>;
-  createBrand(input: BrandInput): Promise<BrandRecord>;
-  updateBrand(id: string, input: BrandUpdate): Promise<BrandRecord>;
   listCategories(): Promise<CategoryRecord[]>;
   createCategory(input: CategoryInput): Promise<CategoryRecord>;
   updateCategory(id: string, input: CategoryUpdate): Promise<CategoryRecord>;

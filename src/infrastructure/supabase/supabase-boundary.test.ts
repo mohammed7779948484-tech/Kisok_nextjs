@@ -49,6 +49,7 @@ describe('Supabase integration boundaries', () => {
       'src/features/admin-users/components/AdminUsersPanel.tsx',
       'src/features/auth-admin-access/components/AdminLoginForm.tsx',
       'src/features/catalog-taxonomy/components/CatalogTaxonomyPanel.tsx',
+      'src/features/catalog-taxonomy/components/BrandsPanel.tsx',
       'src/features/dashboard-operations/components/AdminShell.tsx',
       'src/features/dashboard-operations/components/OperationalDashboard.tsx',
       'src/features/inventory/components/InventoryPanel.tsx',
