@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { KisokButton, KisokInput, StatusPill } from '@/shared/ui';
 
 import { adminUsersRepository } from '../repositories';
+import { updateAdminUser } from '../server/actions';
 import type { AdminUserRecord } from '../types';
 
 function roleLabel(role: AdminUserRecord['role']) {
@@ -16,6 +17,7 @@ export function AdminUsersPanel() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -32,6 +34,22 @@ export function AdminUsersPanel() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  async function toggleActive(user: AdminUserRecord) {
+    setUpdatingId(user.id);
+    setError(null);
+    try {
+      await updateAdminUser({
+        targetId: user.id,
+        changes: { is_active: !user.isActive },
+      });
+      await refresh();
+    } catch {
+      setError(`The profile for ${user.displayName} could not be updated.`);
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   return (
     <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
@@ -95,11 +113,22 @@ export function AdminUsersPanel() {
               <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
                 {roleLabel(user.role)}
               </p>
-              <StatusPill
-                className={user.isActive ? undefined : 'border-destructive text-destructive'}
-              >
-                {user.isActive ? 'Active' : 'Paused'}
-              </StatusPill>
+              <div className="flex items-center justify-end gap-2">
+                <StatusPill
+                  className={user.isActive ? undefined : 'border-destructive text-destructive'}
+                >
+                  {user.isActive ? 'Active' : 'Paused'}
+                </StatusPill>
+                <KisokButton
+                  aria-label={`${user.isActive ? 'Deactivate' : 'Activate'} ${user.displayName}`}
+                  disabled={updatingId === user.id}
+                  onClick={() => void toggleActive(user)}
+                  size="sm"
+                  variant="quiet"
+                >
+                  {updatingId === user.id ? 'Saving…' : user.isActive ? 'Deactivate' : 'Activate'}
+                </KisokButton>
+              </div>
             </article>
           ))}
         </div>
