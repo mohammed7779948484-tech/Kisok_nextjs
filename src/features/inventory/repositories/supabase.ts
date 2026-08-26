@@ -49,7 +49,7 @@ export function createInventoryRepository(client: SupabaseClient<Database>): Inv
         .select(
           'variant_id,current_quantity,product_variants!inner(id,sku,barcode,low_stock_threshold,products!inner(id,name))',
         )
-        .order('current_quantity', { ascending: true });
+        ['order']('current_quantity', { ascending: true });
       if (inventoryResult.error) throw inventoryResult.error;
 
       const globalThreshold = settingsResult.data.global_low_stock_threshold;

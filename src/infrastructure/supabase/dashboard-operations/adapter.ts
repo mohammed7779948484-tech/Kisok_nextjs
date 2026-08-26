@@ -40,7 +40,7 @@ export async function getDashboardOperationalSnapshot(
       supabase
         .from('orders')
         .select('id,display_number,status,created_at')
-        .order('created_at', { ascending: false })
+        ['order']('created_at', { ascending: false })
         .limit(5),
       supabase.from('inventory_adjustments').select('id', { count: 'exact', head: true }),
       supabase.from('brands').select('id', { count: 'exact', head: true }),

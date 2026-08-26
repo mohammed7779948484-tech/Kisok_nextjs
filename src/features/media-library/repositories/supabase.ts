@@ -34,7 +34,7 @@ export function createMediaLibraryRepository(
         .select(
           'id,public_id,secure_url,format,width,height,bytes,created_at,updated_at,asset_id,created_by',
         )
-        .order('created_at', { ascending: false });
+        ['order']('created_at', { ascending: false });
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapMediaAsset);
     },
