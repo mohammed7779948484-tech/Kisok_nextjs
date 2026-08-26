@@ -4,7 +4,11 @@ import { KisokButton, StatusPill } from '@/shared/ui';
 
 import { adminUsersRepository } from '../repositories';
 
-export function AdminUsersPanel({ onAction }: { onAction: (message: string) => void }) {
+export function AdminUsersPanel({
+  onAction = () => undefined,
+}: {
+  onAction?: (message: string) => void;
+}) {
   const localUsers = adminUsersRepository.list();
 
   return (

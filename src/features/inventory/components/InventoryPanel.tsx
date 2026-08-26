@@ -16,7 +16,11 @@ import {
 
 import { inventoryRepository } from '../repositories';
 
-export function InventoryPanel({ onAction }: { onAction: (message: string) => void }) {
+export function InventoryPanel({
+  onAction = () => undefined,
+}: {
+  onAction?: (message: string) => void;
+}) {
   const [adjustmentOpen, setAdjustmentOpen] = useState(false);
   const [reason, setReason] = useState('');
   const inventoryRows = inventoryRepository.list();
@@ -68,7 +72,7 @@ export function InventoryPanel({ onAction }: { onAction: (message: string) => vo
       <KisokDialog onOpenChange={setAdjustmentOpen} open={adjustmentOpen}>
         <KisokDialogContent>
           <KisokDialogHeader>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#969694]">
+            <p className="font-mono text-[#969694] text-[10px] uppercase tracking-[0.2em]">
               Inventory control / local action
             </p>
             <KisokDialogTitle>Record stock adjustment</KisokDialogTitle>
@@ -78,11 +82,11 @@ export function InventoryPanel({ onAction }: { onAction: (message: string) => vo
             </KisokDialogDescription>
           </KisokDialogHeader>
           <label className="grid gap-2" htmlFor="inventory-adjustment-reason">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
+            <span className="font-mono text-[#c2c2be] text-[10px] uppercase tracking-[0.16em]">
               Adjustment reason
             </span>
             <KisokTextarea
-              className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-sm text-[#f0f0ed] outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
+              className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
               id="inventory-adjustment-reason"
               onChange={(event) => setReason(event.target.value)}
               placeholder="Describe the stock count or received delivery."

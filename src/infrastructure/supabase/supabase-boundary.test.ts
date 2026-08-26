@@ -1,17 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { deferredBrowserSupabaseClient } from './client/browser-client';
-import { deferredServerSupabaseClient } from './client/server-client';
-import { dashboardOperationsSupabaseAdapter } from './dashboard-operations/adapter';
+import { getSupabaseConfig } from './client/supabase-config';
 
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-describe('deferred Supabase boundaries', () => {
-  it('exposes explicit non-connected browser, server, and dashboard boundaries', () => {
-    expect(deferredBrowserSupabaseClient.connection).toBe('deferred');
-    expect(deferredServerSupabaseClient.connection).toBe('deferred');
-    expect(dashboardOperationsSupabaseAdapter.connection).toBe('deferred');
+describe('Supabase integration boundaries', () => {
+  it('treats missing local configuration as an explicit unconfigured state', () => {
+    expect(getSupabaseConfig(undefined, undefined)).toBeNull();
   });
 
   it('keeps a distributed adapter boundary and presentation components free of data clients', () => {
@@ -37,8 +33,10 @@ describe('deferred Supabase boundaries', () => {
     const componentFiles = [
       'src/features/admin-users/components/AdminUsersPanel.tsx',
       'src/features/auth-admin-access/components/LocalAccessGate.tsx',
+      'src/features/auth-admin-access/components/AdminLoginForm.tsx',
       'src/features/catalog-taxonomy/components/CatalogTaxonomyPanel.tsx',
-      'src/features/dashboard-operations/components/KisokAdminConsole.tsx',
+      'src/features/dashboard-operations/components/AdminShell.tsx',
+      'src/features/dashboard-operations/components/OperationalDashboard.tsx',
       'src/features/inventory/components/InventoryPanel.tsx',
       'src/features/media-library/components/MediaLibraryPanel.tsx',
       'src/features/orders/components/OrdersPanel.tsx',

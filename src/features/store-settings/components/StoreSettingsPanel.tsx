@@ -16,7 +16,11 @@ import {
 import { storeSettingsRepository } from '../repositories';
 import { storeSettingsSchema } from '../schemas/store-settings.schema';
 
-export function StoreSettingsPanel({ onAction }: { onAction: (message: string) => void }) {
+export function StoreSettingsPanel({
+  onAction = () => undefined,
+}: {
+  onAction?: (message: string) => void;
+}) {
   const [editOpen, setEditOpen] = useState(false);
   const [settings, setSettings] = useState(() => ({ ...storeSettingsRepository.get() }));
   const [lowStockThresholdDraft, setLowStockThresholdDraft] = useState(settings.lowStockThreshold);
@@ -96,7 +100,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
       <KisokDialog onOpenChange={setEditOpen} open={editOpen}>
         <KisokDialogContent>
           <KisokDialogHeader>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#969694]">
+            <p className="font-mono text-[#969694] text-[10px] uppercase tracking-[0.2em]">
               Store configuration / local action
             </p>
             <KisokDialogTitle>Edit store settings</KisokDialogTitle>
@@ -106,7 +110,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
             </KisokDialogDescription>
           </KisokDialogHeader>
           <label className="grid gap-2" htmlFor="store-identity">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
+            <span className="font-mono text-[#c2c2be] text-[10px] uppercase tracking-[0.16em]">
               Store identity
             </span>
             <KisokInput
@@ -117,7 +121,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
             />
           </label>
           <label className="grid gap-2" htmlFor="low-stock-threshold">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
+            <span className="font-mono text-[#c2c2be] text-[10px] uppercase tracking-[0.16em]">
               Low-stock threshold
             </span>
             <KisokInput
@@ -128,7 +132,7 @@ export function StoreSettingsPanel({ onAction }: { onAction: (message: string) =
             />
           </label>
           <label className="grid gap-2" htmlFor="order-reset">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
+            <span className="font-mono text-[#c2c2be] text-[10px] uppercase tracking-[0.16em]">
               Order reset
             </span>
             <KisokInput

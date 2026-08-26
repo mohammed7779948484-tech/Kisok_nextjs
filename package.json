@@ -30,6 +30,9 @@
     "lint-staged": "lint-staged",
     "env:sync": "tsx scripts/sync-env.ts",
     "check:deprecated": "tsx scripts/check-deprecated.ts",
+    "check:lean-v2": "python3 scripts/static_validate.py",
+    "supabase": "pnpm dlx supabase",
+    "verify:lean-v2": "bash scripts/verify-local.sh",
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check",
     "prepare": "husky",
@@ -37,7 +40,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "validate": "pnpm ci:check && pnpm type-check && pnpm check:deprecated && pnpm test && pnpm build"
+    "validate": "pnpm ci:check && pnpm type-check && pnpm check:deprecated && pnpm check:lean-v2 && pnpm test && pnpm build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -48,6 +51,7 @@
     "@refinedev/react-table": "^6.0.1",
     "@refinedev/supabase": "^6.0.2",
     "@shadcn/react": "^0.3.0",
+    "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "@tanstack/react-query": "^5.102.4",
     "@tanstack/react-table": "^8.21.3",

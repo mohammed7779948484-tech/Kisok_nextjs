@@ -15,7 +15,11 @@ import {
 import { mediaLibraryRepository } from '../repositories';
 import type { LocalMediaAsset } from '../types';
 
-export function MediaLibraryPanel({ onAction }: { onAction: (message: string) => void }) {
+export function MediaLibraryPanel({
+  onAction = () => undefined,
+}: {
+  onAction?: (message: string) => void;
+}) {
   const [assetForRemoval, setAssetForRemoval] = useState<LocalMediaAsset | null>(null);
   const mediaAssets = mediaLibraryRepository.list();
 
@@ -75,7 +79,7 @@ export function MediaLibraryPanel({ onAction }: { onAction: (message: string) =>
       >
         <KisokDialogContent>
           <KisokDialogHeader>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#969694]">
+            <p className="font-mono text-[#969694] text-[10px] uppercase tracking-[0.2em]">
               Media library / local action
             </p>
             <KisokDialogTitle>Review asset removal</KisokDialogTitle>
@@ -84,11 +88,11 @@ export function MediaLibraryPanel({ onAction }: { onAction: (message: string) =>
               first verify product references through the Cloudinary integration.
             </KisokDialogDescription>
           </KisokDialogHeader>
-          <div className="border-l-2 border-[#e7e7e4] bg-[#222222] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#e7e7e4]">
+          <div className="border-[#e7e7e4] border-l-2 bg-[#222222] p-4">
+            <p className="font-mono text-[#e7e7e4] text-[10px] uppercase tracking-[0.16em]">
               Usage check required
             </p>
-            <p className="mt-2 text-sm leading-6 text-[#b7b7b3]">
+            <p className="mt-2 text-[#b7b7b3] text-sm leading-6">
               This local review does not delete a file or alter a product record.
             </p>
           </div>

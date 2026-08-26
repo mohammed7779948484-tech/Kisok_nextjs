@@ -1,9 +1,27 @@
 import type { LocalOrder, OrdersDataContract } from '../types';
 
 export const localOrders: readonly LocalOrder[] = [
-  { id: '#K-1048', status: 'Preparing', total: '58.5 SAR', type: 'Customer pickup' },
-  { id: '#K-1049', status: 'Completed', total: '42.0 SAR', type: 'Walk-in' },
-  { id: '#K-1050', status: 'New', total: '35.0 SAR', type: 'Customer pickup' },
+  {
+    id: 'KSK001',
+    status: 'Preparing',
+    itemCount: 2,
+    createdAt: '09:24',
+    customerLabel: 'Kiosk customer',
+  },
+  {
+    id: 'KSK002',
+    status: 'Completed',
+    itemCount: 1,
+    createdAt: '09:08',
+    customerLabel: 'Kiosk customer',
+  },
+  {
+    id: 'KSK003',
+    status: 'New',
+    itemCount: 3,
+    createdAt: '08:56',
+    customerLabel: 'Kiosk customer',
+  },
 ];
 
 export const localOrdersContract: OrdersDataContract = {

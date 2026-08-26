@@ -6,12 +6,20 @@ import { refineResources } from './resources';
 describe('Kisok Refine runtime', () => {
   it('declares feature-owned resource names without replacing local panel routes', () => {
     expect(refineResources.map((resource) => resource.name)).toEqual([
+      'brands',
+      'categories',
+      'option-types',
+      'option-values',
       'products',
-      'orders',
+      'product-categories',
+      'product-variants',
+      'variant-option-values',
+      'product-variant-media',
+      'inventory',
       'inventory-adjustments',
-      'catalog-taxonomy',
+      'orders',
       'media-assets',
-      'operators',
+      'admin-users',
       'store-settings',
     ]);
   });

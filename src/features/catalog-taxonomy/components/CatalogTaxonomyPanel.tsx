@@ -4,7 +4,11 @@ import { KisokButton, StatusPill } from '@/shared/ui';
 
 import { catalogTaxonomyRepository } from '../repositories';
 
-export function CatalogTaxonomyPanel({ onAction }: { onAction: (message: string) => void }) {
+export function CatalogTaxonomyPanel({
+  onAction = () => undefined,
+}: {
+  onAction?: (message: string) => void;
+}) {
   const catalogRows = catalogTaxonomyRepository.list();
 
   return (
