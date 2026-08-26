@@ -6,6 +6,8 @@
 - Installed Docker Engine `29.7.2`, Docker Compose `v5.5.0`, `slirp4netns`, `fuse-overlayfs`, `uidmap`, `kmod`, and `iproute2`; added the user to the `docker` group and verified Docker host-network containers.
 - Resolved and downloaded Supabase CLI `2.115.0` through the repository’s `pnpm supabase` script.
 - Added a TDD-tested Lean V2 inventory adjustment adapter that calls the transactional `apply_inventory_adjustment` RPC and validates its returned quantity/ledger ID.
+- Connected to the provided hosted Supabase project through its pooler, applied all 13 Lean V2 migrations, and verified the supplied structural and behavioral pgTAP suites with no `not ok` results.
+- Confirmed the hosted project has all 16 Lean application tables, `orders` as the only published application table in Realtime, and the Customer snapshot, checkout, and inventory adjustment RPCs.
 
 - Recovered `mohammed7779948484-tech/Kisok_nextjs` from GitHub and verified `main` at `1c6538a`.
 - Confirmed no previous-agent feature branch or feature PR contains unmerged work; only Dependabot PRs are open.
@@ -42,7 +44,8 @@
 | Locked dependency install | Passed | `pnpm install --frozen-lockfile` under Node 24.19.0 and pnpm 10.4.1 |
 | Dependency freshness audit | Completed | `pnpm outdated`, `pnpm why` |
 | Lean V2 static validator | Passed | `pnpm check:lean-v2`; 13 migrations, 19 functions, 17 triggers; orders-only Realtime |
-| Local DB reset/lint/pgTAP | Blocked by sandbox kernel | Docker Engine and Supabase CLI are installed; bridge networking fails because the host kernel lacks iptables raw/nftables support, and rootless slirp4netns cannot create a TUN device |
+| Hosted DB migration/pgTAP | Passed | All 13 Lean V2 migrations applied to the provided Supabase project; structural suite 29/29 and behavioral suite 30/30 passed |
+| Local DB reset/lint/pgTAP | Blocked by sandbox kernel | Local Docker bridge networking fails because the host kernel lacks iptables raw/nftables support; rootless slirp4netns cannot create a TUN device |
 | Unit/component tests | Passed | `pnpm test`; 25 files, 124 tests, including the TDD inventory RPC adapter test |
 | Type-check/Biome/build | Passed under Node 24 | `pnpm ci:check`, `pnpm type-check`, `pnpm build`; Node 24.19.0 with pnpm 10.4.1 |
 | Browser verification | Partial | Dev server smoke check passed for route responses; authenticated login workflow awaits Local Supabase/Auth runtime |

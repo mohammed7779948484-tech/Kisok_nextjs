@@ -129,9 +129,12 @@ select ok(
   'RLS is enabled on all sixteen application tables'
 );
 
-select results_eq(
-  $$
-    select array_agg(pt.tablename order by pt.tablename)
+select is(
+  (
+    select pg_catalog.array_to_string(
+      pg_catalog.array_agg(pt.tablename::text order by pt.tablename),
+      ','
+    )
     from pg_catalog.pg_publication_tables pt
     where pt.pubname = 'supabase_realtime'
       and pt.schemaname = 'public'
@@ -139,8 +142,8 @@ select results_eq(
         'brands','categories','products','product_categories',
         'product_variants','inventory','orders'
       )
-  $$,
-  $$ values (array['orders']::text[]) $$,
+  ),
+  'orders',
   'Only orders is published from the application catalog/operations tables'
 );
 

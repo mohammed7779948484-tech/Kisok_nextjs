@@ -13,6 +13,7 @@ This PR integrates the supplied Lean V2 database contract into `Kisok_nextjs` an
 - Added a live execution plan, TODO tracker, Local Supabase setup guide, Supabase SSR research notes, a CI workflow, and archived the stale V1 feature map.
 - Removed committed debug/build logs and the obsolete single-console demo implementation.
 - Upgraded the development environment to Node 24.19.0 with pnpm 10.4.1, installed Docker Engine 29.7.2 and Compose 5.5.0, and added a TDD-tested inventory adjustment adapter for the Lean `apply_inventory_adjustment` RPC.
+- Connected to the provided hosted Supabase project through its pooler, applied all 13 Lean V2 migrations, and kept the public client environment in ignored `.env.local` while server-only credentials remained outside the repository.
 
 ## Validation
 
@@ -23,10 +24,11 @@ This PR integrates the supplied Lean V2 database contract into `Kisok_nextjs` an
 - `pnpm test` — passed: 25 files, 124 tests, including the inventory RPC adapter test.
 - `pnpm build` — passed; Next.js generated all protected Admin and login routes.
 - Dev-server route smoke check — public login and protected Admin requests respond through the locale proxy.
-- `pnpm verify:lean-v2` — Supabase CLI 2.115.0 resolves, but startup is blocked by the sandbox kernel: Docker bridge networking cannot access iptables raw/nftables support, and rootless slirp4netns cannot create a TUN device.
+- Hosted pgTAP validation — passed after a collation/type-safe fix to the supplied Realtime assertion: structural suite 29/29 and behavioral suite 30/30, with no TAP `not ok` results. The behavioral suite runs inside a transaction and rolled back.
+- `pnpm verify:lean-v2` — the hosted database gate passed through the direct pooler connection; the separate local Docker verification remains blocked by the sandbox kernel because Docker bridge networking cannot access iptables raw/nftables support, and rootless slirp4netns cannot create a TUN device.
 
 ## Review notes
 
-The database runtime gate remains open until this branch is verified on a Docker host with normal bridge networking through two clean reset/lint/pgTAP cycles, Local Auth bootstrap, and authenticated browser smoke tests. Docker is installed here, but the sandbox kernel prevents the required bridge networking. Cloudinary upload/deletion runtime checks also require server-side Cloudinary configuration. The application checks now run on Node 24.19.0; the remaining warning is the existing Vite CommonJS/ESM configuration warning.
+The hosted database schema and supplied pgTAP contract are now verified. The separate local reset/lint workflow remains open until this branch is run on a Docker host with normal bridge networking through two clean reset/lint/pgTAP cycles, Local Auth bootstrap, and authenticated browser smoke tests. Docker is installed here, but the sandbox kernel prevents the required local bridge networking. Cloudinary upload/deletion runtime checks also require server-side Cloudinary configuration. Application checks run on Node 24.19.0; the remaining warning is the existing Vite CommonJS/ESM configuration warning.
 
 No pricing, currency, revenue, tax, payment, or financial KPI fields are present in the active Admin routes, feature fixtures, or operational dashboard.
