@@ -44,3 +44,6 @@ next-env.d.ts
 
 # MacOS
 *.DS_Store
+
+# local project configuration may contain environment-specific secrets
+.project-config.json

@@ -1,10 +1,22 @@
-import type { ListDataContract } from '@/shared/contracts';
-
-export interface LocalTaxonomyNode {
-  children: number;
+export interface BrandRecord {
+  id: string;
   name: string;
-  type: 'Brand' | 'Child category' | 'Root category';
-  visibility: 'Active';
+  isActive: boolean;
+  displayOrder: number;
+  imageMediaAssetId: string | null;
 }
 
-export interface CatalogTaxonomyDataContract extends ListDataContract<LocalTaxonomyNode> {}
+export interface BrandInput {
+  name: string;
+}
+
+export interface BrandUpdate {
+  name?: string;
+  isActive?: boolean;
+}
+
+export interface CatalogTaxonomyDataContract {
+  listBrands(search?: string): Promise<BrandRecord[]>;
+  createBrand(input: BrandInput): Promise<BrandRecord>;
+  updateBrand(id: string, input: BrandUpdate): Promise<BrandRecord>;
+}

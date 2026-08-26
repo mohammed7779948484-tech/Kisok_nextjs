@@ -1,10 +1,16 @@
-import type { ListDataContract } from '@/shared/contracts';
+export type ProductStockStatus = 'In stock' | 'Low stock' | 'Review stock' | 'Out of stock';
 
-export interface LocalProduct {
-  category: string;
+export interface ProductRecord {
+  id: string;
   name: string;
-  status: 'In stock' | 'Low stock' | 'Review stock';
-  stock: number;
+  brandName: string | null;
+  variantCount: number;
+  availableStock: number;
+  status: ProductStockStatus;
+  isActive: boolean;
+  isFeatured: boolean;
 }
 
-export interface ProductCatalogDataContract extends ListDataContract<LocalProduct> {}
+export interface ProductCatalogDataContract {
+  listProducts(): Promise<ProductRecord[]>;
+}
