@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { KisokButton, StatusPill } from '@/shared/ui';
+import {
+  KisokButton,
+  KisokDialog,
+  KisokDialogContent,
+  KisokDialogDescription,
+  KisokDialogFooter,
+  KisokDialogHeader,
+  KisokDialogTitle,
+  KisokTextarea,
+  StatusPill,
+} from '@/shared/ui';
 
 import { ordersRepository } from '../repositories';
 import type { OrderRecord } from '../types';
@@ -18,11 +28,17 @@ function nextStatus(status: OrderRecord['status']): OrderRecord['status'] | null
   return null;
 }
 
+function canCancel(status: OrderRecord['status']) {
+  return status !== 'cancelled' && status !== 'completed';
+}
+
 export function OrdersPanel() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [cancellationOrder, setCancellationOrder] = useState<OrderRecord | null>(null);
+  const [cancellationReason, setCancellationReason] = useState('');
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -50,6 +66,37 @@ export function OrdersPanel() {
       await refresh();
     } catch {
       setError(`Order ${order.displayNumber} could not be advanced.`);
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  }
+
+  function openCancellation(order: OrderRecord) {
+    setCancellationOrder(order);
+    setCancellationReason('');
+    setError(null);
+  }
+
+  function closeCancellation(open: boolean) {
+    if (open) return;
+    setCancellationOrder(null);
+    setCancellationReason('');
+  }
+
+  async function cancelOrder() {
+    if (!(cancellationOrder && cancellationReason.trim())) return;
+    setUpdatingOrderId(cancellationOrder.id);
+    setError(null);
+    try {
+      await ordersRepository.updateStatus(
+        cancellationOrder.id,
+        'cancelled',
+        cancellationReason.trim(),
+      );
+      closeCancellation(false);
+      await refresh();
+    } catch {
+      setError(`Order ${cancellationOrder.displayNumber} could not be cancelled.`);
     } finally {
       setUpdatingOrderId(null);
     }
@@ -97,16 +144,51 @@ export function OrdersPanel() {
               <p className="mt-1 text-muted-foreground text-xs uppercase tracking-[0.15em]">
                 line items
               </p>
-              {nextStatus(order.status) ? (
-                <KisokButton
-                  className="mt-6"
-                  disabled={updatingOrderId === order.id}
-                  onClick={() => void advanceOrder(order)}
-                  variant="outline"
-                >
-                  {updatingOrderId === order.id ? 'Updating…' : 'Advance status'}
-                </KisokButton>
+
+              {order.items.length > 0 ? (
+                <div className="mt-6 space-y-3 border-border border-t pt-4">
+                  <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+                    Order Items
+                  </p>
+                  {order.items.map((item) => (
+                    <div
+                      className="border-border border-b pb-3 last:border-0 last:pb-0"
+                      key={item.id}
+                    >
+                      <p className="font-semibold text-sm">{item.productName}</p>
+                      <p className="mt-1 font-mono text-muted-foreground text-[10px]">
+                        {item.variantName ? `${item.variantName} · ` : ''}
+                        {item.variantSku}
+                      </p>
+                      {item.variantOptions ? (
+                        <p className="mt-1 text-muted-foreground text-xs">{item.variantOptions}</p>
+                      ) : null}
+                      <p className="mt-1 text-muted-foreground text-xs">Quantity {item.quantity}</p>
+                    </div>
+                  ))}
+                </div>
               ) : null}
+
+              <div className="mt-6 flex flex-wrap gap-2 border-border border-t pt-4">
+                {nextStatus(order.status) ? (
+                  <KisokButton
+                    disabled={updatingOrderId === order.id}
+                    onClick={() => void advanceOrder(order)}
+                    variant="outline"
+                  >
+                    {updatingOrderId === order.id ? 'Updating…' : 'Advance status'}
+                  </KisokButton>
+                ) : null}
+                {canCancel(order.status) ? (
+                  <KisokButton
+                    disabled={updatingOrderId === order.id}
+                    onClick={() => openCancellation(order)}
+                    variant="quiet"
+                  >
+                    Cancel order
+                  </KisokButton>
+                ) : null}
+              </div>
               <dl className="mt-6 grid gap-2 border-border border-t pt-4 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted-foreground">Created</dt>
@@ -121,6 +203,49 @@ export function OrdersPanel() {
           ))}
         </div>
       )}
+
+      <KisokDialog onOpenChange={closeCancellation} open={cancellationOrder !== null}>
+        <KisokDialogContent>
+          <KisokDialogHeader>
+            <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+              Fulfillment control / cancellation
+            </p>
+            <KisokDialogTitle>Cancel order</KisokDialogTitle>
+            <KisokDialogDescription>
+              Cancellation restores reserved inventory through the Lean V2 transaction. A reason is
+              required.
+            </KisokDialogDescription>
+          </KisokDialogHeader>
+          <label className="grid gap-2" htmlFor="order-cancellation-reason">
+            <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+              Cancellation reason
+            </span>
+            <KisokTextarea
+              aria-label="Cancellation reason"
+              className="min-h-28 w-full resize-y"
+              id="order-cancellation-reason"
+              onChange={(event) => setCancellationReason(event.target.value)}
+              placeholder="Describe why this order is being cancelled."
+              value={cancellationReason}
+            />
+          </label>
+          <KisokDialogFooter>
+            <KisokButton
+              disabled={updatingOrderId !== null}
+              onClick={() => closeCancellation(false)}
+              variant="quiet"
+            >
+              Keep order
+            </KisokButton>
+            <KisokButton
+              disabled={updatingOrderId !== null || !cancellationReason.trim()}
+              onClick={() => void cancelOrder()}
+            >
+              {updatingOrderId !== null ? 'Cancelling…' : 'Confirm cancellation'}
+            </KisokButton>
+          </KisokDialogFooter>
+        </KisokDialogContent>
+      </KisokDialog>
     </section>
   );
 }
