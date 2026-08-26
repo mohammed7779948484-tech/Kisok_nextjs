@@ -9,6 +9,7 @@ import type {
   ProductRecord,
   ProductStockStatus,
   VariantInput,
+  VariantOptionSelection,
   VariantRecord,
   VariantUpdate,
 } from '../types';
@@ -115,6 +116,30 @@ export function createProductCatalogRepository(
       return mapVariant(result.data);
     },
 
+    async replaceVariantOptionValues(variantId: string, selections: VariantOptionSelection[]) {
+      const uniqueTypeIds = new Set(selections.map((selection) => selection.optionTypeId));
+      if (uniqueTypeIds.size !== selections.length) {
+        throw new Error('A Variant can have at most one Value per Option Type.');
+      }
+
+      const deleteResult = await client
+        .from('variant_option_values')
+        .delete()
+        .eq('variant_id', variantId);
+      if (deleteResult.error) throw deleteResult.error;
+
+      if (selections.length === 0) return;
+
+      const insertResult = await client.from('variant_option_values').insert(
+        selections.map((selection) => ({
+          variant_id: variantId,
+          option_type_id: selection.optionTypeId,
+          option_value_id: selection.optionValueId,
+        })),
+      );
+      if (insertResult.error) throw insertResult.error;
+    },
+
     async createProduct(input: ProductInput) {
       const result = await client
         .from('products')
@@ -185,6 +210,12 @@ export const productCatalogRepository: ProductCatalogDataContract = {
   },
   updateVariant(id, input) {
     return createProductCatalogRepository(getClientOrThrow()).updateVariant(id, input);
+  },
+  replaceVariantOptionValues(variantId, selections) {
+    return createProductCatalogRepository(getClientOrThrow()).replaceVariantOptionValues(
+      variantId,
+      selections,
+    );
   },
   listProducts() {
     return createProductCatalogRepository(getClientOrThrow()).listProducts();

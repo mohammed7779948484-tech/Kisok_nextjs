@@ -22,6 +22,11 @@ export interface VariantUpdate {
   isActive?: boolean;
 }
 
+export interface VariantOptionSelection {
+  optionTypeId: string;
+  optionValueId: string;
+}
+
 export interface VariantRecord {
   id: string;
   productId: string;
@@ -57,4 +62,8 @@ export interface ProductCatalogDataContract {
   createVariant(input: VariantInput): Promise<VariantRecord>;
   listVariants(productId: string): Promise<VariantRecord[]>;
   updateVariant(id: string, input: VariantUpdate): Promise<VariantRecord>;
+  replaceVariantOptionValues(
+    variantId: string,
+    selections: VariantOptionSelection[],
+  ): Promise<void>;
 }

@@ -5,6 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 const testContext = vi.hoisted(() => ({
   listProducts: vi.fn(),
   createProduct: vi.fn(),
+  listVariants: vi.fn(),
+  createVariant: vi.fn(),
+  updateVariant: vi.fn(),
   listBrands: vi.fn(),
   listCategories: vi.fn(),
 }));
@@ -13,6 +16,9 @@ vi.mock('../repositories', () => ({
   productCatalogRepository: {
     listProducts: testContext.listProducts,
     createProduct: testContext.createProduct,
+    listVariants: testContext.listVariants,
+    createVariant: testContext.createVariant,
+    updateVariant: testContext.updateVariant,
   },
 }));
 
@@ -96,6 +102,49 @@ describe('ProductCatalogPanel', () => {
         shortDescription: null,
         isFeatured: false,
         categoryIds: ['category-1'],
+      }),
+    );
+  });
+
+  it('creates a hosted Variant from the Product editor', async () => {
+    const user = userEvent.setup();
+    testContext.listProducts.mockResolvedValue([
+      {
+        id: 'product-1',
+        name: 'Berry Spark',
+        brandName: 'Northline',
+        variantCount: 0,
+        availableStock: 0,
+        status: 'Out of stock',
+        isActive: true,
+        isFeatured: false,
+      },
+    ]);
+    testContext.listBrands.mockResolvedValue([]);
+    testContext.listCategories.mockResolvedValue([]);
+    testContext.listVariants.mockResolvedValue([]);
+    testContext.createVariant.mockResolvedValue({
+      id: 'variant-1',
+      productId: 'product-1',
+      sku: 'KSK-000001',
+      barcode: null,
+      titleOverride: 'Single',
+      isActive: true,
+      lowStockThreshold: 5,
+    });
+
+    render(<ProductCatalogPanel />);
+    await screen.findByText('Berry Spark');
+    await user.click(screen.getByRole('button', { name: 'Manage variants for Berry Spark' }));
+    await user.click(screen.getByRole('button', { name: 'Add variant' }));
+    await user.type(screen.getByLabelText('Variant title'), 'Single');
+    await user.click(screen.getByRole('button', { name: 'Save variant' }));
+
+    await waitFor(() =>
+      expect(testContext.createVariant).toHaveBeenCalledWith({
+        productId: 'product-1',
+        titleOverride: 'Single',
+        lowStockThreshold: 5,
       }),
     );
   });
