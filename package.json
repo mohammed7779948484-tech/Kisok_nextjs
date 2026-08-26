@@ -31,6 +31,7 @@
     "env:sync": "tsx scripts/sync-env.ts",
     "check:deprecated": "tsx scripts/check-deprecated.ts",
     "check:lean-v2": "python3 scripts/static_validate.py",
+    "supabase:types": "python3 scripts/generate_types.py",
     "supabase": "pnpm dlx supabase",
     "verify:lean-v2": "bash scripts/verify-local.sh",
     "type-check": "tsc --noEmit",

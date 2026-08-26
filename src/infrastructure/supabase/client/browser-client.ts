@@ -5,11 +5,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { env } from '@/lib/env';
 
+import type { Database } from '../database.types';
 import { getSupabaseConfig } from './supabase-config';
 
-let browserClient: SupabaseClient | null = null;
+let browserClient: SupabaseClient<Database> | null = null;
 
-export function getBrowserSupabaseClient(): SupabaseClient | null {
+export function getBrowserSupabaseClient(): SupabaseClient<Database> | null {
   const config = getSupabaseConfig(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,

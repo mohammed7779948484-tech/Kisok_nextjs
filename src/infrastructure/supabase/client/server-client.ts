@@ -5,9 +5,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { env } from '@/lib/env';
 
+import type { Database } from '../database.types';
 import { getSupabaseConfig } from './supabase-config';
 
-export async function getServerSupabaseClient(): Promise<SupabaseClient | null> {
+export async function getServerSupabaseClient(): Promise<SupabaseClient<Database> | null> {
   const config = getSupabaseConfig(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
