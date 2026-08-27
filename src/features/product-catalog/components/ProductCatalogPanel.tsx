@@ -4,14 +4,6 @@ import { useEffect, useState } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
   Table,
   TableBody,
   TableCell,
@@ -20,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Link } from '@/i18n/navigation';
-import { KisokButton, KisokInput, StatusPill } from '@/shared/ui';
+import { CompactPagination, KisokButton, KisokInput, StatusPill } from '@/shared/ui';
 
 import { useProductsList } from '../hooks/useProductsList';
 import { productCatalogRepository } from '../repositories';
@@ -180,31 +172,12 @@ export function ProductCatalogPanel() {
         </div>
       )}
 
-      {totalPages > 1 ? (
-        <Pagination className="mt-6 justify-start">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                aria-disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink isActive={pageNumber === page} onClick={() => setPage(pageNumber)}>
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                aria-disabled={page >= totalPages}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      ) : null}
+      <CompactPagination
+        className="mt-6 justify-start"
+        onPageChange={setPage}
+        page={page}
+        totalPages={totalPages}
+      />
     </section>
   );
 }
