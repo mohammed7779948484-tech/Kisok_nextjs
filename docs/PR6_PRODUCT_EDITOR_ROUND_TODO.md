@@ -67,5 +67,5 @@
 
 ## Phase 10 — PR delivery
 
-- [x] Updated this scoped tracker and browser evidence truthfully, including the final keyboard picker, dismissal, and Variant-tab rechecks. The PR #6 description update follows the final commit.
-- [ ] Commit with conventional messages and push only `feat/lean-v2-admin-integration` to the existing PR.
+- [x] Updated this scoped tracker and browser evidence truthfully, including the final keyboard picker, dismissal, and Variant-tab rechecks. PR #6 description now reflects the verified scope and limitations.
+- [x] Created conventional commit `ddadddf` and pushed only `feat/lean-v2-admin-integration` to the existing PR #6; the pre-push 118-file / 393-test suite passed.
