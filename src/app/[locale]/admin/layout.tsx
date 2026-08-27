@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { AdminShell } from '@/features/dashboard-operations/components/AdminShell';
@@ -16,7 +17,9 @@ export default async function AdminLayout({
   const session = await getTrustedAdminSession();
 
   if (!session) {
-    redirect(`/${locale}/login?next=/${locale}/admin`);
+    const requestHeaders = await headers();
+    const requestedPath = requestHeaders.get('x-pathname') ?? `/${locale}/admin`;
+    redirect(`/${locale}/login?next=${requestedPath}`);
   }
 
   return (

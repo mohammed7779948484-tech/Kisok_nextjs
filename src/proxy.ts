@@ -12,6 +12,7 @@ import { getSupabaseConfig } from './infrastructure/supabase/client/supabase-con
 const handleI18nRouting = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
+  request.headers.set('x-pathname', request.nextUrl.pathname);
   const response = handleI18nRouting(request) ?? NextResponse.next({ request });
   const config = getSupabaseConfig(
     env.NEXT_PUBLIC_SUPABASE_URL,

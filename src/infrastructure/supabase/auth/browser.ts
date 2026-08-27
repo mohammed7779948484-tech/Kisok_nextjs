@@ -44,5 +44,13 @@ export async function signInAdmin(email: string, password: string): Promise<Admi
 }
 
 export async function signOutCurrentUser() {
-  await getBrowserSupabaseClient()?.auth.signOut();
+  const supabase = getBrowserSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    throw error;
+  }
 }
