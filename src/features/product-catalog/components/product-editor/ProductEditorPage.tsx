@@ -6,6 +6,7 @@ import { MediaPickerDialog } from '@/features/media-library/components/MediaPick
 import { VariantMediaPicker } from '@/features/media-library/components/VariantMediaPicker';
 import { useMediaUpload } from '@/features/media-library/hooks/useMediaUpload';
 import { Link } from '@/i18n/navigation';
+import { useConfirmLeave } from '@/shared/navigation/UnsavedChangesGuard';
 import {
   KisokButton,
   KisokDialog,
@@ -49,6 +50,7 @@ function getLoadError(
 
 export function ProductEditorPage({ mode, productId }: { mode: EditorMode; productId?: string }) {
   const workflow = useProductEditorWorkflow({ mode, productId });
+  const confirmLeave = useConfirmLeave();
   const { upload, uploading, error: uploadError } = useMediaUpload();
   const [activeTab, setActiveTab] = useState<ProductEditorTab>('details');
   const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
@@ -110,7 +112,12 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
             {workflow.saveError ?? uploadError ?? variantDeletion.error}
           </p>
           {workflow.recoveryDraftId ? (
-            <Link href={`/admin/products/${workflow.recoveryDraftId}/edit`}>
+            <Link
+              href={`/admin/products/${workflow.recoveryDraftId}/edit`}
+              onClick={(event) => {
+                if (!confirmLeave()) event.preventDefault();
+              }}
+            >
               <KisokButton type="button" variant="outline">
                 Open saved draft
               </KisokButton>
