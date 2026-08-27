@@ -56,6 +56,10 @@ export interface MediaLibraryDataContract {
   listAssetsPage(input: MediaAssetPageInput): Promise<MediaAssetPage>;
   registerAsset(input: MediaAssetInsertInput): Promise<MediaAssetRecord>;
   listVariantMedia(variantId: string): Promise<VariantMediaRecord[]>;
+  /** Batched form of `listVariantMedia` for counts only — one query for
+   * every id in `variantIds` instead of one query per Variant. Variants
+   * with no Media rows are omitted from the result map (treat as 0). */
+  listVariantMediaCounts(variantIds: string[]): Promise<Record<string, number>>;
   attachVariantMedia(variantId: string, mediaAssetId: string): Promise<void>;
   /**
    * Deletes only the `product_variant_media` join row for this Variant and

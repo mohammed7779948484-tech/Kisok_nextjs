@@ -99,6 +99,12 @@ export interface ProductCatalogDataContract {
   listVariants(productId: string): Promise<VariantRecord[]>;
   updateVariant(id: string, input: VariantUpdate): Promise<VariantRecord>;
   listVariantOptionValues(variantId: string): Promise<VariantOptionValueRecord[]>;
+  /** Batched form of `listVariantOptionValues` — one query for every id in
+   * `variantIds` instead of one query per Variant. Variants with no
+   * selections are omitted from the result map. */
+  listVariantOptionValuesForVariants(
+    variantIds: string[],
+  ): Promise<Record<string, VariantOptionValueRecord[]>>;
   replaceVariantOptionValues(
     variantId: string,
     selections: VariantOptionSelection[],

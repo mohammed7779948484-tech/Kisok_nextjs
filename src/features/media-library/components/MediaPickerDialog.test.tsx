@@ -1,7 +1,25 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+const acceptedImageTypes = new Set([
+  'image/avif',
+  'image/gif',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
+
+vi.mock('../client/media-upload-validation', () => ({
+  // Mirrors the real type check but skips the async dimension read, which
+  // jsdom cannot perform for a synthetic in-memory File/Blob.
+  validateMediaUploadFile: vi.fn(async (file: File) =>
+    acceptedImageTypes.has(file.type)
+      ? { valid: true }
+      : { message: 'Choose a PNG, JPEG, WebP, GIF, or AVIF image.', valid: false },
+  ),
+}));
 
 import { MediaPickerDialog } from './MediaPickerDialog';
 
@@ -95,5 +113,67 @@ describe('MediaPickerDialog', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Take photo' })).toBeEnabled();
+  });
+
+  describe('camera capture failure retention', () => {
+    const originalGetUserMedia = navigator.mediaDevices?.getUserMedia;
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      if (originalGetUserMedia) {
+        Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+          configurable: true,
+          value: originalGetUserMedia,
+        });
+      }
+    });
+
+    it('keeps the captured photo preview and shows the error when the upload fails', async () => {
+      const user = userEvent.setup();
+      const fakeStream = { getTracks: () => [] } as unknown as MediaStream;
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: { getUserMedia: vi.fn().mockResolvedValue(fakeStream) },
+      });
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        drawImage: vi.fn(),
+      } as unknown as CanvasRenderingContext2D);
+      vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((callback) => {
+        callback(new Blob(['fake'], { type: 'image/jpeg' }));
+      });
+
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const failingUpload = vi.fn().mockResolvedValue(null);
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <MediaPickerDialog
+            assets={[]}
+            onOpenChange={vi.fn()}
+            onSelect={vi.fn()}
+            onUpload={failingUpload}
+            open
+            selectedAssetId={null}
+          />
+        </QueryClientProvider>,
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Take photo' }));
+      await screen.findByLabelText('Camera preview');
+      const video = screen.getByLabelText('Camera preview') as HTMLVideoElement;
+      Object.defineProperty(video, 'videoWidth', { configurable: true, value: 640 });
+      Object.defineProperty(video, 'videoHeight', { configurable: true, value: 480 });
+
+      await user.click(screen.getByRole('button', { name: 'Capture photo' }));
+      await screen.findByText('Use this photo?');
+
+      await user.click(screen.getByRole('button', { name: 'Use photo' }));
+
+      await waitFor(() => expect(failingUpload).toHaveBeenCalled());
+      // The upload failed (returned null): the captured preview must remain so
+      // the admin can retry, not silently disappear as if it never happened.
+      expect(screen.getByText('Use this photo?')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Retake photo' })).toBeInTheDocument();
+    });
   });
 });

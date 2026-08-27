@@ -91,28 +91,16 @@ export function useProductEditorData({ mode, productId }: ProductEditorDataParam
   const variantIds = variantsQuery.data?.map((variant) => variant.id) ?? [];
   const variantMediaQuery = useQuery({
     queryKey: ['product-editor', 'variant-media', productId, variantIds],
-    queryFn: async (): Promise<Record<string, number>> => {
-      const entries = await Promise.all(
-        variantIds.map(async (variantId) => [
-          variantId,
-          (await mediaLibraryRepository.listVariantMedia(variantId)).length,
-        ]),
-      );
-      return Object.fromEntries(entries);
-    },
+    // One batched query for every Variant on this Product, not one query
+    // per Variant — see `listVariantMediaCounts`.
+    queryFn: () => mediaLibraryRepository.listVariantMediaCounts(variantIds),
     enabled: shouldLoadProduct && variantsQuery.isSuccess,
   });
   const variantOptionsQuery = useQuery({
     queryKey: ['product-editor', 'variant-options', productId, variantIds],
-    queryFn: async (): Promise<Record<string, VariantOptionValueRecord[]>> => {
-      const entries = await Promise.all(
-        variantIds.map(async (variantId) => [
-          variantId,
-          await productCatalogRepository.listVariantOptionValues(variantId),
-        ]),
-      );
-      return Object.fromEntries(entries);
-    },
+    // One batched query for every Variant on this Product, not one query
+    // per Variant — see `listVariantOptionValuesForVariants`.
+    queryFn: () => productCatalogRepository.listVariantOptionValuesForVariants(variantIds),
     enabled: shouldLoadProduct && variantsQuery.isSuccess,
   });
 

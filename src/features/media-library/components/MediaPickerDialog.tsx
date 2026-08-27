@@ -23,6 +23,7 @@ import type { MediaAssetRecord } from '../types';
 type MediaPickerDialogProps = {
   /** An explicit list is useful for small, preloaded contexts and focused tests. Omit it to use server pages. */
   assets?: MediaAssetRecord[];
+  description?: string;
   error?: string | null;
   isLoading?: boolean;
   isUploading?: boolean;
@@ -32,6 +33,7 @@ type MediaPickerDialogProps = {
   onUpload?: (file: File) => Promise<MediaAssetRecord | null | undefined>;
   open: boolean;
   selectedAssetId: string | null;
+  title?: string;
 };
 
 function captureVideoFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): Promise<File> {
@@ -59,6 +61,7 @@ function captureVideoFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): 
 
 export function MediaPickerDialog({
   assets: suppliedAssets,
+  description = 'Choose an existing image, upload a new image, or capture a photo.',
   error: suppliedError = null,
   isLoading: suppliedLoading = false,
   isUploading = false,
@@ -68,6 +71,7 @@ export function MediaPickerDialog({
   onUpload,
   open,
   selectedAssetId,
+  title = 'Media Library',
 }: MediaPickerDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -121,20 +125,24 @@ export function MediaPickerDialog({
     return () => URL.revokeObjectURL(objectUrl);
   }, [capturedPhoto]);
 
-  async function handleFileChange(file: File) {
+  /** Returns whether the upload actually succeeded, so callers (e.g. the
+   * camera confirm step) only clear their local state on success and can
+   * retry against the same file/photo after a validation or upload failure. */
+  async function handleFileChange(file: File): Promise<boolean> {
     setValidationError(null);
     const validation = await validateMediaUploadFile(file);
     if (!validation.valid) {
       setValidationError(validation.message);
-      return;
+      return false;
     }
     const uploaded = await onUpload?.(file);
-    if (!uploaded) return;
+    if (!uploaded) return false;
     setUploadedAssets((current) => [
       uploaded,
       ...current.filter((asset) => asset.id !== uploaded.id),
     ]);
     setPendingAssetId(uploaded.id);
+    return true;
   }
 
   function handleSearchChange(value: string) {
@@ -178,11 +186,8 @@ export function MediaPickerDialog({
     <KisokDialog onOpenChange={handleDialogOpenChange} open={open}>
       <KisokDialogContent className="max-w-4xl">
         <KisokDialogHeader>
-          <KisokDialogTitle>Media Library</KisokDialogTitle>
-          <KisokDialogDescription>
-            Choose an existing image, upload a new image, or capture a photo for this Product
-            context.
-          </KisokDialogDescription>
+          <KisokDialogTitle>{title}</KisokDialogTitle>
+          <KisokDialogDescription>{description}</KisokDialogDescription>
         </KisokDialogHeader>
 
         <div className="flex flex-col justify-between gap-3 sm:flex-row">
@@ -276,7 +281,9 @@ export function MediaPickerDialog({
                 <KisokButton
                   disabled={isUploading}
                   onClick={() => {
-                    void handleFileChange(capturedPhoto).then(() => setCapturedPhoto(null));
+                    void handleFileChange(capturedPhoto).then((succeeded) => {
+                      if (succeeded) setCapturedPhoto(null);
+                    });
                   }}
                   type="button"
                 >

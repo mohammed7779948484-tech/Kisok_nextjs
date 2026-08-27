@@ -2,17 +2,17 @@ import type { ReactNode } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const testContext = vi.hoisted(() => ({
   listAssets: vi.fn(),
   listBrands: vi.fn(),
   listCategories: vi.fn(),
   listOptionTypes: vi.fn(),
-  listVariantMedia: vi.fn(),
+  listVariantMediaCounts: vi.fn(),
   getProduct: vi.fn(),
   listProductCategoryIds: vi.fn(),
-  listVariantOptionValues: vi.fn(),
+  listVariantOptionValuesForVariants: vi.fn(),
   listVariants: vi.fn(),
 }));
 
@@ -27,7 +27,7 @@ vi.mock('@/features/catalog-taxonomy/repositories', () => ({
 vi.mock('@/features/media-library/repositories', () => ({
   mediaLibraryRepository: {
     listAssets: testContext.listAssets,
-    listVariantMedia: testContext.listVariantMedia,
+    listVariantMediaCounts: testContext.listVariantMediaCounts,
   },
 }));
 
@@ -35,7 +35,7 @@ vi.mock('../repositories', () => ({
   productCatalogRepository: {
     getProduct: testContext.getProduct,
     listProductCategoryIds: testContext.listProductCategoryIds,
-    listVariantOptionValues: testContext.listVariantOptionValues,
+    listVariantOptionValuesForVariants: testContext.listVariantOptionValuesForVariants,
     listVariants: testContext.listVariants,
   },
 }));
@@ -53,6 +53,10 @@ function createWrapper() {
 }
 
 describe('useProductEditorData', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('loads Product editor references as ready context for a new draft', async () => {
     testContext.listBrands.mockResolvedValue([
       { id: 'brand-1', isActive: true, name: 'Northline' },
@@ -108,30 +112,17 @@ describe('useProductEditorData', () => {
         titleOverride: null,
       },
     ]);
-    testContext.listVariantMedia.mockResolvedValue([
-      {
-        asset: {
-          format: 'webp',
-          height: 640,
-          publicId: 'products/citrus',
-          secureUrl: 'https://example.test/citrus.webp',
-          width: 640,
+    testContext.listVariantMediaCounts.mockResolvedValue({ 'variant-1': 1 });
+    testContext.listVariantOptionValuesForVariants.mockResolvedValue({
+      'variant-1': [
+        {
+          optionTypeId: 'flavor',
+          optionTypeName: 'Flavor',
+          optionValueId: 'berry',
+          optionValueName: 'Berry',
         },
-        createdAt: '2026-08-27T00:00:00Z',
-        displayOrder: 1,
-        isPrimary: true,
-        mediaAssetId: 'media-1',
-        variantId: 'variant-1',
-      },
-    ]);
-    testContext.listVariantOptionValues.mockResolvedValue([
-      {
-        optionTypeId: 'flavor',
-        optionTypeName: 'Flavor',
-        optionValueId: 'berry',
-        optionValueName: 'Berry',
-      },
-    ]);
+      ],
+    });
 
     const { result } = renderHook(
       () => useProductEditorData({ mode: 'edit', productId: 'product-1' }),
@@ -154,6 +145,62 @@ describe('useProductEditorData', () => {
     expect(result.current.variantEligibilityById).toEqual({
       'variant-1': { isCustomerEligible: true, reasons: [] },
     });
+  });
+
+  it('batches Variant Media and Option Value reads into one query per Product instead of one per Variant', async () => {
+    testContext.listBrands.mockResolvedValue([]);
+    testContext.listCategories.mockResolvedValue([]);
+    testContext.listOptionTypes.mockResolvedValue([]);
+    testContext.listAssets.mockResolvedValue([]);
+    testContext.getProduct.mockResolvedValue({
+      brandId: null,
+      coverMediaAssetId: null,
+      id: 'product-1',
+      isActive: false,
+      isFeatured: false,
+      name: 'Citrus Spark',
+      searchKeywords: [],
+      shortDescription: null,
+    });
+    testContext.listProductCategoryIds.mockResolvedValue([]);
+    testContext.listVariants.mockResolvedValue([
+      {
+        barcode: null,
+        id: 'variant-1',
+        isActive: true,
+        lowStockThreshold: null,
+        productId: 'product-1',
+        sku: 'KSK-000001',
+        titleOverride: null,
+      },
+      {
+        barcode: null,
+        id: 'variant-2',
+        isActive: true,
+        lowStockThreshold: null,
+        productId: 'product-1',
+        sku: 'KSK-000002',
+        titleOverride: null,
+      },
+    ]);
+    testContext.listVariantMediaCounts.mockResolvedValue({ 'variant-1': 1 });
+    testContext.listVariantOptionValuesForVariants.mockResolvedValue({});
+
+    const { result } = renderHook(
+      () => useProductEditorData({ mode: 'edit', productId: 'product-1' }),
+      { wrapper: createWrapper() },
+    );
+
+    await waitFor(() => expect(result.current.variantOptions.status).toBe('ready'));
+
+    // Exactly one batched call for both Variants — never one call per Variant.
+    expect(testContext.listVariantMediaCounts).toHaveBeenCalledTimes(1);
+    expect(testContext.listVariantMediaCounts).toHaveBeenCalledWith(['variant-1', 'variant-2']);
+    expect(testContext.listVariantOptionValuesForVariants).toHaveBeenCalledTimes(1);
+    expect(testContext.listVariantOptionValuesForVariants).toHaveBeenCalledWith([
+      'variant-1',
+      'variant-2',
+    ]);
   });
 
   it('does not fetch the entire Media Library while initializing a new Product draft', async () => {

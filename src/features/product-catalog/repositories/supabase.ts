@@ -206,6 +206,23 @@ export function createProductCatalogRepository(
       return (result.data ?? []).map((row) => mapVariantOptionValue(row as never));
     },
 
+    async listVariantOptionValuesForVariants(variantIds: string[]) {
+      if (variantIds.length === 0) return {};
+      const result = await client
+        .from('variant_option_values')
+        .select(
+          'variant_id,option_type_id,option_value_id,option_types(name),option_values(value)',
+        )
+        .in('variant_id', variantIds);
+      if (result.error) throw result.error;
+      const byVariantId: Record<string, VariantOptionValueRecord[]> = {};
+      for (const row of (result.data ?? []) as unknown as Array<{ variant_id: string }>) {
+        const list = (byVariantId[row.variant_id] ??= []);
+        list.push(mapVariantOptionValue(row as never));
+      }
+      return byVariantId;
+    },
+
     async replaceVariantOptionValues(variantId: string, selections: VariantOptionSelection[]) {
       const uniqueTypeIds = new Set(selections.map((selection) => selection.optionTypeId));
       if (uniqueTypeIds.size !== selections.length) {
@@ -522,6 +539,11 @@ export const productCatalogRepository: ProductCatalogDataContract = {
   },
   listVariantOptionValues(variantId) {
     return createProductCatalogRepository(getClientOrThrow()).listVariantOptionValues(variantId);
+  },
+  listVariantOptionValuesForVariants(variantIds) {
+    return createProductCatalogRepository(getClientOrThrow()).listVariantOptionValuesForVariants(
+      variantIds,
+    );
   },
   replaceVariantOptionValues(variantId, selections) {
     return createProductCatalogRepository(getClientOrThrow()).replaceVariantOptionValues(

@@ -145,6 +145,20 @@ export function createMediaLibraryRepository(
       return (result.data ?? []).map(mapVariantMedia);
     },
 
+    async listVariantMediaCounts(variantIds: string[]) {
+      if (variantIds.length === 0) return {};
+      const result = await client
+        .from('product_variant_media')
+        .select('variant_id')
+        .in('variant_id', variantIds);
+      if (result.error) throw result.error;
+      const counts: Record<string, number> = {};
+      for (const row of result.data ?? []) {
+        counts[row.variant_id] = (counts[row.variant_id] ?? 0) + 1;
+      }
+      return counts;
+    },
+
     async attachVariantMedia(variantId: string, mediaAssetId: string) {
       const result = await client
         .from('product_variant_media')
@@ -233,6 +247,9 @@ export const mediaLibraryRepository: MediaLibraryDataContract = {
   },
   listVariantMedia(variantId) {
     return createMediaLibraryRepository(getClientOrThrow()).listVariantMedia(variantId);
+  },
+  listVariantMediaCounts(variantIds) {
+    return createMediaLibraryRepository(getClientOrThrow()).listVariantMediaCounts(variantIds);
   },
   attachVariantMedia(variantId, mediaAssetId) {
     return createMediaLibraryRepository(getClientOrThrow()).attachVariantMedia(
