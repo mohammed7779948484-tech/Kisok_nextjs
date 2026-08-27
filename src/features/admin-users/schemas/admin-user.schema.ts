@@ -10,7 +10,11 @@ export const ADMIN_USER_ROLES = ['admin', 'preparation', 'customer'] as const;
 
 export const adminUserCreateFormSchema = z.object({
   displayName: z.string().trim().min(1, 'Display name is required.'),
-  email: z.string().trim().min(1, 'Email is required.').email('Enter a valid email address.'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email is required.')
+    .pipe(z.email('Enter a valid email address.')),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
   role: z.enum(ADMIN_USER_ROLES),
 });
