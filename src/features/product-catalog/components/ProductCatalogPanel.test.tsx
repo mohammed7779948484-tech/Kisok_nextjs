@@ -36,6 +36,9 @@ function baseProduct(overrides: Partial<Record<string, unknown>> = {}) {
     status: 'In stock',
     isActive: true,
     isFeatured: false,
+    searchKeywords: [],
+    variantBarcodes: [],
+    variantSkus: [],
     ...overrides,
   };
 }

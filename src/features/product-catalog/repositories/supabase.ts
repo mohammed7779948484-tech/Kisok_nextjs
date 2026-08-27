@@ -42,10 +42,13 @@ type ProductListRow = {
   short_description: string | null;
   is_active: boolean;
   is_featured: boolean;
+  search_keywords: string[] | null;
   brands: { name: string } | null;
   product_variants: Array<{
+    barcode: string | null;
     is_active: boolean;
     low_stock_threshold: number | null;
+    sku: string;
     inventory: Array<{ current_quantity: number }>;
   }>;
 };
@@ -486,7 +489,7 @@ export function createProductCatalogRepository(
       const result = await client
         .from('products')
         .select(
-          'id,name,brand_id,short_description,is_active,is_featured,brands(name),product_variants(id,is_active,low_stock_threshold,inventory(current_quantity))',
+          'id,name,brand_id,short_description,is_active,is_featured,search_keywords,brands(name),product_variants(id,sku,barcode,is_active,low_stock_threshold,inventory(current_quantity))',
         )
         [ORDER_METHOD]('display_order', { ascending: true });
       if (result.error) throw result.error;
@@ -516,6 +519,11 @@ export function createProductCatalogRepository(
           status: getStockStatus(availableStock, isLowStock),
           isActive: product.is_active,
           isFeatured: product.is_featured,
+          searchKeywords: product.search_keywords ?? [],
+          variantBarcodes: product.product_variants
+            .map((variant) => variant.barcode)
+            .filter((barcode): barcode is string => Boolean(barcode)),
+          variantSkus: product.product_variants.map((variant) => variant.sku),
         };
       });
     },

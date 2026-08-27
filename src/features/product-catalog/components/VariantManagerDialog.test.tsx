@@ -33,6 +33,9 @@ const PRODUCT = {
   status: 'In stock' as const,
   isActive: true,
   isFeatured: false,
+  searchKeywords: [],
+  variantBarcodes: [],
+  variantSkus: [],
 };
 
 describe('VariantManagerDialog', () => {

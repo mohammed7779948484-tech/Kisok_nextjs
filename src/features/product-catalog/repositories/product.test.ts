@@ -122,6 +122,9 @@ describe('Product Catalog Supabase repository', () => {
         status: 'In stock',
         isActive: true,
         isFeatured: false,
+        searchKeywords: [],
+        variantBarcodes: [],
+        variantSkus: ['KSK-000001', 'KSK-000002'],
       },
     ]);
     expect(calls).toEqual([

@@ -85,6 +85,11 @@ export interface ProductRecord {
   status: ProductStockStatus;
   isActive: boolean;
   isFeatured: boolean;
+  /** Operational identifiers searchable beyond the Product name: curated
+   * search keywords, and every Variant's SKU/barcode. */
+  searchKeywords: string[];
+  variantBarcodes: string[];
+  variantSkus: string[];
 }
 
 export interface ProductCatalogDataContract {

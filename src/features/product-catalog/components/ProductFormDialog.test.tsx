@@ -82,6 +82,9 @@ describe('ProductFormDialog', () => {
           status: 'In stock',
           isActive: true,
           isFeatured: false,
+          searchKeywords: [],
+          variantBarcodes: [],
+          variantSkus: [],
         }}
       />,
     );
@@ -117,6 +120,9 @@ describe('ProductFormDialog', () => {
           status: 'In stock',
           isActive: true,
           isFeatured: false,
+          searchKeywords: [],
+          variantBarcodes: [],
+          variantSkus: [],
         }}
       />,
     );
