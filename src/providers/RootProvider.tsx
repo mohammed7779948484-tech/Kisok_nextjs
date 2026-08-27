@@ -4,6 +4,7 @@ import { type AbstractIntlMessages, NextIntlClientProvider } from 'next-intl';
 
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CustomThemeProvider } from '@/providers';
+import { UnsavedChangesGuardProvider } from '@/shared/navigation/UnsavedChangesGuard';
 import type { AppState } from '@/store';
 import type { SupportedLocale } from '@/types/i18n';
 
@@ -30,7 +31,9 @@ export const RootProvider = ({
       <CustomThemeProvider>
         <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
           <RefineProvider>
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              <UnsavedChangesGuardProvider>{children}</UnsavedChangesGuardProvider>
+            </TooltipProvider>
           </RefineProvider>
         </NextIntlClientProvider>
       </CustomThemeProvider>

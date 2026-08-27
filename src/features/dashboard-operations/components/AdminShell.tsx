@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { OrderNotificationCenter, useOrderRealtimeNotifications } from '@/features/orders';
 import { signOutCurrentUser } from '@/infrastructure/supabase/auth/browser';
+import { GuardedLink } from '@/shared/navigation/UnsavedChangesGuard';
 import { StatusPill } from '@/shared/ui';
 
 const navigation = [
@@ -74,7 +74,9 @@ export function AdminShell({
               </p>
               <p className="mt-2 font-black text-3xl tracking-[-0.08em]">KISOK.</p>
             </div>
-            <StatusPill>Connected</StatusPill>
+            <StatusPill title="Access is verified on each data operation, not by a live connection probe.">
+              Supabase-backed
+            </StatusPill>
           </div>
           <nav className="mt-8 grid gap-1" aria-label="Administration sections">
             {navigation.map((item) => {
@@ -83,7 +85,7 @@ export function AdminShell({
               const isOrders = item.href === '/admin/orders';
 
               return (
-                <Link
+                <GuardedLink
                   aria-current={active ? 'page' : undefined}
                   className={buttonVariants({
                     className: 'h-10 w-full justify-between rounded-none px-3 text-left',
@@ -98,7 +100,7 @@ export function AdminShell({
                       {unreadCount}
                     </span>
                   ) : null}
-                </Link>
+                </GuardedLink>
               );
             })}
           </nav>

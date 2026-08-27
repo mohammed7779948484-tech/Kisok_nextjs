@@ -45,6 +45,16 @@ export function getVariantEligibility(variant: VariantEligibilityInput): Variant
   return { isCustomerEligible: reasons.length === 0, reasons };
 }
 
+/**
+ * Mirrors the Lean V2 `get_customer_catalog()` rule: a Product is
+ * customer-visible when it (and its Brand, if any) is active AND it has at
+ * least one active Variant that is individually eligible. An ineligible
+ * sibling Variant only removes itself from the catalog — it must never hide
+ * a Product that still has another, valid Variant. Variant-specific
+ * problems remain reachable via `getVariantEligibility` for the Variant's
+ * own diagnostic; they are folded into `reasons` here only when they are
+ * part of why the whole Product is hidden.
+ */
 export function getProductVisibility({
   brand,
   dependencyDataReady = true,
@@ -57,23 +67,38 @@ export function getProductVisibility({
       reasons: ['Variant eligibility is still loading. Retry when Product setup is ready.'],
     };
   }
-  const reasons: string[] = [];
 
-  if (!isActive) reasons.push('Product is a draft.');
-  if (brand && !brand.isActive) reasons.push('Assigned Brand is inactive.');
+  const blockingReasons: string[] = [];
+  if (!isActive) blockingReasons.push('Product is a draft.');
+  if (brand && !brand.isActive) blockingReasons.push('Assigned Brand is inactive.');
 
   const activeVariants = variants.filter((variant) => variant.isActive);
-  if (isActive && activeVariants.length === 0) {
+  const variantEligibilities = activeVariants.map((variant) => ({
+    eligibility: getVariantEligibility(variant),
+    variant,
+  }));
+  const hasEligibleVariant = variantEligibilities.some(
+    ({ eligibility }) => eligibility.isCustomerEligible,
+  );
+
+  const isCustomerVisible = blockingReasons.length === 0 && hasEligibleVariant;
+  if (isCustomerVisible) return { isCustomerVisible: true, reasons: [] };
+
+  const reasons = [...blockingReasons];
+  if (blockingReasons.length === 0) {
     reasons.push(
-      variants.length === 0 ? 'No Variant exists yet.' : 'No active Variant is available.',
+      variants.length === 0
+        ? 'No Variant exists yet.'
+        : activeVariants.length === 0
+          ? 'No active Variant is available.'
+          : 'No active Variant is currently eligible for customers.',
     );
   }
-
-  for (const variant of activeVariants) {
-    for (const reason of getVariantEligibility(variant).reasons) {
+  for (const { eligibility, variant } of variantEligibilities) {
+    for (const reason of eligibility.reasons) {
       reasons.push(`Variant ${variant.sku} ${reason.charAt(0).toLowerCase()}${reason.slice(1)}`);
     }
   }
 
-  return { isCustomerVisible: reasons.length === 0, reasons };
+  return { isCustomerVisible: false, reasons };
 }

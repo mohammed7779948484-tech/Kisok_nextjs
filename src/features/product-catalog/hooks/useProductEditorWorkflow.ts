@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 
 import { mediaLibraryRepository } from '@/features/media-library/repositories';
 import { useRouter } from '@/i18n/navigation';
+import { useConfirmLeave, useUnsavedChangesGuard } from '@/shared/navigation/UnsavedChangesGuard';
 
 import { productCatalogRepository } from '../repositories';
 import { ProductDraftCreatedError } from '../repositories/supabase';
@@ -84,6 +85,13 @@ export function useProductEditorWorkflow({ mode, productId }: ProductEditorWorkf
     window.addEventListener('beforeunload', warnBeforeUnload);
     return () => window.removeEventListener('beforeunload', warnBeforeUnload);
   }, [form.formState.isDirty, isSaving, mode]);
+
+  // Guards ALL in-app navigation (sidebar links, header links, …) while
+  // this editor is dirty — not just the browser-native unload case above
+  // and not just the one dedicated "Back to Products" button.
+  const isUnsaved = mode !== 'show' && form.formState.isDirty && !isSaving;
+  useUnsavedChangesGuard(isUnsaved ? 'Discard unsaved Product changes?' : null);
+  const confirmLeave = useConfirmLeave();
 
   const values = form.watch();
   const selectedBrand = data.references.brands.find((brand) => brand.id === values.brandId) ?? null;
@@ -216,9 +224,7 @@ export function useProductEditorWorkflow({ mode, productId }: ProductEditorWorkf
   }
 
   function leaveEditor() {
-    if (mode !== 'show' && form.formState.isDirty && !isSaving) {
-      if (!window.confirm('Discard unsaved Product changes?')) return;
-    }
+    if (!confirmLeave()) return;
     router.push('/admin/products');
   }
 

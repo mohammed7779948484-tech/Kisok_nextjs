@@ -39,4 +39,15 @@ describe('AdminShell', () => {
 
     expect(screen.getByRole('button', { name: /notification sound/i })).toBeInTheDocument();
   });
+
+  it('does not claim a live connection status in the sidebar', () => {
+    render(
+      <AdminShell displayName="Admin" locale="en">
+        <p>Workspace</p>
+      </AdminShell>,
+    );
+
+    expect(screen.queryByText('Connected')).not.toBeInTheDocument();
+    expect(screen.getByText('Supabase-backed')).toBeInTheDocument();
+  });
 });
