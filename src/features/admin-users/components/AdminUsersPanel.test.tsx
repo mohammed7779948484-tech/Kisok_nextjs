@@ -221,6 +221,57 @@ describe('AdminUsersPanel', () => {
     );
   });
 
+  it('rejects a whitespace-only display name on create via Zod validation instead of calling the action', async () => {
+    const user = userEvent.setup();
+    testContext.search.mockResolvedValue([]);
+
+    render(<AdminUsersPanel />);
+    await waitFor(() => expect(testContext.search).toHaveBeenCalled());
+
+    await user.click(screen.getByRole('button', { name: 'Add team member' }));
+    await user.type(await screen.findByLabelText('Display name'), '   ');
+    await user.type(screen.getByLabelText('Email'), 'new@example.test');
+    await user.type(screen.getByLabelText('Initial password'), 'CorrectHorseBattery1!');
+    await user.click(screen.getByRole('button', { name: 'Create team member' }));
+
+    expect(await screen.findByText('Display name is required.')).toBeInTheDocument();
+    expect(testContext.createAdminUser).not.toHaveBeenCalled();
+  });
+
+  it('rejects a malformed email on create via Zod validation instead of calling the action', async () => {
+    const user = userEvent.setup();
+    testContext.search.mockResolvedValue([]);
+
+    render(<AdminUsersPanel />);
+    await waitFor(() => expect(testContext.search).toHaveBeenCalled());
+
+    await user.click(screen.getByRole('button', { name: 'Add team member' }));
+    await user.type(await screen.findByLabelText('Display name'), 'New Person');
+    await user.type(screen.getByLabelText('Email'), 'not-an-email');
+    await user.type(screen.getByLabelText('Initial password'), 'CorrectHorseBattery1!');
+    await user.click(screen.getByRole('button', { name: 'Create team member' }));
+
+    expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();
+    expect(testContext.createAdminUser).not.toHaveBeenCalled();
+  });
+
+  it('rejects a whitespace-only display name on edit via Zod validation instead of calling the action', async () => {
+    const user = userEvent.setup();
+    testContext.search.mockResolvedValue([prepUser]);
+
+    render(<AdminUsersPanel />);
+    await screen.findByText('Prep User');
+
+    await user.click(screen.getByRole('button', { name: 'Edit' }));
+    const nameInput = await screen.findByLabelText('Display name');
+    await user.clear(nameInput);
+    await user.type(nameInput, '   ');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Display name is required.')).toBeInTheDocument();
+    expect(testContext.updateAdminUser).not.toHaveBeenCalled();
+  });
+
   it('resets a password through the trusted password-reset action', async () => {
     const user = userEvent.setup();
     testContext.search.mockResolvedValue([prepUser]);

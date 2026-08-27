@@ -132,4 +132,39 @@ describe('server-only Admin User creation boundary', () => {
 
     expect(deleteUser).toHaveBeenCalledWith('orphan-1');
   });
+
+  it('surfaces both failures when the rollback delete also fails after the profile insert fails', async () => {
+    const createUser = vi.fn().mockResolvedValue({
+      data: { user: { id: 'orphan-2' } },
+      error: null,
+    });
+    const deleteUser = vi.fn().mockResolvedValue({
+      error: { message: 'service role key lacks admin API access' },
+    });
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'duplicate key value violates unique constraint' },
+    });
+    const insert = vi.fn(() => ({ select: () => ({ single }) }));
+    const from = vi.fn(() => ({ insert }));
+
+    await expect(
+      executeAdminUserCreate(
+        {
+          email: 'new@example.test',
+          password: 'CorrectHorseBattery1!',
+          displayName: 'New Person',
+          role: 'preparation',
+        },
+        {
+          getSession: async () => activeAdmin,
+          getServiceClient: () => ({ auth: { admin: { createUser, deleteUser } }, from }),
+        },
+      ),
+    ).rejects.toThrow(
+      'Admin User profile creation failed (duplicate key value violates unique constraint); the orphaned Auth user could not be cleaned up either (service role key lacks admin API access) — manual review is required.',
+    );
+
+    expect(deleteUser).toHaveBeenCalledWith('orphan-2');
+  });
 });

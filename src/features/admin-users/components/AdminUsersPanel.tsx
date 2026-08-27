@@ -2,6 +2,9 @@
 
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
+
 import { Label } from '@/components/ui/label';
 import {
   Pagination,
@@ -32,6 +35,13 @@ import {
 } from '@/shared/ui';
 
 import { adminUsersRepository } from '../repositories';
+import {
+  type AdminUserCreateFormValues,
+  type AdminUserEditFormValues,
+  adminUserCreateFormDefaultValues,
+  adminUserCreateFormSchema,
+  adminUserEditFormSchema,
+} from '../schemas/admin-user.schema';
 import { createAdminUser, resetAdminUserPassword, updateAdminUser } from '../server/actions';
 import type { AdminUserRecord } from '../types';
 
@@ -75,20 +85,27 @@ function EditAdminUserDialog({
   onSaved: () => void | Promise<void>;
 }) {
   const { open, user } = dialogState;
-  const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<AppRole>('preparation');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AdminUserEditFormValues>({
+    resolver: zodResolver(adminUserEditFormSchema),
+    defaultValues: { displayName: '', role: 'preparation' },
+  });
+
   useEffect(() => {
     if (!(open && user)) return;
-    setDisplayName(user.displayName);
-    setRole(user.role);
+    reset({ displayName: user.displayName, role: user.role });
     setError(null);
-  }, [open, user]);
+  }, [open, user, reset]);
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function onSubmit(values: AdminUserEditFormValues) {
     if (!user) return;
 
     setSubmitting(true);
@@ -96,7 +113,7 @@ function EditAdminUserDialog({
     try {
       await updateAdminUser({
         targetId: user.id,
-        changes: { display_name: displayName.trim(), role },
+        changes: { display_name: values.displayName, role: values.role },
       });
       await onSaved();
       onOpenChange(false);
@@ -116,30 +133,38 @@ function EditAdminUserDialog({
             Update the display name and role for this hosted profile.
           </KisokDialogDescription>
         </KisokDialogHeader>
-        <form className="grid gap-4" onSubmit={onSubmit}>
+        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-2">
             <Label htmlFor="admin-user-edit-name">Display name</Label>
             <KisokInput
+              aria-invalid={Boolean(errors.displayName)}
               id="admin-user-edit-name"
-              onChange={(event) => setDisplayName(event.target.value)}
-              required
-              value={displayName}
+              {...register('displayName')}
             />
+            {errors.displayName ? (
+              <p className="text-destructive text-sm">{errors.displayName.message}</p>
+            ) : null}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="admin-user-edit-role">Role</Label>
-            <Select onValueChange={(value) => setRole(value as AppRole)} value={role}>
-              <SelectTrigger className="w-full" id="admin-user-edit-role">
-                <SelectValue>{(value: AppRole) => roleLabel(value)}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              control={control}
+              name="role"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full" id="admin-user-edit-role">
+                    <SelectValue>{(value: AppRole) => roleLabel(value)}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
           {error ? (
             <p className="text-destructive text-sm" role="alert">
@@ -174,33 +199,31 @@ function CreateAdminUserDialog({
   onOpenChange: (open: boolean) => void;
   onCreated: () => void | Promise<void>;
 }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<AppRole>('preparation');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AdminUserCreateFormValues>({
+    resolver: zodResolver(adminUserCreateFormSchema),
+    defaultValues: adminUserCreateFormDefaultValues,
+  });
+
   useEffect(() => {
     if (open) return;
-    setEmail('');
-    setPassword('');
-    setDisplayName('');
-    setRole('preparation');
+    reset(adminUserCreateFormDefaultValues);
     setError(null);
-  }, [open]);
+  }, [open, reset]);
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function onSubmit(values: AdminUserCreateFormValues) {
     setSubmitting(true);
     setError(null);
     try {
-      await createAdminUser({
-        email: email.trim(),
-        password,
-        displayName: displayName.trim(),
-        role,
-      });
+      await createAdminUser(values);
       await onCreated();
       onOpenChange(false);
     } catch (caught) {
@@ -220,51 +243,62 @@ function CreateAdminUserDialog({
             sent.
           </KisokDialogDescription>
         </KisokDialogHeader>
-        <form className="grid gap-4" onSubmit={onSubmit}>
+        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-2">
             <Label htmlFor="admin-user-create-name">Display name</Label>
             <KisokInput
+              aria-invalid={Boolean(errors.displayName)}
               id="admin-user-create-name"
-              onChange={(event) => setDisplayName(event.target.value)}
-              required
-              value={displayName}
+              {...register('displayName')}
             />
+            {errors.displayName ? (
+              <p className="text-destructive text-sm">{errors.displayName.message}</p>
+            ) : null}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="admin-user-create-email">Email</Label>
             <KisokInput
+              aria-invalid={Boolean(errors.email)}
               id="admin-user-create-email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              type="email"
-              value={email}
+              type="text"
+              {...register('email')}
             />
+            {errors.email ? (
+              <p className="text-destructive text-sm">{errors.email.message}</p>
+            ) : null}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="admin-user-create-password">Initial password</Label>
             <KisokInput
+              aria-invalid={Boolean(errors.password)}
               id="admin-user-create-password"
-              minLength={6}
-              onChange={(event) => setPassword(event.target.value)}
-              required
               type="password"
-              value={password}
+              {...register('password')}
             />
+            {errors.password ? (
+              <p className="text-destructive text-sm">{errors.password.message}</p>
+            ) : null}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="admin-user-create-role">Role</Label>
-            <Select onValueChange={(value) => setRole(value as AppRole)} value={role}>
-              <SelectTrigger className="w-full" id="admin-user-create-role">
-                <SelectValue>{(value: AppRole) => roleLabel(value)}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              control={control}
+              name="role"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full" id="admin-user-create-role">
+                    <SelectValue>{(value: AppRole) => roleLabel(value)}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
           {error ? (
             <p className="text-destructive text-sm" role="alert">

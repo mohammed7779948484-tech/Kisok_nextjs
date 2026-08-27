@@ -103,12 +103,27 @@ export async function executeAdminUserCreate(
     .single();
 
   if (inserted.error || !inserted.data) {
+    const profileErrorMessage =
+      inserted.error?.message ?? 'Admin User profile creation returned no profile.';
+
+    let rollbackErrorMessage: string | null = null;
     try {
-      await client.auth.admin.deleteUser(userId);
-    } catch {
-      // Best-effort rollback only — the primary error below is what surfaces.
+      const rollback = await client.auth.admin.deleteUser(userId);
+      if (rollback.error) {
+        rollbackErrorMessage = rollback.error.message;
+      }
+    } catch (rollbackException) {
+      rollbackErrorMessage =
+        rollbackException instanceof Error ? rollbackException.message : String(rollbackException);
     }
-    throw new Error(inserted.error?.message ?? 'Admin User profile creation returned no profile.');
+
+    if (rollbackErrorMessage) {
+      throw new Error(
+        `Admin User profile creation failed (${profileErrorMessage}); the orphaned Auth user could not be cleaned up either (${rollbackErrorMessage}) — manual review is required.`,
+      );
+    }
+
+    throw new Error(profileErrorMessage);
   }
 
   return mapProfile(inserted.data as ProfileInsertRow);
