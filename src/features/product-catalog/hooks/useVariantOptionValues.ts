@@ -37,7 +37,20 @@ export function useVariantOptionValues(variantId: string) {
     void refetch();
   }, [refetch]);
 
+  function canMutate(): boolean {
+    if (isLoading) {
+      setFormError('Existing Option Values are still loading. Please wait before making changes.');
+      return false;
+    }
+    if (isError) {
+      setFormError('Existing Option Values could not be loaded. Retry before making changes.');
+      return false;
+    }
+    return true;
+  }
+
   function addSelection(selection: VariantOptionValueRecord) {
+    if (!canMutate()) return;
     setFormError(null);
     setSelections((current) => {
       if (current.some((existing) => existing.optionTypeId === selection.optionTypeId)) {
@@ -49,11 +62,13 @@ export function useVariantOptionValues(variantId: string) {
   }
 
   function removeSelection(optionTypeId: string) {
+    if (!canMutate()) return;
     setFormError(null);
     setSelections((current) => current.filter((entry) => entry.optionTypeId !== optionTypeId));
   }
 
-  async function submit() {
+  async function submit(): Promise<boolean> {
+    if (!canMutate()) return false;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -64,6 +79,7 @@ export function useVariantOptionValues(variantId: string) {
           optionValueId: selection.optionValueId,
         })),
       );
+      return true;
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : 'Save failed.';
       setSubmitError(message);
@@ -71,6 +87,7 @@ export function useVariantOptionValues(variantId: string) {
     } finally {
       setIsSubmitting(false);
     }
+    return false;
   }
 
   return {

@@ -17,6 +17,22 @@ const testContext = vi.hoisted(() => ({
             return {
               eq(_column: string, _variantId: string) {
                 return {
+                  eq() {
+                    return {
+                      maybeSingle: async () => ({
+                        data: testContext.variantMediaRows.find((row: any) => row.is_primary)
+                          ? {
+                              media_asset_id: (
+                                testContext.variantMediaRows.find(
+                                  (row: any) => row.is_primary,
+                                ) as any
+                              ).media_asset_id,
+                            }
+                          : null,
+                        error: null,
+                      }),
+                    };
+                  },
                   order: async () => ({ data: testContext.variantMediaRows, error: null }),
                 };
               },

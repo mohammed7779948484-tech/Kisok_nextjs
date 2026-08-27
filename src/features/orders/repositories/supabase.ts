@@ -34,7 +34,26 @@ function getClientOrThrow(): SupabaseClient<Database> {
 
 function formatVariantOptions(value: OrderItemListRow['variant_options']): string {
   if (typeof value === 'string') return value;
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return '';
+  if (!value || typeof value !== 'object') return '';
+
+  // Lean V2 `create_order` stores an ordered JSON array of `{ type, value }`
+  // snapshots. Retain object support only for historical rows created before
+  // that contract, never for new fixtures or writes.
+  if (Array.isArray(value)) {
+    return value
+      .filter((option): option is { type: string; value: string } =>
+        Boolean(
+          option &&
+            typeof option === 'object' &&
+            'type' in option &&
+            'value' in option &&
+            typeof option.type === 'string' &&
+            typeof option.value === 'string',
+        ),
+      )
+      .map((option) => `${option.type}: ${option.value}`)
+      .join(' · ');
+  }
 
   return Object.entries(value)
     .map(([key, option]) => `${key}: ${String(option)}`)

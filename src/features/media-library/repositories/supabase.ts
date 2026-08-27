@@ -136,12 +136,17 @@ export function createMediaLibraryRepository(
     },
 
     async setPrimaryVariantMedia(variantId: string, mediaAssetId: string) {
-      // `product_variant_media_one_primary_per_variant` is a partial unique
-      // index on (variant_id) WHERE is_primary. Setting the new primary
-      // before clearing the old one would momentarily leave two primary
-      // rows for the same Variant and violate that index, so the previous
-      // primary is always unset first, in its own statement, before the new
-      // one is set.
+      // The unique partial index allows only one primary. Because PostgREST
+      // mutations are separate statements, load the old primary first and
+      // compensate if setting the replacement fails after unsetting it.
+      const priorResult = await client
+        .from('product_variant_media')
+        .select('media_asset_id')
+        .eq('variant_id', variantId)
+        .eq('is_primary', true)
+        .maybeSingle();
+      if (priorResult.error) throw priorResult.error;
+
       const unset = await client
         .from('product_variant_media')
         .update({ is_primary: false })
@@ -154,7 +159,21 @@ export function createMediaLibraryRepository(
         .update({ is_primary: true })
         .eq('variant_id', variantId)
         .eq('media_asset_id', mediaAssetId);
-      if (set.error) throw set.error;
+      if (!set.error) return;
+
+      if (priorResult.data?.media_asset_id) {
+        const restore = await client
+          .from('product_variant_media')
+          .update({ is_primary: true })
+          .eq('variant_id', variantId)
+          .eq('media_asset_id', priorResult.data.media_asset_id);
+        if (restore.error) {
+          throw new Error(
+            `Setting Variant primary Media failed (${set.error.message}) and restoring the prior primary also failed (${restore.error.message}). Manual review is required.`,
+          );
+        }
+      }
+      throw set.error;
     },
 
     async reorderVariantMedia(variantId: string, orderedMediaAssetIds: string[]) {

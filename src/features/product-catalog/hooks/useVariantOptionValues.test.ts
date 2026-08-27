@@ -39,6 +39,31 @@ describe('useVariantOptionValues', () => {
     ]);
   });
 
+  it('blocks staged mutations until the existing combination is hydrated', async () => {
+    let resolveRead: ((value: []) => void) | undefined;
+    testContext.listVariantOptionValues.mockImplementation(
+      () =>
+        new Promise<[]>((resolve) => {
+          resolveRead = resolve;
+        }),
+    );
+    const { result } = renderHook(() => useVariantOptionValues('variant-1'));
+
+    act(() => {
+      result.current.addSelection({
+        optionTypeId: 'type-flavor',
+        optionTypeName: 'Flavor',
+        optionValueId: 'value-berry',
+        optionValueName: 'Berry',
+      });
+    });
+
+    expect(result.current.selections).toEqual([]);
+    expect(result.current.formError).toMatch(/still loading/i);
+    resolveRead?.([]);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
+
   it('rejects adding a second Value for an Option Type already staged', async () => {
     testContext.listVariantOptionValues.mockResolvedValue([]);
     const { result } = renderHook(() => useVariantOptionValues('variant-1'));

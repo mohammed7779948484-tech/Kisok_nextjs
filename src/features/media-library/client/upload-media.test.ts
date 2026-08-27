@@ -106,6 +106,7 @@ describe('executeMediaUpload', () => {
         },
         uploadToCloudinary,
         registerMediaAsset,
+        cleanupUploadedAsset: async () => undefined,
       }),
     ).rejects.toThrow('An active Admin session is required.');
 
@@ -129,10 +130,35 @@ describe('executeMediaUpload', () => {
       requestSignature: async () => signature,
       uploadToCloudinary: vi.fn().mockResolvedValue(cloudinaryResult),
       registerMediaAsset,
+      cleanupUploadedAsset: async () => undefined,
     });
 
     expect(registerMediaAsset).toHaveBeenCalledWith(cloudinaryResult);
     expect(result).toBe(registeredAsset);
+  });
+
+  it('destroys the uploaded Cloudinary binary when metadata registration fails', async () => {
+    const cloudinaryResult = {
+      publicId: 'kisok/new/asset',
+      secureUrl: 'https://res.cloudinary.com/demo-cloud/image/upload/new',
+      assetId: 'cloudinary-asset-new',
+      width: 200,
+      height: 100,
+      format: 'png',
+      bytes: 4321,
+    };
+    const cleanupUploadedAsset = vi.fn().mockResolvedValue(undefined);
+
+    await expect(
+      executeMediaUpload(makeFile(), {
+        requestSignature: async () => signature,
+        uploadToCloudinary: vi.fn().mockResolvedValue(cloudinaryResult),
+        registerMediaAsset: vi.fn().mockRejectedValue(new Error('metadata write failed')),
+        cleanupUploadedAsset,
+      }),
+    ).rejects.toThrow('metadata write failed');
+
+    expect(cleanupUploadedAsset).toHaveBeenCalledWith(cloudinaryResult);
   });
 
   it('does not insert a media_assets row when the Cloudinary upload fails', async () => {
@@ -143,6 +169,7 @@ describe('executeMediaUpload', () => {
         requestSignature: async () => signature,
         uploadToCloudinary: vi.fn().mockRejectedValue(new Error('Cloudinary upload failed.')),
         registerMediaAsset,
+        cleanupUploadedAsset: async () => undefined,
       }),
     ).rejects.toThrow('Cloudinary upload failed.');
 

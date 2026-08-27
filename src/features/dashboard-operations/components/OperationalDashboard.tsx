@@ -48,7 +48,7 @@ export async function OperationalDashboard() {
             A compact view of catalog health, stock availability, fulfillment, and shared media.
           </p>
         </div>
-        <StatusPill>Live operational data</StatusPill>
+        <StatusPill>Operational snapshot</StatusPill>
       </div>
 
       <div className="grid gap-px border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">

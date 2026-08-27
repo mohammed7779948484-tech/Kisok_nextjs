@@ -26,4 +26,13 @@ describe('Refine resource mapping', () => {
       privileged: true,
     });
   });
+
+  it('declares dedicated Product list, create, show, and edit routes', () => {
+    expect(refineResources.find((resource) => resource.name === 'products')).toMatchObject({
+      list: '/admin/products',
+      create: '/admin/products/create',
+      show: '/admin/products/:id',
+      edit: '/admin/products/:id/edit',
+    });
+  });
 });

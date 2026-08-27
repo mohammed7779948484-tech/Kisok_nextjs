@@ -78,4 +78,16 @@ describe('Product update repository', () => {
       payload: { brand_id: null },
     });
   });
+
+  it('persists deliberate Product search keywords rather than leaving the database field unmanaged', async () => {
+    await productCatalogRepository.updateProduct('product-1', {
+      searchKeywords: ['berry', 'spark'],
+    });
+
+    expect(testContext.calls).toContainEqual({
+      table: 'products',
+      operation: 'update',
+      payload: { search_keywords: ['berry', 'spark'] },
+    });
+  });
 });

@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 
 import { executeMediaUpload, uploadFileToCloudinary } from '../client/upload-media';
 import { mediaLibraryRepository } from '../repositories';
-import { getMediaUploadSignature } from '../server/actions';
+import { cleanupUnregisteredCloudinaryAsset, getMediaUploadSignature } from '../server/actions';
 import type { MediaAssetRecord } from '../types';
 
 /**
@@ -26,6 +26,7 @@ export function useMediaUpload() {
         uploadToCloudinary: (uploadedFile, signature) =>
           uploadFileToCloudinary(uploadedFile, signature),
         registerMediaAsset: (result) => mediaLibraryRepository.registerAsset(result),
+        cleanupUploadedAsset: (result) => cleanupUnregisteredCloudinaryAsset(result.publicId),
       });
     } catch (uploadError) {
       setError(

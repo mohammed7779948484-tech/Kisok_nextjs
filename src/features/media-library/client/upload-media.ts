@@ -78,6 +78,7 @@ export type MediaUploadDependencies = {
     signature: MediaUploadSignature,
   ) => Promise<CloudinaryUploadResult>;
   registerMediaAsset: (result: CloudinaryUploadResult) => Promise<MediaAssetRecord>;
+  cleanupUploadedAsset: (result: CloudinaryUploadResult) => Promise<void>;
 };
 
 /**
@@ -92,5 +93,20 @@ export async function executeMediaUpload(
 ): Promise<MediaAssetRecord> {
   const signature = await dependencies.requestSignature();
   const uploaded = await dependencies.uploadToCloudinary(file, signature);
-  return dependencies.registerMediaAsset(uploaded);
+  try {
+    return await dependencies.registerMediaAsset(uploaded);
+  } catch (registrationError) {
+    try {
+      await dependencies.cleanupUploadedAsset(uploaded);
+    } catch (cleanupError) {
+      const registrationMessage =
+        registrationError instanceof Error ? registrationError.message : String(registrationError);
+      const cleanupMessage =
+        cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
+      throw new Error(
+        `Media metadata registration failed (${registrationMessage}) and Cloudinary cleanup also failed (${cleanupMessage}). Manual cleanup is required.`,
+      );
+    }
+    throw registrationError;
+  }
 }

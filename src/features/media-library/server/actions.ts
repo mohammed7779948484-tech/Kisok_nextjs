@@ -38,19 +38,19 @@ function usageFromJson(value: unknown): Record<string, number> {
   );
 }
 
-async function destroyCloudinaryAsset(asset: MediaAssetRecord): Promise<void> {
+async function destroyCloudinaryAsset(publicId: string): Promise<void> {
   if (!(env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET)) {
     throw new Error('Cloudinary server configuration is unavailable.');
   }
   const parameters: CloudinaryUploadParameters = {
     invalidate: true,
-    public_id: asset.publicId,
+    public_id: publicId,
     timestamp: Math.floor(Date.now() / 1000),
   };
   const form = new URLSearchParams({
     api_key: env.CLOUDINARY_API_KEY,
     invalidate: 'true',
-    public_id: asset.publicId,
+    public_id: publicId,
     signature: createCloudinaryUploadSignature(parameters, env.CLOUDINARY_API_SECRET),
     timestamp: String(parameters.timestamp),
   });
@@ -101,6 +101,15 @@ export async function getMediaUploadSignature(): Promise<MediaUploadSignaturePay
   };
 }
 
+/** Removes a just-uploaded Cloudinary binary when metadata registration fails. */
+export async function cleanupUnregisteredCloudinaryAsset(publicId: string): Promise<void> {
+  if (!(await getTrustedAdminSession())) {
+    throw new Error('An active Admin session is required.');
+  }
+  if (!publicId.trim()) throw new Error('Cloudinary public id is required for cleanup.');
+  await destroyCloudinaryAsset(publicId);
+}
+
 export async function deleteMediaAsset(id: string): Promise<void> {
   if (!(await getTrustedAdminSession())) {
     throw new Error('An active Admin session is required.');
@@ -144,6 +153,6 @@ export async function deleteMediaAsset(id: string): Promise<void> {
       });
       if (result.error) throw result.error;
     },
-    deleteCloudinary: destroyCloudinaryAsset,
+    deleteCloudinary: async (asset) => destroyCloudinaryAsset(asset.publicId),
   });
 }

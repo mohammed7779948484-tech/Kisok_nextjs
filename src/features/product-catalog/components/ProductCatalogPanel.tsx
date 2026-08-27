@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { buttonVariants } from '@/components/ui/button';
 import {
   Pagination,
   PaginationContent,
@@ -18,28 +19,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { catalogTaxonomyRepository } from '@/features/catalog-taxonomy/repositories';
-import type { OptionTypeRecord } from '@/features/catalog-taxonomy/types';
+import { Link } from '@/i18n/navigation';
 import { KisokButton, KisokInput, StatusPill } from '@/shared/ui';
 
 import { useProductsList } from '../hooks/useProductsList';
 import { productCatalogRepository } from '../repositories';
 import type { ProductRecord } from '../types';
-import { ProductFormDialog } from './ProductFormDialog';
-import { VariantManagerDialog } from './VariantManagerDialog';
 
-/** Debounced-as-you-type search: one deliberate pattern, not a live-effect
- * search plus a redundant "Search" button. Mirrors `BrandsPanel`. */
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(value), delayMs);
     return () => clearTimeout(timer);
-  }, [value, delayMs]);
+  }, [delayMs, value]);
   return debounced;
 }
-
-type ProductDialogState = { open: boolean; mode: 'create' | 'edit'; product?: ProductRecord };
 
 export function ProductCatalogPanel() {
   const [searchInput, setSearchInput] = useState('');
@@ -49,39 +43,6 @@ export function ProductCatalogPanel() {
     page,
     search: debouncedSearch,
   });
-
-  const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([]);
-  const [categories, setCategories] = useState<
-    Array<{ id: string; name: string; parentId: string | null }>
-  >([]);
-  const [optionTypes, setOptionTypes] = useState<OptionTypeRecord[]>([]);
-
-  const [productDialog, setProductDialog] = useState<ProductDialogState>({
-    mode: 'create',
-    open: false,
-  });
-  const [variantManagerProduct, setVariantManagerProduct] = useState<ProductRecord | null>(null);
-
-  const loadReferenceData = useCallback(async () => {
-    const [brandRows, categoryRows, optionTypeRows] = await Promise.all([
-      catalogTaxonomyRepository.listBrands(),
-      catalogTaxonomyRepository.listCategories(),
-      catalogTaxonomyRepository.listOptionTypes(),
-    ]);
-    setBrands((brandRows ?? []).map((brand) => ({ id: brand.id, name: brand.name })));
-    setCategories(
-      (categoryRows ?? []).map((category) => ({
-        id: category.id,
-        name: category.name,
-        parentId: category.parentId,
-      })),
-    );
-    setOptionTypes(optionTypeRows ?? []);
-  }, []);
-
-  useEffect(() => {
-    void loadReferenceData();
-  }, [loadReferenceData]);
 
   async function toggleActive(product: ProductRecord) {
     await productCatalogRepository.updateProduct(product.id, { isActive: !product.isActive });
@@ -102,12 +63,9 @@ export function ProductCatalogPanel() {
           </h1>
         </div>
         <div className="flex gap-2">
-          <KisokButton
-            onClick={() => setProductDialog({ mode: 'create', open: true })}
-            variant="outline"
-          >
+          <Link className={buttonVariants({ variant: 'outline' })} href="/admin/products/create">
             New product
-          </KisokButton>
+          </Link>
           <KisokButton onClick={() => void refetch()} variant="outline">
             Refresh
           </KisokButton>
@@ -181,22 +139,20 @@ export function ProductCatalogPanel() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <KisokButton
-                        aria-label={`Manage variants for ${product.name}`}
-                        onClick={() => setVariantManagerProduct(product)}
-                        size="sm"
-                        variant="quiet"
+                      <Link
+                        aria-label={`View ${product.name}`}
+                        className={buttonVariants({ size: 'sm', variant: 'quiet' })}
+                        href={`/admin/products/${product.id}`}
                       >
-                        Variants
-                      </KisokButton>
-                      <KisokButton
+                        View
+                      </Link>
+                      <Link
                         aria-label={`Edit ${product.name}`}
-                        onClick={() => setProductDialog({ mode: 'edit', open: true, product })}
-                        size="sm"
-                        variant="quiet"
+                        className={buttonVariants({ size: 'sm', variant: 'quiet' })}
+                        href={`/admin/products/${product.id}/edit`}
                       >
                         Edit
-                      </KisokButton>
+                      </Link>
                       <KisokButton
                         aria-label={`${product.isActive ? 'Deactivate' : 'Activate'} ${product.name}`}
                         onClick={() => void toggleActive(product)}
@@ -239,26 +195,6 @@ export function ProductCatalogPanel() {
           </PaginationContent>
         </Pagination>
       ) : null}
-
-      <ProductFormDialog
-        brands={brands}
-        categories={categories}
-        mode={productDialog.mode}
-        onOpenChange={(open) => setProductDialog((current) => ({ ...current, open }))}
-        onSaved={() => void refetch()}
-        open={productDialog.open}
-        product={productDialog.product}
-      />
-
-      <VariantManagerDialog
-        onOpenChange={(open) => {
-          if (!open) setVariantManagerProduct(null);
-        }}
-        onVariantsChanged={() => void refetch()}
-        open={variantManagerProduct !== null}
-        optionTypes={optionTypes}
-        product={variantManagerProduct}
-      />
     </section>
   );
 }

@@ -5,6 +5,7 @@ export interface ProductInput {
   brandId?: string | null;
   shortDescription?: string | null;
   isFeatured?: boolean;
+  searchKeywords?: string[] | null;
   categoryIds?: string[];
 }
 
@@ -13,6 +14,7 @@ export interface ProductUpdate {
   brandId?: string | null;
   shortDescription?: string | null;
   isFeatured?: boolean;
+  searchKeywords?: string[] | null;
   isActive?: boolean;
   coverMediaAssetId?: string | null;
 }
@@ -25,6 +27,10 @@ export interface ProductWriteResult {
   isActive: boolean;
   isFeatured: boolean;
   coverMediaAssetId: string | null;
+}
+
+export interface ProductDetailRecord extends ProductWriteResult {
+  searchKeywords: string[] | null;
 }
 
 export interface VariantInput {
@@ -53,6 +59,10 @@ export interface VariantOptionValueRecord {
   optionValueName: string;
 }
 
+export type VariantDeletionOutcome =
+  | { outcome: 'deleted' }
+  | { outcome: 'history-blocked'; message: string };
+
 export interface VariantRecord {
   id: string;
   productId: string;
@@ -78,11 +88,13 @@ export interface ProductRecord {
 
 export interface ProductCatalogDataContract {
   listProducts(): Promise<ProductRecord[]>;
+  getProduct(id: string): Promise<ProductDetailRecord>;
   createProduct(input: ProductInput): Promise<ProductWriteResult>;
   updateProduct(id: string, input: ProductUpdate): Promise<ProductWriteResult>;
   listProductCategoryIds(productId: string): Promise<string[]>;
   setProductCategories(productId: string, categoryIds: string[]): Promise<void>;
   createVariant(input: VariantInput): Promise<VariantRecord>;
+  deleteVariant(id: string): Promise<VariantDeletionOutcome>;
   listVariants(productId: string): Promise<VariantRecord[]>;
   updateVariant(id: string, input: VariantUpdate): Promise<VariantRecord>;
   listVariantOptionValues(variantId: string): Promise<VariantOptionValueRecord[]>;

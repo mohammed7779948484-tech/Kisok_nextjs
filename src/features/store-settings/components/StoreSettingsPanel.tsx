@@ -18,6 +18,15 @@ import {
 import { storeSettingsRepository } from '../repositories';
 import type { StoreSettingsRecord } from '../types';
 
+function isValidIanaTimezone(value: string): boolean {
+  try {
+    Intl.DateTimeFormat('en-US', { timeZone: value }).format();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function StoreSettingsPanel() {
   const [settings, setSettings] = useState<StoreSettingsRecord | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -71,9 +80,15 @@ export function StoreSettingsPanel() {
       !(storeName.trim() && timezone.trim() && Number.isInteger(globalLowStockThreshold)) ||
       globalLowStockThreshold < 0 ||
       !Number.isInteger(customerSuccessResetSeconds) ||
-      customerSuccessResetSeconds < 0
+      customerSuccessResetSeconds < 1
     ) {
-      setError('Enter a store name, timezone, and non-negative integer settings.');
+      setError(
+        'Enter a store name, a valid IANA timezone, and non-negative integer settings. Customer success reset must be at least 1 second.',
+      );
+      return;
+    }
+    if (!isValidIanaTimezone(timezone.trim())) {
+      setError('Enter a valid IANA timezone, such as UTC or Asia/Riyadh.');
       return;
     }
     setSaving(true);
@@ -150,11 +165,15 @@ export function StoreSettingsPanel() {
       </div>
 
       <div className="flex min-h-72 flex-col justify-between bg-primary p-6 text-primary-foreground sm:p-8">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em]">Connection status</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em]">Operational data</p>
         <div>
-          <p className="font-black text-5xl tracking-[-0.08em]">HOSTED</p>
-          <div className="mt-3 flex items-center gap-2">
-            <StatusPill>Hosted Supabase</StatusPill>
+          <p className="font-black text-4xl tracking-[-0.07em]">Store settings</p>
+          <p className="mt-3 max-w-sm text-sm leading-6 text-primary-foreground/75">
+            Access is verified when you refresh Store Settings or complete a saved change; this
+            panel does not claim an independent connection health check.
+          </p>
+          <div className="mt-4 flex items-center gap-2">
+            <StatusPill>Supabase-backed</StatusPill>
           </div>
         </div>
       </div>
@@ -196,7 +215,7 @@ export function StoreSettingsPanel() {
               </span>
               <KisokInput
                 id="order-reset"
-                min="0"
+                min="1"
                 onChange={(event) => setResetSeconds(event.target.value)}
                 type="number"
                 value={resetSeconds}

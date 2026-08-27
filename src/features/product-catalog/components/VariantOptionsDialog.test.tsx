@@ -110,6 +110,60 @@ describe('VariantOptionsDialog', () => {
     );
   });
 
+  it('rejects saving a Variant combination that duplicates a sibling regardless of selection order', async () => {
+    testContext.replaceVariantOptionValues.mockClear();
+    const user = userEvent.setup();
+    testContext.listVariantOptionValues.mockImplementation((variantId: string) =>
+      Promise.resolve(
+        variantId === 'variant-2'
+          ? [
+              {
+                optionTypeId: 'type-size',
+                optionTypeName: 'Size',
+                optionValueId: 'value-large',
+                optionValueName: 'Large',
+              },
+              {
+                optionTypeId: 'type-flavor',
+                optionTypeName: 'Flavor',
+                optionValueId: 'value-berry',
+                optionValueName: 'Berry',
+              },
+            ]
+          : [
+              {
+                optionTypeId: 'type-flavor',
+                optionTypeName: 'Flavor',
+                optionValueId: 'value-berry',
+                optionValueName: 'Berry',
+              },
+              {
+                optionTypeId: 'type-size',
+                optionTypeName: 'Size',
+                optionValueId: 'value-large',
+                optionValueName: 'Large',
+              },
+            ],
+      ),
+    );
+
+    render(
+      <VariantOptionsDialog
+        onOpenChange={() => undefined}
+        open
+        optionTypes={OPTION_TYPES}
+        siblingVariants={[{ id: 'variant-2', sku: 'KSK-000002' }]}
+        variantId="variant-1"
+        variantLabel="KSK-000001"
+      />,
+    );
+    await screen.findByText('Flavor: Berry');
+    await user.click(screen.getByRole('button', { name: 'Save combination' }));
+
+    expect(await screen.findByText(/duplicates Variant KSK-000002/i)).toBeInTheDocument();
+    expect(testContext.replaceVariantOptionValues).not.toHaveBeenCalled();
+  });
+
   it('removes a staged pair via its chip', async () => {
     const user = userEvent.setup();
     testContext.listVariantOptionValues.mockResolvedValue([

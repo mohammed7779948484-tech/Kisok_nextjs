@@ -70,15 +70,24 @@ export function InventoryPanel() {
   }, [refresh]);
 
   async function submitAdjustment() {
-    const delta = Number(quantityChange);
-    if (!(selectedVariantId && Number.isInteger(delta)) || delta === 0 || !reason.trim()) return;
+    const enteredQuantity = Number(quantityChange);
+    if (
+      !(selectedVariantId && Number.isInteger(enteredQuantity)) ||
+      enteredQuantity < 1 ||
+      !reason.trim()
+    )
+      return;
+    const quantityDelta =
+      adjustmentType === 'manual_decrease' || adjustmentType === 'damaged_or_expired'
+        ? -enteredQuantity
+        : enteredQuantity;
 
     setSubmitting(true);
     setError(null);
     try {
       await inventoryRepository.applyAdjustment({
         adjustmentType,
-        quantityChange: delta,
+        quantityChange: quantityDelta,
         reason: reason.trim(),
         variantId: selectedVariantId,
       });
@@ -97,6 +106,13 @@ export function InventoryPanel() {
     const quantity = Number(finalQuantity);
     if (!(selectedVariantId && Number.isInteger(quantity)) || quantity < 0 || !reason.trim())
       return;
+    const currentQuantity = inventoryRows.find(
+      (row) => row.variantId === selectedVariantId,
+    )?.currentQuantity;
+    if (currentQuantity === quantity) {
+      setError('Set Quantity must differ from the current quantity. No ledger entry was created.');
+      return;
+    }
 
     setSetQuantitySubmitting(true);
     setError(null);
@@ -307,11 +323,14 @@ export function InventoryPanel() {
             </label>
             <label className="grid gap-2" htmlFor="inventory-adjustment-quantity">
               <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Quantity change
+                {adjustmentType === 'manual_decrease' || adjustmentType === 'damaged_or_expired'
+                  ? 'Quantity to remove'
+                  : 'Quantity to add'}
               </span>
               <KisokInput
                 id="inventory-adjustment-quantity"
                 inputMode="numeric"
+                min="1"
                 onChange={(event) => setQuantityChange(event.target.value)}
                 type="number"
                 value={quantityChange}

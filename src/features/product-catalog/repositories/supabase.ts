@@ -6,6 +6,7 @@ import { resolveLowStockThreshold } from '@/lib/utils/inventory/low-stock-thresh
 
 import type {
   ProductCatalogDataContract,
+  ProductDetailRecord,
   ProductInput,
   ProductRecord,
   ProductStockStatus,
@@ -65,6 +66,15 @@ function mapProduct(row: Database['public']['Tables']['products']['Row']): Produ
   };
 }
 
+function mapProductDetail(
+  row: Database['public']['Tables']['products']['Row'],
+): ProductDetailRecord {
+  return {
+    ...mapProduct(row),
+    searchKeywords: row.search_keywords,
+  };
+}
+
 function mapVariantOptionValue(row: {
   option_type_id: string;
   option_value_id: string;
@@ -94,9 +104,23 @@ export function createProductCatalogRepository(
   client: SupabaseClient<Database>,
 ): ProductCatalogDataContract {
   return {
+    async getProduct(id: string) {
+      const result = await client
+        .from('products')
+        .select(
+          'id,name,brand_id,short_description,is_active,is_featured,cover_media_asset_id,search_keywords,display_order,created_at,updated_at',
+        )
+        .eq('id', id)
+        .maybeSingle();
+      if (result.error) throw result.error;
+      if (!result.data) throw new Error('Product not found.');
+      return mapProductDetail(result.data);
+    },
+
     async createVariant(input: VariantInput) {
       const payload: Database['public']['Tables']['product_variants']['Insert'] = {
         product_id: input.productId,
+        is_active: false,
       };
       if (input.barcode !== undefined) payload.barcode = input.barcode?.trim() || null;
       if (input.titleOverride !== undefined)
@@ -113,6 +137,18 @@ export function createProductCatalogRepository(
         .single();
       if (result.error) throw result.error;
       return mapVariant(result.data);
+    },
+
+    async deleteVariant(id: string) {
+      const result = await client.from('product_variants').delete().eq('id', id);
+      if (result.error?.code === '23503') {
+        return {
+          outcome: 'history-blocked' as const,
+          message: 'This Variant is referenced by historical orders and cannot be deleted.',
+        };
+      }
+      if (result.error) throw result.error;
+      return { outcome: 'deleted' as const };
     },
 
     async listVariants(productId: string) {
@@ -291,6 +327,8 @@ export function createProductCatalogRepository(
           brand_id: input.brandId ?? null,
           short_description: input.shortDescription?.trim() || null,
           is_featured: input.isFeatured ?? false,
+          search_keywords: input.searchKeywords ?? null,
+          is_active: false,
         })
         .select(
           'id,name,brand_id,short_description,is_active,is_featured,cover_media_asset_id,display_order,search_keywords,created_at,updated_at',
@@ -322,6 +360,7 @@ export function createProductCatalogRepository(
       if (input.shortDescription !== undefined)
         payload.short_description = input.shortDescription?.trim() || null;
       if (input.isFeatured !== undefined) payload.is_featured = input.isFeatured;
+      if (input.searchKeywords !== undefined) payload.search_keywords = input.searchKeywords;
       if (input.isActive !== undefined) payload.is_active = input.isActive;
       if (input.coverMediaAssetId !== undefined)
         payload.cover_media_asset_id = input.coverMediaAssetId;
@@ -347,12 +386,10 @@ export function createProductCatalogRepository(
       return (result.data ?? []).map((row) => row.category_id);
     },
 
-    // Direct diff-based insert/delete on the join table — Lean V2 keeps this
-    // relation ranking-free (see the schema comment on `product_categories`),
-    // so there is no ordering/primary-category invariant a transactional RPC
-    // would need to protect. Unlike `replaceVariantOptionValues`, a partial
-    // failure here just leaves some Categories unchanged; it never corrupts
-    // a required combination, so no compensating rollback is warranted.
+    // Lean V2 keeps `product_categories` ranking-free, but relation replacement
+    // still spans more than one HTTP statement. Add first, then remove. If a
+    // later removal fails, compensate by deleting only the new rows so the
+    // original assignment set is restored instead of being silently widened.
     async setProductCategories(productId: string, categoryIds: string[]) {
       const desired = new Set(categoryIds);
       const existingResult = await client
@@ -364,24 +401,48 @@ export function createProductCatalogRepository(
 
       const toRemove = [...existing].filter((categoryId) => !desired.has(categoryId));
       const toAdd = [...desired].filter((categoryId) => !existing.has(categoryId));
+      let additionsApplied = false;
 
-      if (toRemove.length > 0) {
-        const deleteResult = await client
-          .from('product_categories')
-          .delete()
-          .eq('product_id', productId)
-          .in('category_id', toRemove);
-        if (deleteResult.error) throw deleteResult.error;
-      }
+      try {
+        if (toAdd.length > 0) {
+          const insertResult = await client.from('product_categories').insert(
+            toAdd.map((categoryId) => ({
+              product_id: productId,
+              category_id: categoryId,
+            })),
+          );
+          if (insertResult.error) throw insertResult.error;
+          additionsApplied = true;
+        }
 
-      if (toAdd.length > 0) {
-        const insertResult = await client.from('product_categories').insert(
-          toAdd.map((categoryId) => ({
-            product_id: productId,
-            category_id: categoryId,
-          })),
-        );
-        if (insertResult.error) throw insertResult.error;
+        if (toRemove.length > 0) {
+          const deleteResult = await client
+            .from('product_categories')
+            .delete()
+            .eq('product_id', productId)
+            .in('category_id', toRemove);
+          if (deleteResult.error) throw deleteResult.error;
+        }
+      } catch (error) {
+        if (additionsApplied) {
+          try {
+            const rollback = await client
+              .from('product_categories')
+              .delete()
+              .eq('product_id', productId)
+              .in('category_id', toAdd);
+            if (rollback.error) throw rollback.error;
+          } catch (rollbackError) {
+            const originalMessage = error instanceof Error ? error.message : String(error);
+            const rollbackMessage =
+              rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+            throw new Error(
+              `Product Category replacement failed (${originalMessage}) and cleanup also failed (${rollbackMessage}). ` +
+                'The Product Category assignment may require manual review.',
+            );
+          }
+        }
+        throw error;
       }
     },
 
@@ -436,6 +497,9 @@ export const productCatalogRepository: ProductCatalogDataContract = {
   createVariant(input) {
     return createProductCatalogRepository(getClientOrThrow()).createVariant(input);
   },
+  deleteVariant(id) {
+    return createProductCatalogRepository(getClientOrThrow()).deleteVariant(id);
+  },
   listVariants(productId) {
     return createProductCatalogRepository(getClientOrThrow()).listVariants(productId);
   },
@@ -453,6 +517,9 @@ export const productCatalogRepository: ProductCatalogDataContract = {
   },
   listProducts() {
     return createProductCatalogRepository(getClientOrThrow()).listProducts();
+  },
+  getProduct(id) {
+    return createProductCatalogRepository(getClientOrThrow()).getProduct(id);
   },
   createProduct(input) {
     return createProductCatalogRepository(getClientOrThrow()).createProduct(input);

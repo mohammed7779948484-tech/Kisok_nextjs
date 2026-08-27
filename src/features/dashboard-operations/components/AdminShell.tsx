@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -31,11 +33,21 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
-    await signOutCurrentUser();
-    router.replace(`/${locale}/login`);
-    router.refresh();
+    setIsSigningOut(true);
+    setSignOutError(null);
+    try {
+      await signOutCurrentUser();
+      router.replace(`/${locale}/login`);
+      router.refresh();
+    } catch {
+      setSignOutError('Sign out could not be completed. Check the connection and try again.');
+    } finally {
+      setIsSigningOut(false);
+    }
   }
 
   return (
@@ -80,10 +92,18 @@ export function AdminShell({
               </p>
               <p className="mt-1 font-medium text-sm">{displayName}</p>
             </div>
-            <Button onClick={handleSignOut} size="sm" variant="outline">
-              Sign out
+            <Button disabled={isSigningOut} onClick={handleSignOut} size="sm" variant="outline">
+              {isSigningOut ? 'Signing out…' : 'Sign out'}
             </Button>
           </header>
+          {signOutError ? (
+            <p
+              className="border-destructive border-l-2 bg-destructive/10 px-5 py-3 text-destructive text-sm sm:px-8"
+              role="alert"
+            >
+              {signOutError}
+            </p>
+          ) : null}
           <div className="p-5 sm:p-8 lg:p-10">{children}</div>
         </div>
       </div>

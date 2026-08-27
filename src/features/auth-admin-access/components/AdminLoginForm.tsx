@@ -27,9 +27,11 @@ export function AdminLoginForm({ nextPath }: { nextPath: string }) {
       setError(
         result.reason === 'configuration'
           ? 'Supabase is not configured for this environment.'
-          : result.reason === 'not-admin'
-            ? 'This account does not have active Admin access.'
-            : 'The email or password is not valid.',
+          : result.reason === 'network'
+            ? 'The authentication service could not be reached. Check the connection and try again.'
+            : result.reason === 'not-admin'
+              ? 'This account does not have active Admin access.'
+              : 'The email or password is not valid.',
       );
       setIsSubmitting(false);
       return;

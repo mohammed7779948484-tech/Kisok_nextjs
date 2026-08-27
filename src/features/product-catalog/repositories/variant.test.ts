@@ -22,7 +22,7 @@ const testContext = vi.hoisted(() => {
                       sku: 'KSK-000003',
                       barcode: null,
                       title_override: 'Berry Spark Single',
-                      is_active: true,
+                      is_active: false,
                       low_stock_threshold: 5,
                       display_order: 2,
                       search_keywords: null,
@@ -62,7 +62,7 @@ describe('Product Variant repository', () => {
       sku: 'KSK-000003',
       barcode: null,
       titleOverride: 'Berry Spark Single',
-      isActive: true,
+      isActive: false,
       lowStockThreshold: 5,
     });
     expect(testContext.calls).toEqual([
@@ -71,6 +71,7 @@ describe('Product Variant repository', () => {
         operation: 'insert',
         payload: {
           product_id: 'product-2',
+          is_active: false,
           title_override: 'Berry Spark Single',
           low_stock_threshold: 5,
         },

@@ -22,6 +22,8 @@ import {
 } from '@/shared/ui';
 
 import { useVariantOptionValues } from '../hooks/useVariantOptionValues';
+import { productCatalogRepository } from '../repositories';
+import type { VariantRecord } from '../types';
 
 export function VariantOptionsDialog({
   open,
@@ -29,6 +31,7 @@ export function VariantOptionsDialog({
   variantId,
   variantLabel,
   optionTypes,
+  siblingVariants = [],
   onSaved,
 }: {
   open: boolean;
@@ -36,11 +39,14 @@ export function VariantOptionsDialog({
   variantId: string;
   variantLabel: string;
   optionTypes: OptionTypeRecord[];
+  siblingVariants?: Pick<VariantRecord, 'id' | 'sku'>[];
   onSaved?: () => void;
 }) {
   const {
     selections,
     isLoading,
+    isError,
+    refetch,
     formError,
     isSubmitting,
     submitError,
@@ -50,6 +56,7 @@ export function VariantOptionsDialog({
   } = useVariantOptionValues(variantId);
   const [pendingTypeId, setPendingTypeId] = useState<string | null>(null);
   const [pendingValueId, setPendingValueId] = useState<string | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   const activeOptionTypes = optionTypes.filter((optionType) => optionType.isActive);
   const availableOptionTypes = activeOptionTypes.filter(
@@ -73,7 +80,38 @@ export function VariantOptionsDialog({
   }
 
   async function handleSubmit() {
-    await submit();
+    setDuplicateError(null);
+    const candidateSignature = selections
+      .map((selection) => `${selection.optionTypeId}:${selection.optionValueId}`)
+      .sort()
+      .join('|');
+    try {
+      const siblingCombinations = await Promise.all(
+        siblingVariants.map(async (sibling) => ({
+          sibling,
+          selections: await productCatalogRepository.listVariantOptionValues(sibling.id),
+        })),
+      );
+      const duplicate = siblingCombinations.find(
+        ({ selections: siblingSelections }) =>
+          siblingSelections
+            .map((selection) => `${selection.optionTypeId}:${selection.optionValueId}`)
+            .sort()
+            .join('|') === candidateSignature,
+      );
+      if (duplicate) {
+        setDuplicateError(
+          `This Option combination duplicates Variant ${duplicate.sibling.sku}. Choose a distinct combination.`,
+        );
+        return;
+      }
+    } catch {
+      setDuplicateError('Sibling Variant combinations could not be checked. Retry before saving.');
+      return;
+    }
+
+    const saved = await submit();
+    if (!saved) return;
     onSaved?.();
     onOpenChange(false);
   }
@@ -103,13 +141,16 @@ export function VariantOptionsDialog({
                   key={selection.optionTypeId}
                 >
                   {selection.optionTypeName}: {selection.optionValueName}
-                  <button
+                  <KisokButton
                     aria-label={`Remove ${selection.optionTypeName}: ${selection.optionValueName}`}
+                    disabled={isLoading || isError || isSubmitting}
                     onClick={() => removeSelection(selection.optionTypeId)}
+                    size="xs"
                     type="button"
+                    variant="quiet"
                   >
                     ×
-                  </button>
+                  </KisokButton>
                 </span>
               ))
             )}
@@ -120,6 +161,7 @@ export function VariantOptionsDialog({
           <div className="grid gap-2">
             <Label htmlFor="variant-option-type">Option Type</Label>
             <Select
+              disabled={isLoading || isError || isSubmitting}
               onValueChange={(value) => {
                 setPendingTypeId((value as string) ?? null);
                 setPendingValueId(null);
@@ -141,7 +183,7 @@ export function VariantOptionsDialog({
           <div className="grid gap-2">
             <Label htmlFor="variant-option-value">Option Value</Label>
             <Select
-              disabled={!pendingType}
+              disabled={!pendingType || isLoading || isError || isSubmitting}
               onValueChange={(value) => setPendingValueId((value as string) ?? null)}
               value={pendingValueId}
             >
@@ -158,7 +200,7 @@ export function VariantOptionsDialog({
             </Select>
           </div>
           <KisokButton
-            disabled={!(pendingType && pendingValueId)}
+            disabled={isLoading || isError || isSubmitting || !(pendingType && pendingValueId)}
             onClick={handleAdd}
             type="button"
           >
@@ -166,6 +208,27 @@ export function VariantOptionsDialog({
           </KisokButton>
         </div>
 
+        {isError ? (
+          <div className="grid gap-2" role="alert">
+            <p className="text-destructive text-sm">
+              Existing Option Values could not be loaded. Retry before making changes.
+            </p>
+            <KisokButton
+              disabled={isSubmitting}
+              onClick={() => void refetch()}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Retry loading combination
+            </KisokButton>
+          </div>
+        ) : null}
+        {duplicateError ? (
+          <p className="text-destructive text-sm" role="alert">
+            {duplicateError}
+          </p>
+        ) : null}
         {formError ? (
           <p className="text-destructive text-sm" role="alert">
             {formError}
@@ -186,7 +249,11 @@ export function VariantOptionsDialog({
           >
             Cancel
           </KisokButton>
-          <KisokButton disabled={isSubmitting} onClick={() => void handleSubmit()} type="button">
+          <KisokButton
+            disabled={isLoading || isError || isSubmitting}
+            onClick={() => void handleSubmit()}
+            type="button"
+          >
             {isSubmitting ? 'Saving…' : 'Save combination'}
           </KisokButton>
         </KisokDialogFooter>
