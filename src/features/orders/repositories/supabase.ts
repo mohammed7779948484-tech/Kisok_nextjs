@@ -3,9 +3,22 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getBrowserSupabaseClient } from '@/infrastructure/supabase/client/browser-client';
 import type { Database } from '@/infrastructure/supabase/database.types';
 
-import type { OrderItemRecord, OrderRecord, OrdersDataContract } from '../types';
+import type { OrderItemRecord, OrderRecord, OrderStatus, OrdersDataContract } from '../types';
 
 const ORDER_METHOD = 'order' as const;
+
+// The Admin Orders UI is an operational fulfillment queue, not a full-table
+// browser — bound every fetch to a page of recent orders instead of pulling
+// the entire `orders` table (with nested order_items) on every load.
+export const ORDERS_PAGE_SIZE = 100;
+const FINAL_ORDER_STATUSES = '(completed,cancelled)';
+
+export interface ListOrdersOptions {
+  /** Include completed/cancelled orders instead of just the open queue. */
+  includeCompleted?: boolean;
+  /** Cursor for "load older orders": only orders created before this ISO timestamp. */
+  before?: string;
+}
 
 type OrderItemListRow = {
   id: string;
@@ -73,9 +86,9 @@ function mapOrderItem(item: OrderItemListRow): OrderItemRecord {
   };
 }
 
-export function createOrdersRepository(client: SupabaseClient<Database>): OrdersDataContract {
+export function createOrdersRepository(client: SupabaseClient<Database>) {
   return {
-    async updateStatus(orderId, targetStatus, reason) {
+    async updateStatus(orderId: string, targetStatus: OrderStatus, reason?: string) {
       const result = await client.rpc('update_order_status', {
         order_id: orderId,
         target_status: targetStatus,
@@ -85,13 +98,23 @@ export function createOrdersRepository(client: SupabaseClient<Database>): Orders
       return result.data;
     },
 
-    async listOrders(): Promise<OrderRecord[]> {
-      const result = await client
+    async listOrders(options: ListOrdersOptions = {}): Promise<OrderRecord[]> {
+      let query = client
         .from('orders')
         .select(
           'id,display_number,status,created_at,order_items(id,product_name,variant_name,variant_sku,variant_options,brand_name,image_secure_url,quantity)',
         )
-        [ORDER_METHOD]('created_at', { ascending: false });
+        [ORDER_METHOD]('created_at', { ascending: false })
+        .limit(ORDERS_PAGE_SIZE);
+
+      if (!options.includeCompleted) {
+        query = query.not('status', 'in', FINAL_ORDER_STATUSES);
+      }
+      if (options.before) {
+        query = query.lt('created_at', options.before);
+      }
+
+      const result = await query;
       if (result.error) throw result.error;
       return ((result.data ?? []) as unknown as OrderListRow[]).map((order) => ({
         id: order.id,
@@ -102,14 +125,14 @@ export function createOrdersRepository(client: SupabaseClient<Database>): Orders
         items: order.order_items.map(mapOrderItem),
       }));
     },
-  };
+  } satisfies OrdersDataContract;
 }
 
-export const ordersRepository: OrdersDataContract = {
-  listOrders() {
-    return createOrdersRepository(getClientOrThrow()).listOrders();
+export const ordersRepository = {
+  listOrders(options?: ListOrdersOptions) {
+    return createOrdersRepository(getClientOrThrow()).listOrders(options);
   },
-  updateStatus(orderId, targetStatus, reason) {
+  updateStatus(orderId: string, targetStatus: OrderStatus, reason?: string) {
     return createOrdersRepository(getClientOrThrow()).updateStatus(orderId, targetStatus, reason);
   },
-};
+} satisfies OrdersDataContract;

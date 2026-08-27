@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as soundModule from '../lib/sound';
 import { useOrderRealtimeNotifications } from './useOrderRealtimeNotifications';
@@ -91,5 +91,61 @@ describe('useOrderRealtimeNotifications', () => {
     });
 
     expect(soundModule.playOrderChime).not.toHaveBeenCalled();
+  });
+
+  describe('AudioContext lifecycle', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('constructs only one AudioContext across multiple notifications and closes it on unmount', () => {
+      const closeMock = vi.fn();
+      const audioContextInstances: unknown[] = [];
+      // A constructible `function`, not an arrow — `new AudioContextMock()`
+      // requires a real constructor.
+      const AudioContextMock = vi.fn(function AudioContextStub(this: {
+        state: string;
+        close: () => void;
+      }) {
+        this.state = 'running';
+        this.close = closeMock;
+        audioContextInstances.push(this);
+      });
+      vi.stubGlobal('AudioContext', AudioContextMock);
+
+      const { unmount } = renderHook(() => useOrderRealtimeNotifications({ soundEnabled: true }));
+
+      act(() => {
+        mockChannelCallback({
+          new: {
+            id: 'ord-1',
+            display_number: 'C-1',
+            status: 'new',
+            created_at: new Date().toISOString(),
+          },
+        });
+      });
+      act(() => {
+        mockChannelCallback({
+          new: {
+            id: 'ord-2',
+            display_number: 'C-2',
+            status: 'new',
+            created_at: new Date().toISOString(),
+          },
+        });
+      });
+
+      expect(AudioContextMock).toHaveBeenCalledTimes(1);
+      expect(soundModule.playOrderChime).toHaveBeenCalledTimes(2);
+      const firstCallContext = vi.mocked(soundModule.playOrderChime).mock.calls[0]?.[0];
+      const secondCallContext = vi.mocked(soundModule.playOrderChime).mock.calls[1]?.[0];
+      expect(firstCallContext).toBe(audioContextInstances[0]);
+      expect(secondCallContext).toBe(audioContextInstances[0]);
+
+      expect(closeMock).not.toHaveBeenCalled();
+      unmount();
+      expect(closeMock).toHaveBeenCalledTimes(1);
+    });
   });
 });

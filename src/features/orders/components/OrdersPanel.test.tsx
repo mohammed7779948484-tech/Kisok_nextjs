@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const testContext = vi.hoisted(() => ({ listOrders: vi.fn(), updateStatus: vi.fn() }));
 
@@ -10,6 +10,11 @@ vi.mock('../repositories', () => ({
 import { OrdersPanel } from './OrdersPanel';
 
 describe('OrdersPanel', () => {
+  beforeEach(() => {
+    testContext.listOrders.mockReset();
+    testContext.updateStatus.mockReset();
+  });
+
   it('renders hosted operational order records instead of local staged data', async () => {
     testContext.listOrders.mockResolvedValue([
       {
@@ -110,6 +115,66 @@ describe('OrdersPanel', () => {
     await user.click(screen.getByRole('button', { name: 'Advance status' }));
 
     expect(testContext.updateStatus).toHaveBeenCalledWith('order-1', 'completed');
+  });
+
+  it('fetches the open queue by default and refetches including completed/cancelled when toggled', async () => {
+    const user = (await import('@testing-library/user-event')).default.setup();
+    testContext.listOrders.mockResolvedValue([
+      {
+        id: 'order-1',
+        displayNumber: 'KSK-001',
+        status: 'new',
+        createdAt: '2026-08-26T10:00:00Z',
+        itemCount: 1,
+        items: [],
+      },
+    ]);
+
+    render(<OrdersPanel />);
+    await screen.findByText('KSK-001');
+
+    expect(testContext.listOrders).toHaveBeenLastCalledWith(
+      expect.objectContaining({ includeCompleted: false }),
+    );
+
+    await user.click(screen.getByRole('checkbox', { name: /include completed.*cancelled/i }));
+
+    expect(testContext.listOrders).toHaveBeenLastCalledWith(
+      expect.objectContaining({ includeCompleted: true }),
+    );
+  });
+
+  it('loads an older page of orders using the last visible order as the cursor', async () => {
+    const user = (await import('@testing-library/user-event')).default.setup();
+    const fullPage = Array.from({ length: 100 }, (_, index) => ({
+      id: `order-${index}`,
+      displayNumber: `KSK-${index}`,
+      status: 'new',
+      createdAt: `2026-08-${String((index % 27) + 1).padStart(2, '0')}T10:00:00Z`,
+      itemCount: 1,
+      items: [],
+    }));
+    testContext.listOrders.mockResolvedValueOnce(fullPage).mockResolvedValueOnce([
+      {
+        id: 'order-old',
+        displayNumber: 'KSK-OLD',
+        status: 'completed',
+        createdAt: '2026-07-01T10:00:00Z',
+        itemCount: 1,
+        items: [],
+      },
+    ]);
+
+    render(<OrdersPanel />);
+    await screen.findByText('KSK-0');
+
+    const loadOlderButton = screen.getByRole('button', { name: /load older orders/i });
+    await user.click(loadOlderButton);
+
+    expect(await screen.findByText('KSK-OLD')).toBeInTheDocument();
+    expect(testContext.listOrders).toHaveBeenLastCalledWith(
+      expect.objectContaining({ before: fullPage[fullPage.length - 1].createdAt }),
+    );
   });
 
   it('does not offer Preparation-only transitions to the Admin actor', async () => {

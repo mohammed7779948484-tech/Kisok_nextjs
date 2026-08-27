@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
   KisokButton,
   KisokDialog,
@@ -15,6 +17,7 @@ import {
 } from '@/shared/ui';
 
 import { ordersRepository } from '../repositories';
+import { ORDERS_PAGE_SIZE } from '../repositories/supabase';
 import type { OrderRecord } from '../types';
 
 function statusLabel(status: OrderRecord['status']) {
@@ -42,22 +45,43 @@ export function OrdersPanel() {
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [cancellationOrder, setCancellationOrder] = useState<OrderRecord | null>(null);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [includeCompleted, setIncludeCompleted] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setOrders(await ordersRepository.listOrders());
+      const result = await ordersRepository.listOrders({ includeCompleted });
+      setOrders(result);
+      setHasMore(result.length >= ORDERS_PAGE_SIZE);
     } catch {
       setError('Orders could not be loaded. Check the connection and try again.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [includeCompleted]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  async function loadOlderOrders() {
+    const cursor = orders.at(-1)?.createdAt;
+    if (!cursor) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const older = await ordersRepository.listOrders({ includeCompleted, before: cursor });
+      setOrders((previous) => [...previous, ...older]);
+      setHasMore(older.length >= ORDERS_PAGE_SIZE);
+    } catch {
+      setError('Older orders could not be loaded.');
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function advanceOrder(order: OrderRecord) {
     const targetStatus = nextStatusForAdmin(order.status);
@@ -117,9 +141,21 @@ export function OrdersPanel() {
             Work operational records through their Lean V2 status lifecycle.
           </p>
         </div>
-        <KisokButton onClick={() => void refresh()} variant="outline">
-          Refresh
-        </KisokButton>
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={includeCompleted}
+              id="orders-include-completed"
+              onCheckedChange={(checked) => setIncludeCompleted(checked === true)}
+            />
+            <Label className="text-muted-foreground text-xs" htmlFor="orders-include-completed">
+              Include completed &amp; cancelled
+            </Label>
+          </div>
+          <KisokButton onClick={() => void refresh()} variant="outline">
+            Refresh
+          </KisokButton>
+        </div>
       </div>
 
       {loading ? (
@@ -206,6 +242,18 @@ export function OrdersPanel() {
           ))}
         </div>
       )}
+
+      {!(loading || error) && hasMore ? (
+        <div className="flex justify-center">
+          <KisokButton
+            disabled={loadingMore}
+            onClick={() => void loadOlderOrders()}
+            variant="outline"
+          >
+            {loadingMore ? 'Loading…' : 'Load older orders'}
+          </KisokButton>
+        </div>
+      ) : null}
 
       <KisokDialog onOpenChange={closeCancellation} open={cancellationOrder !== null}>
         <KisokDialogContent>
