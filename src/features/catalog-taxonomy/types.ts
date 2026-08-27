@@ -42,6 +42,10 @@ export interface OptionValueUpdate {
   isActive?: boolean;
 }
 
+export type OptionValueDeletionOutcome =
+  | { outcome: 'deleted' }
+  | { outcome: 'in-use'; message: string };
+
 export interface CategoryRecord {
   id: string;
   name: string;
@@ -74,6 +78,7 @@ export interface CatalogTaxonomyDataContract {
    * still used by the Product editor's Brand selector.
    */
   listBrands(search?: string): Promise<BrandRecord[]>;
+  reorderBrands(orderedIds: string[]): Promise<void>;
   listCategories(): Promise<CategoryRecord[]>;
   createCategory(input: CategoryInput): Promise<CategoryRecord>;
   updateCategory(id: string, input: CategoryUpdate): Promise<CategoryRecord>;
@@ -85,4 +90,5 @@ export interface CatalogTaxonomyDataContract {
   createOptionValue(input: OptionValueInput): Promise<OptionValueRecord>;
   updateOptionValue(id: string, input: OptionValueUpdate): Promise<OptionValueRecord>;
   reorderOptionValues(scopeId: string, orderedIds: string[]): Promise<void>;
+  deleteOptionValue(id: string): Promise<OptionValueDeletionOutcome>;
 }

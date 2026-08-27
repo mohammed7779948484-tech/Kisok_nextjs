@@ -23,7 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { MediaAssetPickerDialog } from '@/features/media-library';
+import { MediaPickerDialog } from '@/features/media-library/components/MediaPickerDialog';
+import { useMediaUpload } from '@/features/media-library/hooks/useMediaUpload';
 import type { MediaAssetRecord } from '@/features/media-library/types';
 import {
   KisokButton,
@@ -38,9 +39,11 @@ import {
 } from '@/shared/ui';
 
 import { useBrandForm } from '../hooks/useBrandForm';
+import { useBrandReorder } from '../hooks/useBrandReorder';
 import { BRANDS_PAGE_SIZE, useBrandsList } from '../hooks/useBrandsList';
 import { type BrandFormValues, brandFormDefaultValues } from '../schemas/brand.schema';
 import type { BrandRecord } from '../types';
+import { ConfirmActionDialog } from './ConfirmActionDialog';
 
 /** Debounced-as-you-type search: one deliberate pattern, not a live-effect
  * search plus a redundant "Search" button. */
@@ -65,6 +68,7 @@ function BrandFormDialog({
   const { mode, brand, open } = dialogState;
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const { upload, uploading, error: uploadError } = useMediaUpload();
 
   const {
     register,
@@ -204,12 +208,15 @@ function BrandFormDialog({
         </KisokDialogContent>
       </KisokDialog>
 
-      <MediaAssetPickerDialog
-        description="Choose an existing image or upload a new one for this brand logo."
+      <MediaPickerDialog
+        description="Choose an existing image, upload a new one, or capture a photo for this brand logo."
+        isUploading={uploading}
+        error={uploadError}
         onOpenChange={setPickerOpen}
         onSelect={handleSelectMedia}
+        onUpload={upload}
         open={pickerOpen}
-        selectedAssetId={currentMediaAssetId}
+        selectedAssetId={currentMediaAssetId ?? null}
         title="Select Brand Logo"
       />
     </>
@@ -225,12 +232,28 @@ export function BrandsPanel() {
     search: debouncedSearch,
   });
   const { mutate: updateBrand } = useUpdate();
+  const { move: moveBrand, isReordering } = useBrandReorder(() => void refetch());
   const [dialogState, setDialogState] = useState<DialogState>({ mode: 'create', open: false });
+  const [deactivateTarget, setDeactivateTarget] = useState<BrandRecord | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / BRANDS_PAGE_SIZE));
 
   function toggleActive(brand: BrandRecord) {
-    updateBrand({ id: brand.id, resource: 'brands', values: { is_active: !brand.isActive } });
+    if (brand.isActive) {
+      setDeactivateTarget(brand);
+      return;
+    }
+    updateBrand({ id: brand.id, resource: 'brands', values: { is_active: true } });
+  }
+
+  function confirmDeactivate() {
+    if (!deactivateTarget) return;
+    updateBrand({
+      id: deactivateTarget.id,
+      resource: 'brands',
+      values: { is_active: false },
+    });
+    setDeactivateTarget(null);
   }
 
   return (
@@ -292,11 +315,12 @@ export function BrandsPanel() {
               <TableHead>Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Order</TableHead>
+              <TableHead className="text-right">Reorder</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {brands.map((brand) => (
+            {brands.map((brand, index) => (
               <TableRow key={brand.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
@@ -323,6 +347,26 @@ export function BrandsPanel() {
                 </TableCell>
                 <TableCell className="text-right font-mono text-muted-foreground text-xs">
                   {brand.displayOrder}
+                </TableCell>
+                <TableCell className="text-right">
+                  <KisokButton
+                    aria-label={`Move ${brand.name} up`}
+                    disabled={isReordering || index === 0}
+                    onClick={() => void moveBrand(brand, 'up')}
+                    size="sm"
+                    variant="quiet"
+                  >
+                    ▲
+                  </KisokButton>
+                  <KisokButton
+                    aria-label={`Move ${brand.name} down`}
+                    disabled={isReordering || index === brands.length - 1}
+                    onClick={() => void moveBrand(brand, 'down')}
+                    size="sm"
+                    variant="quiet"
+                  >
+                    ▼
+                  </KisokButton>
                 </TableCell>
                 <TableCell className="text-right">
                   <KisokButton
@@ -376,6 +420,15 @@ export function BrandsPanel() {
       <BrandFormDialog
         dialogState={dialogState}
         onOpenChange={(open) => setDialogState((current) => ({ ...current, open }))}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Deactivate"
+        description={`Deactivating ${deactivateTarget?.name ?? 'this brand'} may hide Products/Variants that depend on it from customers. Continue?`}
+        onCancel={() => setDeactivateTarget(null)}
+        onConfirm={confirmDeactivate}
+        open={deactivateTarget !== null}
+        title={`Deactivate ${deactivateTarget?.name ?? 'Brand'}`}
       />
     </section>
   );

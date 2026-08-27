@@ -9,9 +9,11 @@ import { KisokButton, KisokInput } from '@/shared/ui';
 
 import { useOptionTypeReorder } from '../hooks/useOptionTypeReorder';
 import { OPTION_TYPES_PAGE_SIZE, useOptionTypesList } from '../hooks/useOptionTypesList';
+import { useOptionValueDeletion } from '../hooks/useOptionValueDeletion';
 import { useOptionValueReorder } from '../hooks/useOptionValueReorder';
 import { useOptionValuesForType } from '../hooks/useOptionValuesForType';
 import type { OptionValueRecord } from '../types';
+import { ConfirmActionDialog } from './ConfirmActionDialog';
 import { type OptionTypeDialogState, OptionTypeFormDialog } from './OptionTypeFormDialog';
 import { OptionTypesNav } from './OptionTypesNav';
 import { type OptionValueDialogState, OptionValueFormDialog } from './OptionValueFormDialog';
@@ -45,17 +47,23 @@ export function OptionLibraryPanel() {
   const {
     optionValues,
     isLoading: valuesLoading,
+    isError: valuesError,
     refetch: refetchValues,
   } = useOptionValuesForType(selectedOptionTypeId || undefined);
 
   const { mutate: updateOptionType } = useUpdate();
   const { mutate: updateOptionValue } = useUpdate();
-  const { move: moveOptionType } = useOptionTypeReorder(() => void refetchOptionTypes());
-  const { move: moveOptionValue } = useOptionValueReorder(
+  const { move: moveOptionType, isReordering: isReorderingOptionType } = useOptionTypeReorder(
+    () => void refetchOptionTypes(),
+  );
+  const { move: moveOptionValue, isReordering: isReorderingOptionValue } = useOptionValueReorder(
     selectedOptionTypeId,
     optionValues,
     () => void refetchValues(),
   );
+  const optionValueDeletion = useOptionValueDeletion({
+    onCompleted: () => void refetchValues(),
+  });
 
   const [typeDialogState, setTypeDialogState] = useState<OptionTypeDialogState>({
     mode: 'create',
@@ -65,23 +73,58 @@ export function OptionLibraryPanel() {
     mode: 'create',
     open: false,
   });
+  const [deactivateOptionType, setDeactivateOptionType] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [deactivateOptionValue, setDeactivateOptionValue] = useState<OptionValueRecord | null>(
+    null,
+  );
 
   const totalPages = Math.max(1, Math.ceil(total / OPTION_TYPES_PAGE_SIZE));
 
-  function toggleOptionTypeActive(optionType: { id: string; isActive: boolean }) {
+  function toggleOptionTypeActive(optionType: { id: string; isActive: boolean; name?: string }) {
+    if (optionType.isActive) {
+      setDeactivateOptionType({ id: optionType.id, name: optionType.name ?? 'this Option Type' });
+      return;
+    }
     updateOptionType({
       id: optionType.id,
       resource: 'option_types',
-      values: { is_active: !optionType.isActive },
+      values: { is_active: true },
     });
   }
 
+  function confirmDeactivateOptionType() {
+    if (!deactivateOptionType) return;
+    updateOptionType({
+      id: deactivateOptionType.id,
+      resource: 'option_types',
+      values: { is_active: false },
+    });
+    setDeactivateOptionType(null);
+  }
+
   function toggleOptionValueActive(optionValue: OptionValueRecord) {
+    if (optionValue.isActive) {
+      setDeactivateOptionValue(optionValue);
+      return;
+    }
     updateOptionValue({
       id: optionValue.id,
       resource: 'option_values',
-      values: { is_active: !optionValue.isActive },
+      values: { is_active: true },
     });
+  }
+
+  function confirmDeactivateOptionValue() {
+    if (!deactivateOptionValue) return;
+    updateOptionValue({
+      id: deactivateOptionValue.id,
+      resource: 'option_values',
+      values: { is_active: false },
+    });
+    setDeactivateOptionValue(null);
   }
 
   return (
@@ -144,6 +187,7 @@ export function OptionLibraryPanel() {
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           <OptionTypesNav
+            isReordering={isReorderingOptionType}
             onMoveType={moveOptionType}
             onOpenCreate={() => setTypeDialogState({ mode: 'create', open: true })}
             onOpenEdit={(optionType) =>
@@ -161,12 +205,16 @@ export function OptionLibraryPanel() {
 
           {selectedOptionType ? (
             <OptionValuesWorkspace
+              isError={valuesError}
               isLoading={valuesLoading}
+              isReordering={isReorderingOptionValue}
+              onDeleteValue={optionValueDeletion.begin}
               onMoveValue={moveOptionValue}
               onOpenCreateValue={() => setValueDialogState({ mode: 'create', open: true })}
               onOpenEditValue={(value) =>
                 setValueDialogState({ mode: 'edit', open: true, optionValue: value })
               }
+              onRetry={() => void refetchValues()}
               onToggleActiveValue={toggleOptionValueActive}
               optionValues={optionValues}
               selectedOptionType={selectedOptionType}
@@ -186,6 +234,47 @@ export function OptionLibraryPanel() {
           optionTypeId={selectedOptionTypeId}
         />
       ) : null}
+
+      <ConfirmActionDialog
+        confirmLabel="Deactivate"
+        description={`Deactivating ${deactivateOptionType?.name ?? 'this Option Type'} may hide Products/Variants that depend on it from customers. Continue?`}
+        onCancel={() => setDeactivateOptionType(null)}
+        onConfirm={confirmDeactivateOptionType}
+        open={deactivateOptionType !== null}
+        title={`Deactivate ${deactivateOptionType?.name ?? 'Option Type'}`}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Deactivate"
+        description={`Deactivating ${deactivateOptionValue?.value ?? 'this Option Value'} may hide Products/Variants that depend on it from customers. Continue?`}
+        onCancel={() => setDeactivateOptionValue(null)}
+        onConfirm={confirmDeactivateOptionValue}
+        open={deactivateOptionValue !== null}
+        title={`Deactivate ${deactivateOptionValue?.value ?? 'Option Value'}`}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel={optionValueDeletion.inUseBlocked ? 'Close' : 'Delete'}
+        description={
+          optionValueDeletion.inUseBlocked
+            ? (optionValueDeletion.error ?? '')
+            : `Delete ${optionValueDeletion.optionValue?.value ?? 'this Option Value'}? This cannot be undone.`
+        }
+        destructive={!optionValueDeletion.inUseBlocked}
+        isWorking={optionValueDeletion.isWorking}
+        onCancel={optionValueDeletion.cancel}
+        onConfirm={
+          optionValueDeletion.inUseBlocked
+            ? optionValueDeletion.cancel
+            : () => void optionValueDeletion.confirm()
+        }
+        open={optionValueDeletion.optionValue !== null}
+        title={
+          optionValueDeletion.inUseBlocked
+            ? `Cannot delete ${optionValueDeletion.optionValue?.value ?? 'Option Value'}`
+            : `Delete ${optionValueDeletion.optionValue?.value ?? 'Option Value'}?`
+        }
+      />
     </section>
   );
 }

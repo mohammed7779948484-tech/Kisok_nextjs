@@ -34,6 +34,7 @@ export interface OptionTypesNavProps {
   onOpenEdit: (optionType: { id: string; name: string; isActive: boolean }) => void;
   onToggleActive: (optionType: { id: string; isActive: boolean }) => void;
   onMoveType: (optionType: { id: string }, direction: 'up' | 'down') => void;
+  isReordering?: boolean;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -48,6 +49,7 @@ export function OptionTypesNav({
   onOpenEdit,
   onToggleActive,
   onMoveType,
+  isReordering = false,
   page,
   totalPages,
   onPageChange,
@@ -102,6 +104,7 @@ export function OptionTypesNav({
                   <div className="flex items-center justify-end gap-1">
                     <KisokButton
                       aria-label={`Move ${optionType.name} up`}
+                      disabled={isReordering}
                       onClick={() => onMoveType(optionType, 'up')}
                       size="sm"
                       variant="quiet"
@@ -110,6 +113,7 @@ export function OptionTypesNav({
                     </KisokButton>
                     <KisokButton
                       aria-label={`Move ${optionType.name} down`}
+                      disabled={isReordering}
                       onClick={() => onMoveType(optionType, 'down')}
                       size="sm"
                       variant="quiet"

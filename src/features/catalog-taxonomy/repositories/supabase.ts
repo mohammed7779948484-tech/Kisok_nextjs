@@ -12,6 +12,7 @@ import type {
   OptionTypeInput,
   OptionTypeRecord,
   OptionTypeUpdate,
+  OptionValueDeletionOutcome,
   OptionValueInput,
   OptionValueRecord,
   OptionValueUpdate,
@@ -222,6 +223,19 @@ export function createCatalogTaxonomyRepository(
       if (result.error) throw result.error;
     },
 
+    async deleteOptionValue(id: string): Promise<OptionValueDeletionOutcome> {
+      const result = await client.from('option_values').delete().eq('id', id);
+      if (result.error?.code === '23503') {
+        return {
+          outcome: 'in-use' as const,
+          message:
+            'This Option Value is still used by existing Variants and cannot be deleted — deactivate it instead.',
+        };
+      }
+      if (result.error) throw result.error;
+      return { outcome: 'deleted' as const };
+    },
+
     async listBrands(search = '') {
       let query = client
         .from('brands')
@@ -232,12 +246,25 @@ export function createCatalogTaxonomyRepository(
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapBrand);
     },
+
+    async reorderBrands(orderedIds: string[]) {
+      const result = await client.rpc('reorder_items', {
+        resource_name: 'brands',
+        scope_id:
+          null as unknown as Database['public']['Functions']['reorder_items']['Args']['scope_id'],
+        ordered_ids: orderedIds,
+      });
+      if (result.error) throw result.error;
+    },
   };
 }
 
 export const catalogTaxonomyRepository: CatalogTaxonomyDataContract = {
   listBrands(search) {
     return createCatalogTaxonomyRepository(getClientOrThrow()).listBrands(search);
+  },
+  reorderBrands(orderedIds) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).reorderBrands(orderedIds);
   },
   listCategories() {
     return createCatalogTaxonomyRepository(getClientOrThrow()).listCategories();
@@ -277,5 +304,8 @@ export const catalogTaxonomyRepository: CatalogTaxonomyDataContract = {
       scopeId,
       orderedIds,
     );
+  },
+  deleteOptionValue(id) {
+    return createCatalogTaxonomyRepository(getClientOrThrow()).deleteOptionValue(id);
   },
 };

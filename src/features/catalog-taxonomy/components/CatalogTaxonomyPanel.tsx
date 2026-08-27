@@ -16,13 +16,6 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -30,7 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { MediaAssetPickerDialog } from '@/features/media-library';
+import { MediaPickerDialog } from '@/features/media-library/components/MediaPickerDialog';
+import { useMediaUpload } from '@/features/media-library/hooks/useMediaUpload';
 import type { MediaAssetRecord } from '@/features/media-library/types';
 import {
   KisokButton,
@@ -49,6 +43,7 @@ import { useCategoryForm } from '../hooks/useCategoryForm';
 import { useCategoryReorder } from '../hooks/useCategoryReorder';
 import { type CategoryFormValues, categoryFormDefaultValues } from '../schemas/category.schema';
 import type { CategoryRecord } from '../types';
+import { ConfirmActionDialog } from './ConfirmActionDialog';
 
 /** Debounced-as-you-type search — same pattern as `BrandsPanel`. */
 function useDebouncedValue<T>(value: T, delayMs: number): T {
@@ -60,22 +55,32 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debounced;
 }
 
-const ROOT_PARENT_VALUE = '__root__';
-
 type DialogState = { open: boolean; mode: 'create' | 'edit'; category?: CategoryRecord };
 
 function CategoryFormDialog({
   dialogState,
   onOpenChange,
-  rootCategories,
 }: {
   dialogState: DialogState;
   onOpenChange: (open: boolean) => void;
-  rootCategories: CategoryRecord[];
 }) {
   const { mode, category, open } = dialogState;
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const { upload, uploading, error: uploadError } = useMediaUpload();
+  const [parentSearchInput, setParentSearchInput] = useState('');
+  const debouncedParentSearch = useDebouncedValue(parentSearchInput, 300);
+  const {
+    categories: rootCategoryMatches,
+    isLoading: parentCategoriesLoading,
+    isError: parentCategoriesError,
+    refetch: refetchParentCategories,
+  } = useCategoriesList({
+    page: 1,
+    search: debouncedParentSearch,
+    parentId: null,
+    pageSize: CATEGORIES_PAGE_SIZE,
+  });
 
   const {
     register,
@@ -121,7 +126,7 @@ function CategoryFormDialog({
     setSelectedImageUrl(null);
   }
 
-  const parentOptions = rootCategories.filter((candidate) => candidate.id !== category?.id);
+  const parentOptions = rootCategoryMatches.filter((candidate) => candidate.id !== category?.id);
 
   return (
     <>
@@ -188,30 +193,73 @@ function CategoryFormDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="category-parent">Parent category</Label>
+              <Label htmlFor="category-parent-search">Parent category</Label>
+              <KisokInput
+                id="category-parent-search"
+                onChange={(event) => setParentSearchInput(event.target.value)}
+                placeholder="Search parent categories"
+                value={parentSearchInput}
+              />
               <Controller
                 control={control}
                 name="parent_id"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(value) =>
-                      field.onChange(value === ROOT_PARENT_VALUE ? null : value)
-                    }
-                    value={field.value ?? ROOT_PARENT_VALUE}
-                  >
-                    <SelectTrigger id="category-parent">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={ROOT_PARENT_VALUE}>Root category</SelectItem>
+                render={({ field }) =>
+                  parentCategoriesLoading ? (
+                    <p className="text-muted-foreground text-sm" role="status">
+                      Loading parent categories…
+                    </p>
+                  ) : parentCategoriesError ? (
+                    <div className="grid gap-2" role="alert">
+                      <p className="text-destructive text-sm">
+                        Parent categories could not be loaded.
+                      </p>
+                      <KisokButton
+                        onClick={() => void refetchParentCategories()}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        Try again
+                      </KisokButton>
+                    </div>
+                  ) : (
+                    <div
+                      aria-label="Parent category"
+                      className="grid max-h-48 gap-1 overflow-y-auto rounded-md border border-border p-1"
+                      role="listbox"
+                    >
+                      <button
+                        aria-selected={field.value === null}
+                        className={
+                          field.value === null
+                            ? 'rounded-sm bg-muted px-2 py-1 text-left text-sm font-medium'
+                            : 'rounded-sm px-2 py-1 text-left text-sm hover:bg-muted/60'
+                        }
+                        onClick={() => field.onChange(null)}
+                        role="option"
+                        type="button"
+                      >
+                        Root category
+                      </button>
                       {parentOptions.map((option) => (
-                        <SelectItem key={option.id} value={option.id}>
+                        <button
+                          aria-selected={field.value === option.id}
+                          className={
+                            field.value === option.id
+                              ? 'rounded-sm bg-muted px-2 py-1 text-left text-sm font-medium'
+                              : 'rounded-sm px-2 py-1 text-left text-sm hover:bg-muted/60'
+                          }
+                          key={option.id}
+                          onClick={() => field.onChange(option.id)}
+                          role="option"
+                          type="button"
+                        >
                           {option.name}
-                        </SelectItem>
+                        </button>
                       ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                    </div>
+                  )
+                }
               />
             </div>
             <Controller
@@ -245,12 +293,15 @@ function CategoryFormDialog({
         </KisokDialogContent>
       </KisokDialog>
 
-      <MediaAssetPickerDialog
-        description="Choose an existing image or upload a new one for this category."
+      <MediaPickerDialog
+        description="Choose an existing image, upload a new one, or capture a photo for this category."
+        isUploading={uploading}
+        error={uploadError}
         onOpenChange={setPickerOpen}
         onSelect={handleSelectMedia}
+        onUpload={upload}
         open={pickerOpen}
-        selectedAssetId={currentMediaAssetId}
+        selectedAssetId={currentMediaAssetId ?? null}
         title="Select Category Image"
       />
     </>
@@ -265,24 +316,33 @@ export function CatalogTaxonomyPanel() {
     page,
     search: debouncedSearch,
   });
-  const { categories: rootCategories } = useCategoriesList({
-    page: 1,
-    search: '',
-    parentId: null,
-    pageSize: 200,
-  });
   const { mutate: updateCategory } = useUpdate();
-  const { move: moveCategory } = useCategoryReorder(() => void refetch());
+  const { move: moveCategory, isReordering } = useCategoryReorder(() => void refetch());
   const [dialogState, setDialogState] = useState<DialogState>({ mode: 'create', open: false });
+  const [deactivateTarget, setDeactivateTarget] = useState<CategoryRecord | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / CATEGORIES_PAGE_SIZE));
 
   function toggleActive(category: CategoryRecord) {
+    if (category.isActive) {
+      setDeactivateTarget(category);
+      return;
+    }
     updateCategory({
       id: category.id,
       resource: 'categories',
-      values: { is_active: !category.isActive },
+      values: { is_active: true },
     });
+  }
+
+  function confirmDeactivate() {
+    if (!deactivateTarget) return;
+    updateCategory({
+      id: deactivateTarget.id,
+      resource: 'categories',
+      values: { is_active: false },
+    });
+    setDeactivateTarget(null);
   }
 
   return (
@@ -386,6 +446,7 @@ export function CatalogTaxonomyPanel() {
                 <TableCell className="text-right">
                   <KisokButton
                     aria-label={`Move ${category.name} up`}
+                    disabled={isReordering}
                     onClick={() => void moveCategory(category, 'up')}
                     size="sm"
                     variant="quiet"
@@ -394,6 +455,7 @@ export function CatalogTaxonomyPanel() {
                   </KisokButton>
                   <KisokButton
                     aria-label={`Move ${category.name} down`}
+                    disabled={isReordering}
                     onClick={() => void moveCategory(category, 'down')}
                     size="sm"
                     variant="quiet"
@@ -453,7 +515,15 @@ export function CatalogTaxonomyPanel() {
       <CategoryFormDialog
         dialogState={dialogState}
         onOpenChange={(open) => setDialogState((current) => ({ ...current, open }))}
-        rootCategories={rootCategories}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Deactivate"
+        description={`Deactivating ${deactivateTarget?.name ?? 'this category'} may hide Products/Variants that depend on it from customers. Continue?`}
+        onCancel={() => setDeactivateTarget(null)}
+        onConfirm={confirmDeactivate}
+        open={deactivateTarget !== null}
+        title={`Deactivate ${deactivateTarget?.name ?? 'Category'}`}
       />
     </section>
   );

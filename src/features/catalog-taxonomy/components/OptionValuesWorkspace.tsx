@@ -22,20 +22,28 @@ export interface OptionValuesWorkspaceProps {
   selectedOptionType: SelectedOptionType;
   optionValues: OptionValueRecord[];
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   onOpenCreateValue: () => void;
   onOpenEditValue: (value: OptionValueRecord) => void;
   onToggleActiveValue: (value: OptionValueRecord) => void;
   onMoveValue: (value: OptionValueRecord, direction: 'up' | 'down') => void;
+  onDeleteValue?: (value: OptionValueRecord) => void;
+  isReordering?: boolean;
 }
 
 export function OptionValuesWorkspace({
   selectedOptionType,
   optionValues,
   isLoading,
+  isError = false,
+  onRetry,
   onOpenCreateValue,
   onOpenEditValue,
   onToggleActiveValue,
   onMoveValue,
+  onDeleteValue,
+  isReordering = false,
 }: OptionValuesWorkspaceProps) {
   return (
     <div className="border border-border bg-card p-5">
@@ -55,6 +63,15 @@ export function OptionValuesWorkspace({
         <p className="mt-6 text-muted-foreground text-sm" role="status">
           Loading Values…
         </p>
+      ) : isError ? (
+        <div className="mt-6 grid gap-3" role="alert">
+          <p className="text-destructive text-sm">
+            Values could not be loaded. Check the connection and try again.
+          </p>
+          <KisokButton onClick={() => onRetry?.()} variant="outline">
+            Try again
+          </KisokButton>
+        </div>
       ) : optionValues.length === 0 ? (
         <p className="mt-6 text-muted-foreground text-sm">No Values yet for this Option Type.</p>
       ) : (
@@ -86,6 +103,7 @@ export function OptionValuesWorkspace({
                   <div className="flex items-center justify-end gap-1">
                     <KisokButton
                       aria-label={`Move ${value.value} up`}
+                      disabled={isReordering}
                       onClick={() => void onMoveValue(value, 'up')}
                       size="sm"
                       variant="quiet"
@@ -94,6 +112,7 @@ export function OptionValuesWorkspace({
                     </KisokButton>
                     <KisokButton
                       aria-label={`Move ${value.value} down`}
+                      disabled={isReordering}
                       onClick={() => void onMoveValue(value, 'down')}
                       size="sm"
                       variant="quiet"
@@ -115,6 +134,16 @@ export function OptionValuesWorkspace({
                     >
                       {value.isActive ? 'Deactivate' : 'Activate'}
                     </KisokButton>
+                    {onDeleteValue ? (
+                      <KisokButton
+                        aria-label={`Delete ${value.value}`}
+                        onClick={() => onDeleteValue(value)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Delete
+                      </KisokButton>
+                    ) : null}
                   </div>
                 </TableCell>
               </TableRow>

@@ -29,7 +29,7 @@ export function useOptionValuesForType(optionTypeId: string | undefined) {
     filters: optionTypeId ? [{ field: 'option_type_id', operator: 'eq', value: optionTypeId }] : [],
     sorters: [{ field: 'display_order', order: 'asc' }],
     pagination: { mode: 'off' },
-    queryOptions: { enabled: Boolean(optionTypeId) },
+    queryOptions: { enabled: Boolean(optionTypeId), retry: false },
   });
 
   return {
