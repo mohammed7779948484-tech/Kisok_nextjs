@@ -12,6 +12,17 @@ export interface MediaAssetRecord {
   createdBy: string | null;
 }
 
+export interface MediaAssetPage {
+  assets: MediaAssetRecord[];
+  total: number;
+}
+
+export interface MediaAssetPageInput {
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
 export interface MediaAssetInsertInput {
   publicId: string;
   secureUrl: string;
@@ -40,7 +51,9 @@ export interface VariantMediaRecord {
 }
 
 export interface MediaLibraryDataContract {
+  getAsset(id: string): Promise<MediaAssetRecord | null>;
   listAssets(): Promise<MediaAssetRecord[]>;
+  listAssetsPage(input: MediaAssetPageInput): Promise<MediaAssetPage>;
   registerAsset(input: MediaAssetInsertInput): Promise<MediaAssetRecord>;
   listVariantMedia(variantId: string): Promise<VariantMediaRecord[]>;
   attachVariantMedia(variantId: string, mediaAssetId: string): Promise<void>;

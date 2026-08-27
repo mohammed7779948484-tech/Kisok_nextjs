@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { Database } from '@/infrastructure/supabase/database.types';
 
+import type { ProductInput } from '../types';
+
 const testContext = vi.hoisted(() => {
   const calls: Array<{ operation: string; payload?: unknown }> = [];
   const client = {
@@ -56,7 +58,8 @@ describe('Product Catalog write repository', () => {
         brandId: 'brand-1',
         shortDescription: 'Operational description',
         isFeatured: true,
-      }),
+        coverMediaAssetId: 'media-1',
+      } as ProductInput),
     ).resolves.toEqual({
       id: 'product-2',
       name: 'KISOK_TEST_Product',
@@ -76,6 +79,7 @@ describe('Product Catalog write repository', () => {
           short_description: 'Operational description',
           is_featured: true,
           is_active: false,
+          cover_media_asset_id: 'media-1',
           search_keywords: null,
         },
       },

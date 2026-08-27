@@ -153,14 +153,24 @@ export function ProductCatalogPanel() {
                       >
                         Edit
                       </Link>
-                      <KisokButton
-                        aria-label={`${product.isActive ? 'Deactivate' : 'Activate'} ${product.name}`}
-                        onClick={() => void toggleActive(product)}
-                        size="sm"
-                        variant="quiet"
-                      >
-                        {product.isActive ? 'Deactivate' : 'Activate'}
-                      </KisokButton>
+                      {product.isActive ? (
+                        <KisokButton
+                          aria-label={`Deactivate ${product.name}`}
+                          onClick={() => void toggleActive(product)}
+                          size="sm"
+                          variant="quiet"
+                        >
+                          Deactivate
+                        </KisokButton>
+                      ) : (
+                        <Link
+                          aria-label={`Review activation ${product.name}`}
+                          className={buttonVariants({ size: 'sm', variant: 'quiet' })}
+                          href={`/admin/products/${product.id}/edit`}
+                        >
+                          Review activation
+                        </Link>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

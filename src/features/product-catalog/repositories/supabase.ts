@@ -21,6 +21,20 @@ import type {
 
 const ORDER_METHOD = 'order' as const;
 
+export class ProductDraftCreatedError extends Error {
+  readonly productId: string;
+
+  constructor(productId: string, cause: unknown) {
+    const message = cause instanceof Error ? cause.message : String(cause);
+    super(
+      `The Product was saved as an inactive draft, but Category assignment failed (${message}). ` +
+        'Open the saved Product to complete its classification.',
+    );
+    this.name = 'ProductDraftCreatedError';
+    this.productId = productId;
+  }
+}
+
 type ProductListRow = {
   id: string;
   name: string;
@@ -328,6 +342,7 @@ export function createProductCatalogRepository(
           short_description: input.shortDescription?.trim() || null,
           is_featured: input.isFeatured ?? false,
           search_keywords: input.searchKeywords ?? null,
+          cover_media_asset_id: input.coverMediaAssetId ?? null,
           is_active: false,
         })
         .select(
@@ -345,8 +360,7 @@ export function createProductCatalogRepository(
           })),
         );
         if (relationResult.error) {
-          await client.from('products').delete().eq('id', result.data.id);
-          throw relationResult.error;
+          throw new ProductDraftCreatedError(result.data.id, relationResult.error);
         }
       }
 

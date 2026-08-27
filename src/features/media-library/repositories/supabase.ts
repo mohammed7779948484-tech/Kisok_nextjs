@@ -71,6 +71,18 @@ export function createMediaLibraryRepository(
   client: SupabaseClient<Database>,
 ): MediaLibraryDataContract {
   return {
+    async getAsset(id) {
+      const result = await client
+        .from('media_assets')
+        .select(
+          'id,public_id,secure_url,format,width,height,bytes,created_at,updated_at,asset_id,created_by',
+        )
+        .eq('id', id)
+        .maybeSingle();
+      if (result.error) throw result.error;
+      return result.data ? mapMediaAsset(result.data) : null;
+    },
+
     async listAssets() {
       const result = await client
         .from('media_assets')
@@ -80,6 +92,25 @@ export function createMediaLibraryRepository(
         [ORDER_METHOD]('created_at', { ascending: false });
       if (result.error) throw result.error;
       return (result.data ?? []).map(mapMediaAsset);
+    },
+
+    async listAssetsPage(input) {
+      const page = Math.max(1, input.page);
+      const pageSize = Math.max(1, input.pageSize);
+      const search = input.search?.trim();
+      let query = client
+        .from('media_assets')
+        .select(
+          'id,public_id,secure_url,format,width,height,bytes,created_at,updated_at,asset_id,created_by',
+          { count: 'exact' },
+        );
+      if (search) query = query.ilike('public_id', `%${search}%`);
+      const result = await query[ORDER_METHOD]('created_at', { ascending: false }).range(
+        (page - 1) * pageSize,
+        page * pageSize - 1,
+      );
+      if (result.error) throw result.error;
+      return { assets: (result.data ?? []).map(mapMediaAsset), total: result.count ?? 0 };
     },
 
     async registerAsset(input: MediaAssetInsertInput) {
@@ -188,8 +219,14 @@ export function createMediaLibraryRepository(
 }
 
 export const mediaLibraryRepository: MediaLibraryDataContract = {
+  getAsset(id) {
+    return createMediaLibraryRepository(getClientOrThrow()).getAsset(id);
+  },
   listAssets() {
     return createMediaLibraryRepository(getClientOrThrow()).listAssets();
+  },
+  listAssetsPage(input) {
+    return createMediaLibraryRepository(getClientOrThrow()).listAssetsPage(input);
   },
   registerAsset(input) {
     return createMediaLibraryRepository(getClientOrThrow()).registerAsset(input);

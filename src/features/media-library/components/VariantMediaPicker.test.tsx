@@ -1,9 +1,11 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const testContext = vi.hoisted(() => ({
   listAssets: vi.fn(),
+  listAssetsPage: vi.fn(),
   listVariantMedia: vi.fn(),
   attachVariantMedia: vi.fn(),
   detachVariantMedia: vi.fn(),
@@ -14,6 +16,7 @@ const testContext = vi.hoisted(() => ({
 vi.mock('../repositories', () => ({
   mediaLibraryRepository: {
     listAssets: testContext.listAssets,
+    listAssetsPage: testContext.listAssetsPage,
     listVariantMedia: testContext.listVariantMedia,
     attachVariantMedia: testContext.attachVariantMedia,
     detachVariantMedia: testContext.detachVariantMedia,
@@ -23,6 +26,17 @@ vi.mock('../repositories', () => ({
 }));
 
 import { VariantMediaPicker } from './VariantMediaPicker';
+
+function renderPicker() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <VariantMediaPicker variantId="variant-1" />
+    </QueryClientProvider>,
+  );
+}
 
 const attachedAsset = {
   variantId: 'variant-1',
@@ -56,6 +70,7 @@ const libraryAsset = {
 describe('VariantMediaPicker', () => {
   beforeEach(() => {
     testContext.listAssets.mockReset();
+    testContext.listAssetsPage.mockReset();
     testContext.listVariantMedia.mockReset();
     testContext.attachVariantMedia.mockReset();
     testContext.detachVariantMedia.mockReset();
@@ -63,42 +78,53 @@ describe('VariantMediaPicker', () => {
     testContext.reorderVariantMedia.mockReset();
   });
 
-  it('lists currently attached Media and available library items to attach', async () => {
+  it('lists currently attached Media and provides explicit shared-picker entry without eager library loading', async () => {
     testContext.listVariantMedia.mockResolvedValue([attachedAsset]);
-    testContext.listAssets.mockResolvedValue([libraryAsset]);
 
-    render(<VariantMediaPicker variantId="variant-1" />);
+    renderPicker();
 
     expect(await screen.findByText('kisok/attached/asset')).toBeInTheDocument();
-    expect(screen.getByText('kisok/library/asset')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add Media' })).toBeInTheDocument();
+    expect(testContext.listAssets).not.toHaveBeenCalled();
     expect(testContext.listVariantMedia).toHaveBeenCalledWith('variant-1');
+  });
+
+  it('opens a shared bounded Media picker only when the operator chooses Add Media', async () => {
+    testContext.listVariantMedia.mockResolvedValue([]);
+    testContext.listAssets.mockRejectedValue(new Error('Unbounded Media fetch must not run.'));
+
+    renderPicker();
+
+    expect(await screen.findByRole('button', { name: 'Add Media' })).toBeEnabled();
+    expect(testContext.listAssets).not.toHaveBeenCalled();
   });
 
   it('never exposes a "Delete" action for attached Media — only "Remove from Variant"', async () => {
     testContext.listVariantMedia.mockResolvedValue([attachedAsset]);
     testContext.listAssets.mockResolvedValue([]);
 
-    render(<VariantMediaPicker variantId="variant-1" />);
+    renderPicker();
 
     await screen.findByText('kisok/attached/asset');
     expect(screen.getByRole('button', { name: /remove from variant/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^delete/i })).not.toBeInTheDocument();
   });
 
-  it('attaches an available Media Asset to the Variant', async () => {
+  it('attaches a Media Asset selected through the shared bounded picker', async () => {
     const user = userEvent.setup();
     testContext.listVariantMedia
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([
         { ...attachedAsset, mediaAssetId: 'media-2', asset: { ...libraryAsset } },
       ]);
-    testContext.listAssets.mockResolvedValue([libraryAsset]);
+    testContext.listAssetsPage.mockResolvedValue({ assets: [libraryAsset], total: 1 });
     testContext.attachVariantMedia.mockResolvedValue(undefined);
 
-    render(<VariantMediaPicker variantId="variant-1" />);
+    renderPicker();
 
-    await screen.findByText('kisok/library/asset');
-    await user.click(screen.getByRole('button', { name: 'Attach to Variant' }));
+    await user.click(await screen.findByRole('button', { name: 'Add Media' }));
+    await user.click(await screen.findByRole('button', { name: 'Select kisok/library/asset' }));
+    await user.click(screen.getByRole('button', { name: 'Use selected image' }));
 
     await waitFor(() =>
       expect(testContext.attachVariantMedia).toHaveBeenCalledWith('variant-1', 'media-2'),
@@ -111,7 +137,7 @@ describe('VariantMediaPicker', () => {
     testContext.listAssets.mockResolvedValue([]);
     testContext.detachVariantMedia.mockResolvedValue(undefined);
 
-    render(<VariantMediaPicker variantId="variant-1" />);
+    renderPicker();
 
     await screen.findByText('kisok/attached/asset');
     await user.click(screen.getByRole('button', { name: /remove from variant/i }));
@@ -133,7 +159,7 @@ describe('VariantMediaPicker', () => {
     testContext.listAssets.mockResolvedValue([]);
     testContext.setPrimaryVariantMedia.mockResolvedValue(undefined);
 
-    render(<VariantMediaPicker variantId="variant-1" />);
+    renderPicker();
 
     await screen.findByText('kisok/second/asset');
     await user.click(screen.getAllByRole('button', { name: /make primary/i })[0]);

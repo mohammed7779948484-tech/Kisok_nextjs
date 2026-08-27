@@ -7,6 +7,7 @@ export interface ProductInput {
   isFeatured?: boolean;
   searchKeywords?: string[] | null;
   categoryIds?: string[];
+  coverMediaAssetId?: string | null;
 }
 
 export interface ProductUpdate {
