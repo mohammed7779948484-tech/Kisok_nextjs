@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import type { ComponentProps, MouseEvent, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 
 import NextLink from 'next/link';
 
@@ -23,7 +23,9 @@ type UnsavedChangesGuardApi = {
 // behavior as before this guard existed.
 const noopGuardApi: UnsavedChangesGuardApi = {
   confirmLeave: () => true,
-  setBlockedMessage: () => {},
+  setBlockedMessage: () => {
+    // Intentionally a no-op outside a Provider — see comment above.
+  },
 };
 
 const UnsavedChangesGuardContext = createContext<UnsavedChangesGuardApi>(noopGuardApi);
@@ -45,7 +47,9 @@ export function UnsavedChangesGuardProvider({ children }: { children: ReactNode 
   const api = useRef<UnsavedChangesGuardApi>({ confirmLeave, setBlockedMessage }).current;
 
   return (
-    <UnsavedChangesGuardContext.Provider value={api}>{children}</UnsavedChangesGuardContext.Provider>
+    <UnsavedChangesGuardContext.Provider value={api}>
+      {children}
+    </UnsavedChangesGuardContext.Provider>
   );
 }
 

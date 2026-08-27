@@ -210,15 +210,13 @@ export function createProductCatalogRepository(
       if (variantIds.length === 0) return {};
       const result = await client
         .from('variant_option_values')
-        .select(
-          'variant_id,option_type_id,option_value_id,option_types(name),option_values(value)',
-        )
+        .select('variant_id,option_type_id,option_value_id,option_types(name),option_values(value)')
         .in('variant_id', variantIds);
       if (result.error) throw result.error;
       const byVariantId: Record<string, VariantOptionValueRecord[]> = {};
       for (const row of (result.data ?? []) as unknown as Array<{ variant_id: string }>) {
-        const list = (byVariantId[row.variant_id] ??= []);
-        list.push(mapVariantOptionValue(row as never));
+        if (!byVariantId[row.variant_id]) byVariantId[row.variant_id] = [];
+        byVariantId[row.variant_id].push(mapVariantOptionValue(row as never));
       }
       return byVariantId;
     },
