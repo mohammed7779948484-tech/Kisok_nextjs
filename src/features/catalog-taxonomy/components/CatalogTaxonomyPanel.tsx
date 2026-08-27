@@ -30,6 +30,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { MediaAssetPickerDialog } from '@/features/media-library';
+import type { MediaAssetRecord } from '@/features/media-library/types';
 import {
   KisokButton,
   KisokDialog,
@@ -72,22 +74,36 @@ function CategoryFormDialog({
   rootCategories: CategoryRecord[];
 }) {
   const { mode, category, open } = dialogState;
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+
   const {
     register,
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
     refineCore: { onFinish },
   } = useCategoryForm({ id: category?.id, mode });
 
+  const currentMediaAssetId = watch('image_media_asset_id');
+
   useEffect(() => {
     if (!open) return;
-    reset(
-      category
-        ? { name: category.name, parent_id: category.parentId, is_active: category.isActive }
-        : categoryFormDefaultValues,
-    );
+    if (category) {
+      reset({
+        name: category.name,
+        parent_id: category.parentId,
+        is_active: category.isActive,
+        image_media_asset_id: category.imageMediaAssetId,
+      });
+      setSelectedImageUrl(category.imageUrl ?? null);
+    } else {
+      reset(categoryFormDefaultValues);
+      setSelectedImageUrl(null);
+    }
   }, [open, category, reset]);
 
   async function onSubmit(values: CategoryFormValues) {
@@ -95,86 +111,149 @@ function CategoryFormDialog({
     onOpenChange(false);
   }
 
+  function handleSelectMedia(asset: MediaAssetRecord) {
+    setValue('image_media_asset_id', asset.id, { shouldDirty: true });
+    setSelectedImageUrl(asset.secureUrl);
+  }
+
+  function handleRemoveMedia() {
+    setValue('image_media_asset_id', null, { shouldDirty: true });
+    setSelectedImageUrl(null);
+  }
+
   const parentOptions = rootCategories.filter((candidate) => candidate.id !== category?.id);
 
   return (
-    <KisokDialog onOpenChange={onOpenChange} open={open}>
-      <KisokDialogContent>
-        <KisokDialogHeader>
-          <KisokDialogTitle>
-            {mode === 'create' ? 'Add Category' : 'Edit Category'}
-          </KisokDialogTitle>
-          <KisokDialogDescription>
-            Categories support one root level and one child level in the hosted Lean V2 catalog.
-          </KisokDialogDescription>
-        </KisokDialogHeader>
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
-            <Label htmlFor="category-name">Category name</Label>
-            <KisokInput
-              aria-invalid={Boolean(errors.name)}
-              id="category-name"
-              {...register('name')}
-            />
-            {errors.name ? <p className="text-destructive text-sm">{errors.name.message}</p> : null}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="category-parent">Parent category</Label>
+    <>
+      <KisokDialog onOpenChange={onOpenChange} open={open}>
+        <KisokDialogContent>
+          <KisokDialogHeader>
+            <KisokDialogTitle>
+              {mode === 'create' ? 'Add Category' : 'Edit Category'}
+            </KisokDialogTitle>
+            <KisokDialogDescription>
+              Categories support one root level and one child level in the hosted Lean V2 catalog.
+            </KisokDialogDescription>
+          </KisokDialogHeader>
+          <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid gap-2">
+              <Label htmlFor="category-name">Category name</Label>
+              <KisokInput
+                aria-invalid={Boolean(errors.name)}
+                id="category-name"
+                {...register('name')}
+              />
+              {errors.name ? (
+                <p className="text-destructive text-sm">{errors.name.message}</p>
+              ) : null}
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Category image</Label>
+              <div className="flex items-center gap-3">
+                <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted">
+                  {selectedImageUrl ? (
+                    <img
+                      alt="Category preview"
+                      className="h-full w-full object-cover"
+                      src={selectedImageUrl}
+                    />
+                  ) : (
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      No image
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <KisokButton
+                    onClick={() => setPickerOpen(true)}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {selectedImageUrl ? 'Change image' : 'Choose from library'}
+                  </KisokButton>
+                  {selectedImageUrl ? (
+                    <KisokButton
+                      onClick={handleRemoveMedia}
+                      size="sm"
+                      type="button"
+                      variant="quiet"
+                    >
+                      Remove image
+                    </KisokButton>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="category-parent">Parent category</Label>
+              <Controller
+                control={control}
+                name="parent_id"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(value) =>
+                      field.onChange(value === ROOT_PARENT_VALUE ? null : value)
+                    }
+                    value={field.value ?? ROOT_PARENT_VALUE}
+                  >
+                    <SelectTrigger id="category-parent">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ROOT_PARENT_VALUE}>Root category</SelectItem>
+                      {parentOptions.map((option) => (
+                        <SelectItem key={option.id} value={option.id}>
+                          {option.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
             <Controller
               control={control}
-              name="parent_id"
+              name="is_active"
               render={({ field }) => (
-                <Select
-                  onValueChange={(value) =>
-                    field.onChange(value === ROOT_PARENT_VALUE ? null : value)
-                  }
-                  value={field.value ?? ROOT_PARENT_VALUE}
-                >
-                  <SelectTrigger id="category-parent">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={ROOT_PARENT_VALUE}>Root category</SelectItem>
-                    {parentOptions.map((option) => (
-                      <SelectItem key={option.id} value={option.id}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={field.value}
+                    id="category-active"
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                  <Label htmlFor="category-active">Active</Label>
+                </div>
               )}
             />
-          </div>
-          <Controller
-            control={control}
-            name="is_active"
-            render={({ field }) => (
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={field.value}
-                  id="category-active"
-                  onCheckedChange={(checked) => field.onChange(checked === true)}
-                />
-                <Label htmlFor="category-active">Active</Label>
-              </div>
-            )}
-          />
-          <KisokDialogFooter>
-            <KisokButton
-              disabled={isSubmitting}
-              onClick={() => onOpenChange(false)}
-              type="button"
-              variant="quiet"
-            >
-              Cancel
-            </KisokButton>
-            <KisokButton disabled={isSubmitting} type="submit">
-              {isSubmitting ? 'Saving…' : 'Save category'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </form>
-      </KisokDialogContent>
-    </KisokDialog>
+            <KisokDialogFooter>
+              <KisokButton
+                disabled={isSubmitting}
+                onClick={() => onOpenChange(false)}
+                type="button"
+                variant="quiet"
+              >
+                Cancel
+              </KisokButton>
+              <KisokButton disabled={isSubmitting} type="submit">
+                {isSubmitting ? 'Saving…' : 'Save category'}
+              </KisokButton>
+            </KisokDialogFooter>
+          </form>
+        </KisokDialogContent>
+      </KisokDialog>
+
+      <MediaAssetPickerDialog
+        description="Choose an existing image or upload a new one for this category."
+        onOpenChange={setPickerOpen}
+        onSelect={handleSelectMedia}
+        open={pickerOpen}
+        selectedAssetId={currentMediaAssetId}
+        title="Select Category Image"
+      />
+    </>
   );
 }
 
@@ -210,7 +289,7 @@ export function CatalogTaxonomyPanel() {
     <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+          <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             Catalog taxonomy / hosted data
           </p>
           <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Categories</h1>
@@ -273,8 +352,21 @@ export function CatalogTaxonomyPanel() {
           <TableBody>
             {categories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell className={category.parentId ? 'pl-8 font-medium' : 'font-medium'}>
-                  {category.name}
+                <TableCell className="font-medium">
+                  <div className={`flex items-center gap-3 ${category.parentId ? 'pl-6' : ''}`}>
+                    {category.imageUrl ? (
+                      <img
+                        alt={category.name}
+                        className="size-8 shrink-0 rounded-md border border-border object-cover bg-muted"
+                        src={category.imageUrl}
+                      />
+                    ) : (
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+                        {category.name.slice(0, 2)}
+                      </div>
+                    )}
+                    <span>{category.name}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-xs">
                   {category.parentId ? 'Child' : 'Root'}

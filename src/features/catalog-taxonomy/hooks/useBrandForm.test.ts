@@ -29,7 +29,7 @@ describe('useBrandForm', () => {
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         resource: 'brands',
-        variables: { name: 'Field Notes', is_active: true },
+        variables: { name: 'Field Notes', is_active: true, image_media_asset_id: null },
       }),
     );
   });

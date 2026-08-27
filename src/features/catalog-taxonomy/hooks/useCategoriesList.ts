@@ -7,7 +7,13 @@ import type { Database } from '@/infrastructure/supabase/database.types';
 
 import type { CategoryRecord } from '../types';
 
-type CategoryRow = Database['public']['Tables']['categories']['Row'];
+type CategoryRow = Database['public']['Tables']['categories']['Row'] & {
+  media_assets?: {
+    id: string;
+    public_id: string;
+    secure_url: string;
+  } | null;
+};
 
 function mapCategory(row: CategoryRow): CategoryRecord {
   return {
@@ -17,6 +23,8 @@ function mapCategory(row: CategoryRow): CategoryRecord {
     isActive: row.is_active,
     displayOrder: row.display_order,
     imageMediaAssetId: row.image_media_asset_id,
+    imageUrl: row.media_assets?.secure_url ?? null,
+    imagePublicId: row.media_assets?.public_id ?? null,
   };
 }
 
@@ -48,6 +56,9 @@ export function useCategoriesList(params: {
 
   const { query, result } = useList<CategoryRow>({
     resource: 'categories',
+    meta: {
+      select: '*, media_assets:image_media_asset_id(id, secure_url, public_id)',
+    },
     filters,
     sorters: [{ field: 'display_order', order: 'asc' }],
     pagination: { currentPage: params.page, pageSize, mode: 'server' },

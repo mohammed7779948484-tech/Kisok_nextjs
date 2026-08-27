@@ -32,7 +32,7 @@ describe('useCategoryForm', () => {
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         resource: 'categories',
-        variables: { name: 'Coffee', parent_id: null, is_active: true },
+        variables: { name: 'Coffee', parent_id: null, is_active: true, image_media_asset_id: null },
       }),
     );
   });
@@ -63,7 +63,12 @@ describe('useCategoryForm', () => {
       expect(create).toHaveBeenCalledWith(
         expect.objectContaining({
           resource: 'categories',
-          variables: { name: 'Cold Drinks', parent_id: 'category-1', is_active: true },
+          variables: {
+            name: 'Cold Drinks',
+            parent_id: 'category-1',
+            is_active: true,
+            image_media_asset_id: null,
+          },
         }),
       ),
     );

@@ -1,0 +1,95 @@
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import * as soundModule from '../lib/sound';
+import { useOrderRealtimeNotifications } from './useOrderRealtimeNotifications';
+
+// Mock Supabase browser client
+let mockChannelCallback: (payload: any) => void;
+const mockRemoveChannel = vi.fn();
+const mockSubscribe = vi.fn();
+
+const mockChannel = {
+  on: vi.fn((_event, _filter, callback) => {
+    mockChannelCallback = callback;
+    return {
+      subscribe: mockSubscribe,
+    };
+  }),
+};
+
+const mockSupabase = {
+  channel: vi.fn(() => mockChannel),
+  removeChannel: mockRemoveChannel,
+};
+
+vi.mock('@/infrastructure/supabase/client/browser-client', () => ({
+  getBrowserSupabaseClient: () => mockSupabase,
+}));
+
+describe('useOrderRealtimeNotifications', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(soundModule, 'playOrderChime').mockReturnValue(true);
+  });
+
+  it('subscribes to orders postgres_changes on mount and unbinds on unmount', () => {
+    const { unmount } = renderHook(() => useOrderRealtimeNotifications({ soundEnabled: true }));
+
+    expect(mockSupabase.channel).toHaveBeenCalledWith('orders-realtime-channel');
+    expect(mockChannel.on).toHaveBeenCalledWith(
+      'postgres_changes',
+      expect.objectContaining({ event: 'INSERT', schema: 'public', table: 'orders' }),
+      expect.any(Function),
+    );
+    expect(mockSubscribe).toHaveBeenCalled();
+
+    unmount();
+    expect(mockSupabase.removeChannel).toHaveBeenCalledWith(mockChannel);
+  });
+
+  it('plays chime and updates state when a new order arrives', () => {
+    const onNewOrder = vi.fn();
+    const { result } = renderHook(() =>
+      useOrderRealtimeNotifications({ soundEnabled: true, onNewOrder }),
+    );
+
+    expect(result.current.unreadCount).toBe(0);
+    expect(result.current.latestOrder).toBeNull();
+
+    act(() => {
+      mockChannelCallback({
+        new: {
+          id: 'ord-123',
+          display_number: 'A-42',
+          status: 'new',
+          created_at: new Date().toISOString(),
+        },
+      });
+    });
+
+    expect(result.current.unreadCount).toBe(1);
+    expect(result.current.latestOrder?.displayNumber).toBe('A-42');
+    expect(soundModule.playOrderChime).toHaveBeenCalled();
+    expect(onNewOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'ord-123', displayNumber: 'A-42' }),
+    );
+  });
+
+  it('does not play audio when soundEnabled is false', () => {
+    renderHook(() => useOrderRealtimeNotifications({ soundEnabled: false }));
+
+    act(() => {
+      mockChannelCallback({
+        new: {
+          id: 'ord-456',
+          display_number: 'B-10',
+          status: 'new',
+          created_at: new Date().toISOString(),
+        },
+      });
+    });
+
+    expect(soundModule.playOrderChime).not.toHaveBeenCalled();
+  });
+});

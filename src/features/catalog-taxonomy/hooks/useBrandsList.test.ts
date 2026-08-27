@@ -33,10 +33,19 @@ describe('useBrandsList', () => {
         isActive: true,
         displayOrder: 0,
         imageMediaAssetId: null,
+        imageUrl: null,
+        imagePublicId: null,
       },
     ]);
     expect(result.current.total).toBe(1);
-    expect(getList).toHaveBeenCalledWith(expect.objectContaining({ resource: 'brands' }));
+    expect(getList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resource: 'brands',
+        meta: expect.objectContaining({
+          select: '*, media_assets:image_media_asset_id(id, secure_url, public_id)',
+        }),
+      }),
+    );
   });
 
   it('sends a contains filter on name when a search term is provided', async () => {

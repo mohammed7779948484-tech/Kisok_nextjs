@@ -16,6 +16,7 @@ export const brandFormSchema = z.object({
     .min(1, 'Brand name is required.')
     .max(120, 'Brand name must be 120 characters or fewer.'),
   is_active: z.boolean(),
+  image_media_asset_id: z.string().nullable().optional(),
 });
 
 export type BrandFormValues = z.infer<typeof brandFormSchema>;
@@ -23,4 +24,5 @@ export type BrandFormValues = z.infer<typeof brandFormSchema>;
 export const brandFormDefaultValues: BrandFormValues = {
   name: '',
   is_active: true,
+  image_media_asset_id: null,
 };

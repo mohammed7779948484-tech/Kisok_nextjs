@@ -1,7 +1,24 @@
 import type { DataProvider } from '@refinedev/core';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mediaTestContext = vi.hoisted(() => ({
+  listAssets: vi.fn(),
+  registerAsset: vi.fn(),
+  getMediaUploadSignature: vi.fn(),
+}));
+
+vi.mock('../../media-library/repositories', () => ({
+  mediaLibraryRepository: {
+    listAssets: mediaTestContext.listAssets,
+    registerAsset: mediaTestContext.registerAsset,
+  },
+}));
+
+vi.mock('../../media-library/server/actions', () => ({
+  getMediaUploadSignature: mediaTestContext.getMediaUploadSignature,
+}));
 
 import { createMockDataProvider, renderWithRefine } from '../../../../test/refine-test-utils';
 import { BrandsPanel } from './BrandsPanel';
@@ -11,11 +28,22 @@ const brandRow = {
   name: 'Northline',
   is_active: true,
   display_order: 0,
-  image_media_asset_id: null,
+  image_media_asset_id: 'asset-1',
+  media_assets: {
+    id: 'asset-1',
+    public_id: 'brand/northline-logo',
+    secure_url: 'https://res.cloudinary.com/example/image/upload/northline.jpg',
+  },
 };
 
 describe('BrandsPanel', () => {
-  it('renders hosted Brand records through Refine list state', async () => {
+  beforeEach(() => {
+    mediaTestContext.listAssets.mockReset();
+    mediaTestContext.registerAsset.mockReset();
+    mediaTestContext.getMediaUploadSignature.mockReset();
+  });
+
+  it('renders hosted Brand records through Refine list state with logo image', async () => {
     const getList = vi.fn(async () => ({ data: [brandRow], total: 1 }));
     const dataProvider = createMockDataProvider({ getList: getList as DataProvider['getList'] });
 
@@ -23,6 +51,12 @@ describe('BrandsPanel', () => {
 
     expect(await screen.findByText('Northline')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
+
+    const logoImg = screen.getByRole('img', { name: 'Northline' });
+    expect(logoImg).toHaveAttribute(
+      'src',
+      'https://res.cloudinary.com/example/image/upload/northline.jpg',
+    );
   });
 
   it('debounces search input into a single contains-filtered list request', async () => {
@@ -45,7 +79,18 @@ describe('BrandsPanel', () => {
     );
   });
 
-  it('creates a Brand through the shared Refine data provider', async () => {
+  it('creates a Brand through the shared Refine data provider and allows selecting a logo', async () => {
+    mediaTestContext.listAssets.mockResolvedValue([
+      {
+        id: 'asset-2',
+        publicId: 'brand/field-notes-logo',
+        secureUrl: 'https://res.cloudinary.com/example/image/upload/field-notes.jpg',
+        format: 'jpg',
+        width: 300,
+        height: 300,
+      },
+    ]);
+
     const getList = vi
       .fn()
       .mockResolvedValueOnce({ data: [], total: 0 })
@@ -63,13 +108,23 @@ describe('BrandsPanel', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Add brand' }));
     await user.type(screen.getByLabelText('Brand name'), 'Field Notes');
+
+    // Open media picker and select image
+    await user.click(screen.getByRole('button', { name: 'Choose from library' }));
+    await screen.findByText('brand/field-notes-logo');
+    await user.click(screen.getByRole('button', { name: 'Select brand/field-notes-logo' }));
+
     await user.click(screen.getByRole('button', { name: 'Save brand' }));
 
     await waitFor(() =>
       expect(create).toHaveBeenCalledWith(
         expect.objectContaining({
           resource: 'brands',
-          variables: { name: 'Field Notes', is_active: true },
+          variables: {
+            name: 'Field Notes',
+            is_active: true,
+            image_media_asset_id: 'asset-2',
+          },
         }),
       ),
     );

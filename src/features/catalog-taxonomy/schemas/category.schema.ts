@@ -13,6 +13,7 @@ export const categoryFormSchema = z.object({
     .max(120, 'Category name must be 120 characters or fewer.'),
   parent_id: z.string().nullable(),
   is_active: z.boolean(),
+  image_media_asset_id: z.string().nullable().optional(),
 });
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -21,4 +22,5 @@ export const categoryFormDefaultValues: CategoryFormValues = {
   name: '',
   parent_id: null,
   is_active: true,
+  image_media_asset_id: null,
 };

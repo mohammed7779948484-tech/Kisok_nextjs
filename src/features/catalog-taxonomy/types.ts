@@ -4,6 +4,8 @@ export interface BrandRecord {
   isActive: boolean;
   displayOrder: number;
   imageMediaAssetId: string | null;
+  imageUrl?: string | null;
+  imagePublicId?: string | null;
 }
 
 export interface OptionValueRecord {
@@ -47,6 +49,8 @@ export interface CategoryRecord {
   isActive: boolean;
   displayOrder: number;
   imageMediaAssetId: string | null;
+  imageUrl?: string | null;
+  imagePublicId?: string | null;
 }
 
 export interface CategoryInput {

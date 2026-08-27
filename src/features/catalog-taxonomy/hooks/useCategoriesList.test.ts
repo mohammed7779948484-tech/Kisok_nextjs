@@ -35,10 +35,19 @@ describe('useCategoriesList', () => {
         isActive: true,
         displayOrder: 0,
         imageMediaAssetId: null,
+        imageUrl: null,
+        imagePublicId: null,
       },
     ]);
     expect(result.current.total).toBe(1);
-    expect(getList).toHaveBeenCalledWith(expect.objectContaining({ resource: 'categories' }));
+    expect(getList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resource: 'categories',
+        meta: expect.objectContaining({
+          select: '*, media_assets:image_media_asset_id(id, secure_url, public_id)',
+        }),
+      }),
+    );
   });
 
   it('sends a contains filter on name when a search term is provided', async () => {

@@ -29,4 +29,14 @@ describe('AdminShell', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/could not be completed/i);
     expect(testContext.replace).not.toHaveBeenCalled();
   });
+
+  it('renders order notification sound toggle in the admin header', () => {
+    render(
+      <AdminShell displayName="Admin" locale="en">
+        <p>Workspace Content</p>
+      </AdminShell>,
+    );
+
+    expect(screen.getByRole('button', { name: /notification sound/i })).toBeInTheDocument();
+  });
 });

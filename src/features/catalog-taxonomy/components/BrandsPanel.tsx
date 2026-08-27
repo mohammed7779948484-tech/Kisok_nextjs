@@ -23,6 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { MediaAssetPickerDialog } from '@/features/media-library';
+import type { MediaAssetRecord } from '@/features/media-library/types';
 import {
   KisokButton,
   KisokDialog,
@@ -61,18 +63,35 @@ function BrandFormDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { mode, brand, open } = dialogState;
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+
   const {
     register,
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
     refineCore: { onFinish },
   } = useBrandForm({ id: brand?.id, mode });
 
+  const currentMediaAssetId = watch('image_media_asset_id');
+
   useEffect(() => {
     if (!open) return;
-    reset(brand ? { name: brand.name, is_active: brand.isActive } : brandFormDefaultValues);
+    if (brand) {
+      reset({
+        name: brand.name,
+        is_active: brand.isActive,
+        image_media_asset_id: brand.imageMediaAssetId,
+      });
+      setSelectedImageUrl(brand.imageUrl ?? null);
+    } else {
+      reset(brandFormDefaultValues);
+      setSelectedImageUrl(null);
+    }
   }, [open, brand, reset]);
 
   async function onSubmit(values: BrandFormValues) {
@@ -80,53 +99,120 @@ function BrandFormDialog({
     onOpenChange(false);
   }
 
+  function handleSelectMedia(asset: MediaAssetRecord) {
+    setValue('image_media_asset_id', asset.id, { shouldDirty: true });
+    setSelectedImageUrl(asset.secureUrl);
+  }
+
+  function handleRemoveMedia() {
+    setValue('image_media_asset_id', null, { shouldDirty: true });
+    setSelectedImageUrl(null);
+  }
+
   return (
-    <KisokDialog onOpenChange={onOpenChange} open={open}>
-      <KisokDialogContent>
-        <KisokDialogHeader>
-          <KisokDialogTitle>{mode === 'create' ? 'Add Brand' : 'Edit Brand'}</KisokDialogTitle>
-          <KisokDialogDescription>
-            {mode === 'create'
-              ? 'Create a reusable Brand in the hosted catalog.'
-              : 'Update this Brand. Products already using it keep their reference.'}
-          </KisokDialogDescription>
-        </KisokDialogHeader>
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
-            <Label htmlFor="brand-name">Brand name</Label>
-            <KisokInput aria-invalid={Boolean(errors.name)} id="brand-name" {...register('name')} />
-            {errors.name ? <p className="text-destructive text-sm">{errors.name.message}</p> : null}
-          </div>
-          <Controller
-            control={control}
-            name="is_active"
-            render={({ field }) => (
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={field.value}
-                  id="brand-active"
-                  onCheckedChange={(checked) => field.onChange(checked === true)}
-                />
-                <Label htmlFor="brand-active">Active</Label>
+    <>
+      <KisokDialog onOpenChange={onOpenChange} open={open}>
+        <KisokDialogContent>
+          <KisokDialogHeader>
+            <KisokDialogTitle>{mode === 'create' ? 'Add Brand' : 'Edit Brand'}</KisokDialogTitle>
+            <KisokDialogDescription>
+              {mode === 'create'
+                ? 'Create a reusable Brand in the hosted catalog.'
+                : 'Update this Brand. Products already using it keep their reference.'}
+            </KisokDialogDescription>
+          </KisokDialogHeader>
+          <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid gap-2">
+              <Label htmlFor="brand-name">Brand name</Label>
+              <KisokInput
+                aria-invalid={Boolean(errors.name)}
+                id="brand-name"
+                {...register('name')}
+              />
+              {errors.name ? (
+                <p className="text-destructive text-sm">{errors.name.message}</p>
+              ) : null}
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Brand logo</Label>
+              <div className="flex items-center gap-3">
+                <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted">
+                  {selectedImageUrl ? (
+                    <img
+                      alt="Brand logo preview"
+                      className="h-full w-full object-cover"
+                      src={selectedImageUrl}
+                    />
+                  ) : (
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      No logo
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <KisokButton
+                    onClick={() => setPickerOpen(true)}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {selectedImageUrl ? 'Change logo' : 'Choose from library'}
+                  </KisokButton>
+                  {selectedImageUrl ? (
+                    <KisokButton
+                      onClick={handleRemoveMedia}
+                      size="sm"
+                      type="button"
+                      variant="quiet"
+                    >
+                      Remove logo
+                    </KisokButton>
+                  ) : null}
+                </div>
               </div>
-            )}
-          />
-          <KisokDialogFooter>
-            <KisokButton
-              disabled={isSubmitting}
-              onClick={() => onOpenChange(false)}
-              type="button"
-              variant="quiet"
-            >
-              Cancel
-            </KisokButton>
-            <KisokButton disabled={isSubmitting} type="submit">
-              {isSubmitting ? 'Saving…' : 'Save brand'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </form>
-      </KisokDialogContent>
-    </KisokDialog>
+            </div>
+
+            <Controller
+              control={control}
+              name="is_active"
+              render={({ field }) => (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={field.value}
+                    id="brand-active"
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                  <Label htmlFor="brand-active">Active</Label>
+                </div>
+              )}
+            />
+            <KisokDialogFooter>
+              <KisokButton
+                disabled={isSubmitting}
+                onClick={() => onOpenChange(false)}
+                type="button"
+                variant="quiet"
+              >
+                Cancel
+              </KisokButton>
+              <KisokButton disabled={isSubmitting} type="submit">
+                {isSubmitting ? 'Saving…' : 'Save brand'}
+              </KisokButton>
+            </KisokDialogFooter>
+          </form>
+        </KisokDialogContent>
+      </KisokDialog>
+
+      <MediaAssetPickerDialog
+        description="Choose an existing image or upload a new one for this brand logo."
+        onOpenChange={setPickerOpen}
+        onSelect={handleSelectMedia}
+        open={pickerOpen}
+        selectedAssetId={currentMediaAssetId}
+        title="Select Brand Logo"
+      />
+    </>
   );
 }
 
@@ -212,7 +298,22 @@ export function BrandsPanel() {
           <TableBody>
             {brands.map((brand) => (
               <TableRow key={brand.id}>
-                <TableCell className="font-medium">{brand.name}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    {brand.imageUrl ? (
+                      <img
+                        alt={brand.name}
+                        className="size-8 shrink-0 rounded-md border border-border object-cover bg-muted"
+                        src={brand.imageUrl}
+                      />
+                    ) : (
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+                        {brand.name.slice(0, 2)}
+                      </div>
+                    )}
+                    <span>{brand.name}</span>
+                  </div>
+                </TableCell>
                 <TableCell>
                   <StatusPill
                     className={brand.isActive ? undefined : 'border-destructive text-destructive'}
