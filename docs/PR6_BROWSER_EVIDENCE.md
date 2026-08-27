@@ -1,5 +1,7 @@
 # PR #6 Browser Verification Evidence
 
+> **2026-08-27, consolidation/correctness repair round.** This round's sandbox had no hosted Supabase/network access at all (egress proxy rejects the hosted host — `curl` → `CONNECT tunnel failed, response 403`, reconfirmed directly rather than assumed) and consequently no browser acceptance was attempted or is claimed for this round's changes (Media Picker consolidation, visibility-semantics fix, navigation guard, Store Settings migration, auth/security fixes, catalog-taxonomy reorder/delete/deactivation safety, dashboard/orders fixes, pagination, product search). All of it was verified at the code/regression-test/type-check/lint level only — see `docs/KIOSK_ADMIN_TDD_EXECUTION_LOG.md`'s "Consolidation/correctness repair round" and `docs/PR6_FINAL_EXECUTION_TODO.md`. The rows below predate this round and remain the most recent real browser evidence on file; they should not be read as covering this round's changes.
+
 | Date | Route | Authenticated state | Finding | Disposition |
 | --- | --- | --- | --- | --- |
 | 2026-08-27 | `/en/admin` | Signed in as supplied test Admin, display name `Mohammed` | Protected dashboard rendered. The earlier unsupported **Connected** and **Live operational data** labels were reproduced, fixed with regressions, and superseded by the neutral **Operational snapshot** copy. All current hosted operational counts were zero at inspection. | Dashboard reachability and corrected status-copy evidence completed; this does not represent a live-health check. |

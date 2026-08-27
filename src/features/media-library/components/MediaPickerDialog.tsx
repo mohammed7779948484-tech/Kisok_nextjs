@@ -20,7 +20,7 @@ import { useCameraCapture } from '../hooks/useCameraCapture';
 import { useMediaPickerAssets } from '../hooks/useMediaPickerAssets';
 import type { MediaAssetRecord } from '../types';
 
-type MediaPickerDialogProps = {
+export type MediaPickerDialogProps = {
   /** An explicit list is useful for small, preloaded contexts and focused tests. Omit it to use server pages. */
   assets?: MediaAssetRecord[];
   description?: string;

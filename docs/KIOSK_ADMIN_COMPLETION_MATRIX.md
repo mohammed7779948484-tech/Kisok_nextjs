@@ -1,6 +1,6 @@
 # KISOK Admin V2 — Completion Matrix
 
-**Audit baseline:** current HEAD on `feat/lean-v2-admin-integration` (post `1e4c14a`, this continuation session's fixes and CRUD completion included).
+**Audit baseline:** current HEAD on `feat/lean-v2-admin-integration` (post `aaa2bb6`, this consolidation/correctness repair round included — see the new section below. The `1e4c14a`-era content further down predates a large parallel "Product Editor Scoped Round" delivery (`ddadddf`) that substantially rewrote the Product editor and taxonomy UI after this matrix was first written; treat any statement below about Product-editor internals as historical unless corroborated by `docs/PR6_FINAL_EXECUTION_TODO.md`, which tracks the current state item-by-item).
 
 **Authority:** Lean V2 migrations and the explicitly authorized hosted Supabase project. A route, configured data provider, fixture-backed component, or unit mock is not counted as completed CRUD. A repository/RPC method with no UI caller is marked "dead code", not "done".
 
@@ -50,6 +50,24 @@ All eight items below were independently verified against the actual code at HEA
 | Store Settings | ✅ | – | – | – | – | – | ✅ (incl. logo picker) | – | – | – | ✅ | ✅ |
 | Dashboard | ✅ (correct global counts, see bug #3) | – | – | – | – | – | – | – | – | – | ✅ | ✅ |
 | Auth | ✅ login/protect/logout/refresh persistence | – | – | – | – | – | – | – | – | – | – | ✅ unit-level; real hosted login attempted via Playwright this session — reached the real Supabase Auth token endpoint and failed with the same `ERR_TUNNEL_CONNECTION_FAILED` egress denial documented below (proves the wiring is correct; hosted credential verification remains blocked) |
+
+## Consolidation/correctness repair round (2026-08-27, post-`a704f57`)
+
+This round's full item-by-item disposition lives in `docs/PR6_FINAL_EXECUTION_TODO.md` (FIX-08/09/13/19/24/25/29/37/38/40/41/42/46/47/48/49/50/55/56/57/58/59/60/61/82/83, plus a new Option Value hard-delete item). Summary:
+
+- **One canonical Media Picker.** Brand, Category, and Store Settings logo pickers now all use the same `MediaPickerDialog` already shared by Product cover and Variant Media. The older, weaker `MediaAssetPickerDialog` (client-only substring search, no pagination, no camera) had no remaining consumers and was deleted.
+- **Lean V2 semantic correctness fix.** `getProductVisibility()` previously required *every* active Variant to be individually eligible; it now matches `get_customer_catalog()`'s actual rule (visible with **at least one** eligible active Variant — a bad sibling only removes itself).
+- **Unsaved-changes navigation guard.** New `src/shared/navigation/UnsavedChangesGuard.tsx` covers in-app Link navigation (admin sidebar, header, recovery links) while a Product editor is dirty, not just the pre-existing `beforeunload` handler and one dedicated "Back to Products" button.
+- **N+1 fix.** Product editor Variant Media/Option reads are now one batched query per Product instead of one per Variant.
+- **Store Settings** migrated from manual `useState`/`useEffect` (with a dead, mismatched Zod schema) to `react-hook-form` + a real Zod schema + TanStack Query + the shared Media Picker.
+- **Auth/security:** sign-out now surfaces a *resolved* `{ error }` from Supabase (previously only a rejected promise was handled — a real gap, despite this being previously marked complete); per-route login redirect (`next` param now reflects the actually-requested path, not always `/admin`); an authenticated Admin visiting `/login` is redirected away; `proxy.ts`'s SSR cookie-refresh logic was re-verified correct and given a regression test it previously lacked.
+- **Admin Users:** create-rollback now surfaces both failures when the compensating Auth-user delete itself also fails (previously silently dropped); Create/Edit forms migrated to RHF/Zod.
+- **Catalog masters:** Brand reorder added (previously the only taxonomy entity with none); reorder-concurrency guards threaded through all four entities; Option Value read-error vs. true-empty state distinguished; Category root selector's hardcoded 200-row cap replaced with search; master-deactivation confirmation warnings added; Option Value hard delete added with a `23503` FK-guard fallback (mirrors the existing Variant hard-delete pattern).
+- **Dashboard/Orders:** the four remaining `.limit(1000)`-capped metrics now use exact counts/bounded pagination; Orders query is now bounded (100/page, cursor pagination, completed/cancelled excluded by default); `useOrderRealtimeNotifications` reuses one `AudioContext` instead of leaking one per notification.
+- **Compact pagination** (`CompactPagination`/`buildPaginationRange`) adopted on Products; Brands/Categories/Option Types/Admin Users still render every page number — tracked, not fixed this round.
+- **Product search** now matches Brand, curated search keywords, and Variant SKU/barcode, not just Product name — still in-memory/bounded per the hook's documented single-store-scale rationale, not a server-side query.
+
+Verification: full `pnpm vitest run` — 490/490 tests passing; `pnpm tsc --noEmit` — 0 errors; `pnpm biome ci` — 0 errors (pre-existing nursery warnings only). No hosted DB or live browser access was available in this round's sandbox (reconfirmed directly, same denial as the "Known blocker" section below) — every item above is verified at the code/regression-test/type-check/lint level only. Full RED→GREEN narrative in `docs/KIOSK_ADMIN_TDD_EXECUTION_LOG.md`'s "Consolidation/correctness repair round" section.
 
 ## Known blocker: hosted DB / browser verification network access
 
