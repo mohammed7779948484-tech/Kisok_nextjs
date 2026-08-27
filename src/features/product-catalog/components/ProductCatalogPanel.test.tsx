@@ -73,6 +73,18 @@ describe('ProductCatalogPanel', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('routes draft activation through Product Edit instead of bypassing shared visibility validation', async () => {
+    testContext.listProducts.mockResolvedValue([baseProduct({ isActive: false })]);
+
+    render(<ProductCatalogPanel />);
+
+    expect(await screen.findByText('Berry Spark')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Review activation Berry Spark' })).toHaveAttribute(
+      'href',
+      '/en/admin/products/product-1/edit',
+    );
+  });
+
   it('activates or deactivates a Product directly from the list', async () => {
     const user = userEvent.setup();
     testContext.listProducts.mockResolvedValue([baseProduct()]);
