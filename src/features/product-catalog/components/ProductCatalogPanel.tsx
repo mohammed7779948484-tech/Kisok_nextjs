@@ -102,8 +102,7 @@ export function ProductCatalogPanel() {
                 <TableHead>Product</TableHead>
                 <TableHead>Brand</TableHead>
                 <TableHead>Variants</TableHead>
-                <TableHead>Available</TableHead>
-                <TableHead>Signal</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -117,16 +116,13 @@ export function ProductCatalogPanel() {
                   <TableCell className="font-mono text-muted-foreground text-sm">
                     {product.variantCount}
                   </TableCell>
-                  <TableCell className="font-mono text-sm">{product.availableStock}</TableCell>
                   <TableCell>
                     <StatusPill
                       className={
-                        product.status === 'Out of stock'
-                          ? 'border-destructive text-destructive'
-                          : undefined
+                        product.isActive ? undefined : 'border-destructive text-destructive'
                       }
                     >
-                      {product.status}
+                      {product.isActive ? 'Active' : 'Inactive'}
                     </StatusPill>
                   </TableCell>
                   <TableCell className="text-right">

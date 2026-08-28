@@ -44,14 +44,15 @@ function baseProduct(overrides: Partial<Record<string, unknown>> = {}) {
 }
 
 describe('ProductCatalogPanel', () => {
-  it('renders hosted product identity and operational stock', async () => {
+  it('renders hosted product identity and operational status', async () => {
     testContext.listProducts.mockResolvedValue([baseProduct()]);
 
     render(<ProductCatalogPanel />);
 
     expect(await screen.findByText('Berry Spark')).toBeInTheDocument();
     expect(screen.getByText('Northline')).toBeInTheDocument();
-    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByText(/local workspace/i)).not.toBeInTheDocument();
   });
 
