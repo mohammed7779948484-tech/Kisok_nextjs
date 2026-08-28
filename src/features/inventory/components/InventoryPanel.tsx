@@ -1,371 +1,366 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InventoryAdjustmentInput } from '@/infrastructure/supabase/inventory/adapter';
-import {
-  KisokButton,
-  KisokDialog,
-  KisokDialogContent,
-  KisokDialogDescription,
-  KisokDialogFooter,
-  KisokDialogHeader,
-  KisokDialogTitle,
-  KisokInput,
-  KisokTextarea,
-  StatusPill,
-} from '@/shared/ui';
+import { KisokButton, KisokInput } from '@/shared/ui';
 
 import { inventoryRepository } from '../repositories';
-import type { InventoryRecord } from '../types';
+import { toSignedInventoryDelta } from '../schemas/inventory-adjustment.schema';
+import type { InventoryHistoryRecord, InventoryRecord } from '../types';
+import { downloadCsv, generateHistoryCsv, generateStockCsv } from '../utils/inventory-export';
+import { InventoryAdjustmentDialog } from './InventoryAdjustmentDialog';
+import { InventoryExportAction } from './InventoryExportAction';
+import { type HistoryFilterType, InventoryHistoryFilter } from './InventoryHistoryFilter';
+import { InventoryHistoryTable } from './InventoryHistoryTable';
+import { InventoryKpiSummary } from './InventoryKpiSummary';
+import { InventoryStockTable } from './InventoryStockTable';
 
-const adjustmentTypes: Array<{
-  value: InventoryAdjustmentInput['adjustmentType'];
-  label: string;
-}> = [
-  { value: 'stock_received', label: 'Stock received' },
-  { value: 'manual_increase', label: 'Manual increase' },
-  { value: 'manual_decrease', label: 'Manual decrease' },
-  { value: 'damaged_or_expired', label: 'Damaged or expired' },
-];
+const ITEMS_PER_PAGE = 15;
 
 export function InventoryPanel() {
-  const [adjustmentOpen, setAdjustmentOpen] = useState(false);
-  const [setQuantityOpen, setSetQuantityOpen] = useState(false);
-  const [adjustmentType, setAdjustmentType] =
-    useState<InventoryAdjustmentInput['adjustmentType']>('stock_received');
-  const [selectedVariantId, setSelectedVariantId] = useState('');
-  const [quantityChange, setQuantityChange] = useState('1');
-  const [finalQuantity, setFinalQuantity] = useState('0');
-  const [reason, setReason] = useState('');
+  const [activeTab, setActiveTab] = useState<'stock' | 'history'>('stock');
   const [inventoryRows, setInventoryRows] = useState<InventoryRecord[]>([]);
+  const [historyRows, setHistoryRows] = useState<InventoryHistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [setQuantitySubmitting, setSetQuantitySubmitting] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // Stock table state
+  const [stockSearch, setStockSearch] = useState('');
+  const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [stockPage, setStockPage] = useState(1);
+
+  // History table state
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyType, setHistoryType] = useState<HistoryFilterType>('all');
+  const [historyPage, setHistoryPage] = useState(1);
+
+  // Modal Dialog state
+  const [dialogTarget, setDialogTarget] = useState<InventoryRecord | null>(null);
+  const [isWorking, setIsWorking] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
+
+  const fetchStock = useCallback(async () => {
     try {
       const rows = await inventoryRepository.list();
       setInventoryRows(rows);
-      setSelectedVariantId((current) => current || rows[0]?.variantId || '');
     } catch {
-      setError('Inventory could not be loaded. Check the connection and try again.');
-    } finally {
-      setLoading(false);
+      setError('Inventory could not be loaded. Check connection and try again.');
     }
   }, []);
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  const fetchHistory = useCallback(async (searchQuery = '') => {
+    setHistoryLoading(true);
+    try {
+      const rows = await inventoryRepository.listHistory(searchQuery);
+      setHistoryRows(rows);
+    } catch {
+      // Non-fatal if history cannot be loaded
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
 
-  async function submitAdjustment() {
-    const enteredQuantity = Number(quantityChange);
-    if (
-      !(selectedVariantId && Number.isInteger(enteredQuantity)) ||
-      enteredQuantity < 1 ||
-      !reason.trim()
-    )
-      return;
-    const quantityDelta =
-      adjustmentType === 'manual_decrease' || adjustmentType === 'damaged_or_expired'
-        ? -enteredQuantity
-        : enteredQuantity;
-
-    setSubmitting(true);
+  const refreshAll = useCallback(async () => {
+    setLoading(true);
     setError(null);
     try {
-      await inventoryRepository.applyAdjustment({
-        adjustmentType,
-        quantityChange: quantityDelta,
-        reason: reason.trim(),
-        variantId: selectedVariantId,
-      });
-      setReason('');
-      setQuantityChange('1');
-      setAdjustmentOpen(false);
-      await refresh();
-    } catch {
-      setError('The inventory adjustment was rejected. Review the quantity and reason.');
+      await Promise.all([fetchStock(), fetchHistory(historySearch)]);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
+    }
+  }, [fetchStock, fetchHistory, historySearch]);
+
+  useEffect(() => {
+    void refreshAll();
+  }, [refreshAll]);
+
+  // Debounced search for history
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void fetchHistory(historySearch);
+      setHistoryPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [historySearch, fetchHistory]);
+
+  // Auto-dismiss success message after 4s
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = setTimeout(() => setSuccessMessage(null), 4000);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
+  // Filtered Stock rows
+  const filteredStockRows = useMemo(() => {
+    const query = stockSearch.trim().toLowerCase();
+    return inventoryRows.filter((row) => {
+      if (onlyLowStock && !row.isLowStock) return false;
+      if (!query) return true;
+      const nameMatch = row.productName.toLowerCase().includes(query);
+      const variantMatch = row.variantName?.toLowerCase().includes(query);
+      const skuMatch = row.sku.toLowerCase().includes(query);
+      const barcodeMatch = row.barcode?.toLowerCase().includes(query);
+      return nameMatch || variantMatch || skuMatch || barcodeMatch;
+    });
+  }, [inventoryRows, stockSearch, onlyLowStock]);
+
+  // Paginated Stock rows
+  const paginatedStockRows = useMemo(() => {
+    const startIndex = (stockPage - 1) * ITEMS_PER_PAGE;
+    return filteredStockRows.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredStockRows, stockPage]);
+
+  // Filtered History rows
+  const filteredHistoryRows = useMemo(() => {
+    const query = historySearch.trim().toLowerCase();
+    return historyRows.filter((row) => {
+      if (historyType !== 'all' && row.type !== historyType) {
+        return false;
+      }
+      if (!query) return true;
+      const reasonMatch = row.reason?.toLowerCase().includes(query);
+      const nameMatch = row.productName.toLowerCase().includes(query);
+      const variantMatch = row.variantName?.toLowerCase().includes(query);
+      const skuMatch = row.sku.toLowerCase().includes(query);
+      return reasonMatch || nameMatch || variantMatch || skuMatch;
+    });
+  }, [historyRows, historySearch, historyType]);
+
+  // Paginated History rows
+  const paginatedHistoryRows = useMemo(() => {
+    const startIndex = (historyPage - 1) * ITEMS_PER_PAGE;
+    return filteredHistoryRows.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredHistoryRows, historyPage]);
+
+  function handleExportStock() {
+    const csv = generateStockCsv(filteredStockRows);
+    downloadCsv('kiosk-inventory-stock.csv', csv);
+  }
+
+  function handleExportHistory() {
+    const csv = generateHistoryCsv(filteredHistoryRows);
+    downloadCsv('kiosk-inventory-history.csv', csv);
+  }
+
+  async function handleApplyChange(values: {
+    adjustmentType: InventoryAdjustmentInput['adjustmentType'];
+    quantityChange: number;
+    reason: string;
+  }) {
+    if (!dialogTarget) return;
+    setIsWorking(true);
+    setDialogError(null);
+    try {
+      const signedDelta = toSignedInventoryDelta(values.adjustmentType, values.quantityChange);
+      await inventoryRepository.applyAdjustment({
+        variantId: dialogTarget.variantId,
+        adjustmentType: values.adjustmentType,
+        quantityChange: signedDelta,
+        reason: values.reason,
+      });
+      setDialogTarget(null);
+      setSuccessMessage('Inventory updated and audit history recorded.');
+      await refreshAll();
+    } catch (caught) {
+      const message =
+        caught instanceof Error
+          ? caught.message
+          : typeof caught === 'object' && caught && 'message' in caught
+            ? String((caught as { message: unknown }).message)
+            : 'The inventory adjustment was rejected. Check your input and try again.';
+      setDialogError(message);
+    } finally {
+      setIsWorking(false);
     }
   }
 
-  async function submitSetQuantity() {
-    const quantity = Number(finalQuantity);
-    if (!(selectedVariantId && Number.isInteger(quantity)) || quantity < 0 || !reason.trim())
-      return;
-    const currentQuantity = inventoryRows.find(
-      (row) => row.variantId === selectedVariantId,
-    )?.currentQuantity;
-    if (currentQuantity === quantity) {
-      setError('Set Quantity must differ from the current quantity. No ledger entry was created.');
-      return;
-    }
-
-    setSetQuantitySubmitting(true);
-    setError(null);
+  async function handleSetQuantity(values: { finalQuantity: number; reason: string }) {
+    if (!dialogTarget) return;
+    setIsWorking(true);
+    setDialogError(null);
     try {
       await inventoryRepository.setQuantity({
-        finalQuantity: quantity,
-        reason: reason.trim(),
-        variantId: selectedVariantId,
+        variantId: dialogTarget.variantId,
+        finalQuantity: values.finalQuantity,
+        reason: values.reason,
       });
-      setReason('');
-      setSetQuantityOpen(false);
-      await refresh();
-    } catch {
-      setError('The final quantity was rejected. Review the quantity and reason.');
+      setDialogTarget(null);
+      setSuccessMessage('Inventory quantity updated and audit history recorded.');
+      await refreshAll();
+    } catch (caught) {
+      const message =
+        caught instanceof Error
+          ? caught.message
+          : typeof caught === 'object' && caught && 'message' in caught
+            ? String((caught as { message: unknown }).message)
+            : 'The final quantity was rejected. Check your input and try again.';
+      setDialogError(message);
     } finally {
-      setSetQuantitySubmitting(false);
+      setIsWorking(false);
     }
   }
 
   return (
-    <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="space-y-6 border border-border bg-card p-5 text-card-foreground sm:p-7">
+      {/* Toast Notification */}
+      {successMessage ? (
+        <aside
+          aria-live="polite"
+          className="fixed top-6 right-6 z-50 flex items-center gap-3 rounded-lg border border-emerald-500/40 bg-card px-4 py-3 shadow-xl ring-1 ring-emerald-500/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4"
+          role="status"
+        >
+          <span className="flex size-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <p className="font-medium text-foreground text-sm">{successMessage}</p>
+          <button
+            aria-label="Close notification"
+            className="ml-2 font-bold text-muted-foreground hover:text-foreground text-xs"
+            onClick={() => setSuccessMessage(null)}
+            type="button"
+          >
+            ✕
+          </button>
+        </aside>
+      ) : null}
+
+      {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
-            Inventory ledger / hosted data
+            Inventory management / Lean V2
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Stock ledger</h1>
+          <h1 className="mt-2 font-black text-4xl tracking-[-0.06em] sm:text-5xl">Stock control</h1>
         </div>
-        <KisokButton
-          disabled={loading || inventoryRows.length === 0}
-          onClick={() => setAdjustmentOpen(true)}
-          variant="outline"
-        >
-          Record adjustment
-        </KisokButton>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <InventoryExportAction
+            activeTab={activeTab}
+            disabled={loading}
+            onExportHistory={handleExportHistory}
+            onExportStock={handleExportStock}
+          />
+        </div>
       </div>
 
-      {loading ? (
-        <p className="mt-6 text-muted-foreground text-sm" role="status">
-          Loading inventory…
-        </p>
-      ) : error && inventoryRows.length === 0 ? (
-        <div className="mt-6 grid gap-3" role="alert">
-          <p className="text-destructive text-sm">{error}</p>
-          <KisokButton onClick={() => void refresh()} variant="outline">
-            Try again
-          </KisokButton>
-        </div>
-      ) : inventoryRows.length === 0 ? (
-        <p className="mt-6 text-muted-foreground text-sm">No inventory records are available.</p>
-      ) : (
-        <div className="mt-6 divide-y divide-border border-border border-y">
-          {inventoryRows.map((row) => (
-            <article
-              className="grid gap-3 py-5 sm:grid-cols-[1.2fr_0.6fr_1fr_auto] sm:items-center"
-              key={row.variantId}
-            >
-              <div>
-                <p className="font-bold">{row.productName}</p>
-                <p className="mt-1 font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                  {row.sku} · Threshold {row.lowStockThreshold}
-                </p>
-              </div>
-              <p className="font-black text-3xl tracking-[-0.06em]">{row.currentQuantity}</p>
-              <p className="text-muted-foreground text-sm">
-                {row.barcode ? `Barcode ${row.barcode}` : 'No barcode'}
-              </p>
-              <div className="flex items-center gap-2">
-                <StatusPill
-                  className={row.isLowStock ? 'border-destructive text-destructive' : undefined}
-                >
-                  {row.isLowStock ? 'Review' : 'Healthy'}
-                </StatusPill>
-                <KisokButton
-                  onClick={() => {
-                    setSelectedVariantId(row.variantId);
-                    setFinalQuantity(String(row.currentQuantity));
-                    setReason('');
-                    setSetQuantityOpen(true);
-                  }}
-                  size="sm"
-                  variant="quiet"
-                >
-                  Set quantity
-                </KisokButton>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      {/* KPI Summary Metrics */}
+      <InventoryKpiSummary rows={inventoryRows} />
 
-      {error && inventoryRows.length > 0 ? (
-        <p className="mt-4 text-destructive text-sm" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {/* Tabs */}
+      <Tabs onValueChange={(v) => setActiveTab(v as 'stock' | 'history')} value={activeTab}>
+        <TabsList className="grid w-full max-w-sm grid-cols-2">
+          <TabsTrigger value="stock">Current stock</TabsTrigger>
+          <TabsTrigger value="history">Adjustment history</TabsTrigger>
+        </TabsList>
 
-      <KisokDialog onOpenChange={setSetQuantityOpen} open={setQuantityOpen}>
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
-              Inventory control / ledger correction
-            </p>
-            <KisokDialogTitle>Set final quantity</KisokDialogTitle>
-            <KisokDialogDescription>
-              Set Quantity writes the difference to the Lean V2 ledger. A reason is required.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          <div className="grid gap-4">
-            <label className="grid gap-2" htmlFor="inventory-final-quantity">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Final quantity
-              </span>
+        {/* TAB 1: Current Stock */}
+        <TabsContent className="mt-6 space-y-4" value="stock">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="w-full sm:max-w-xs">
               <KisokInput
-                id="inventory-final-quantity"
-                inputMode="numeric"
-                min="0"
-                onChange={(event) => setFinalQuantity(event.target.value)}
-                type="number"
-                value={finalQuantity}
+                aria-label="Search stock"
+                onChange={(e) => {
+                  setStockSearch(e.target.value);
+                  setStockPage(1);
+                }}
+                placeholder="Search by product, SKU, or barcode…"
+                value={stockSearch}
               />
-            </label>
-            <label className="grid gap-2" htmlFor="inventory-set-quantity-reason">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Reason
-              </span>
-              <KisokTextarea
-                className="min-h-28 w-full resize-y"
-                id="inventory-set-quantity-reason"
-                onChange={(event) => setReason(event.target.value)}
-                placeholder="Describe the stock count or correction."
-                value={reason}
-              />
-            </label>
+            </div>
+            <KisokButton
+              className={
+                onlyLowStock ? 'border-destructive bg-destructive/10 text-destructive' : ''
+              }
+              onClick={() => {
+                setOnlyLowStock((prev) => !prev);
+                setStockPage(1);
+              }}
+              size="sm"
+              variant={onlyLowStock ? 'outline' : 'quiet'}
+            >
+              {onlyLowStock ? 'Showing low stock only' : 'Filter low stock'}
+            </KisokButton>
           </div>
-          <KisokDialogFooter>
-            <KisokButton
-              disabled={setQuantitySubmitting}
-              onClick={() => setSetQuantityOpen(false)}
-              variant="quiet"
-            >
-              Cancel
-            </KisokButton>
-            <KisokButton
-              disabled={setQuantitySubmitting || !selectedVariantId || !reason.trim()}
-              onClick={() => void submitSetQuantity()}
-            >
-              {setQuantitySubmitting ? 'Saving…' : 'Save quantity'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
 
-      <KisokDialog onOpenChange={setAdjustmentOpen} open={adjustmentOpen}>
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
-              Inventory control / transactional adjustment
+          {loading ? (
+            <p className="py-12 text-center text-muted-foreground text-sm" role="status">
+              Loading inventory stock…
             </p>
-            <KisokDialogTitle>Record stock adjustment</KisokDialogTitle>
-            <KisokDialogDescription>
-              Every change is written through the Lean V2 inventory ledger. A reason is required for
-              Admin adjustments.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          <div className="grid gap-4">
-            <label className="grid gap-2" htmlFor="inventory-adjustment-variant">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Variant
-              </span>
-              <Select
-                onValueChange={(value) => setSelectedVariantId(value ?? '')}
-                value={selectedVariantId}
-              >
-                <SelectTrigger id="inventory-adjustment-variant">
-                  <SelectValue placeholder="Select a variant" />
-                </SelectTrigger>
-                <SelectContent>
-                  {inventoryRows.map((row) => (
-                    <SelectItem key={row.variantId} value={row.variantId}>
-                      {row.productName} · {row.sku}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </label>
-            <label className="grid gap-2" htmlFor="inventory-adjustment-type">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Adjustment type
-              </span>
-              <Select
-                onValueChange={(value) =>
-                  setAdjustmentType(value as InventoryAdjustmentInput['adjustmentType'])
-                }
-                value={adjustmentType}
-              >
-                <SelectTrigger id="inventory-adjustment-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {adjustmentTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </label>
-            <label className="grid gap-2" htmlFor="inventory-adjustment-quantity">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                {adjustmentType === 'manual_decrease' || adjustmentType === 'damaged_or_expired'
-                  ? 'Quantity to remove'
-                  : 'Quantity to add'}
-              </span>
+          ) : error ? (
+            <div className="grid gap-3 py-6" role="alert">
+              <p className="text-destructive text-sm">{error}</p>
+              <KisokButton onClick={() => void refreshAll()} variant="outline">
+                Try again
+              </KisokButton>
+            </div>
+          ) : (
+            <InventoryStockTable
+              currentPage={stockPage}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onAdjust={(row) => {
+                setDialogError(null);
+                setDialogTarget(row);
+              }}
+              onPageChange={setStockPage}
+              rows={paginatedStockRows}
+              totalItems={filteredStockRows.length}
+            />
+          )}
+        </TabsContent>
+
+        {/* TAB 2: Adjustment History */}
+        <TabsContent className="mt-6 space-y-4" value="history">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="w-full sm:max-w-xs">
               <KisokInput
-                id="inventory-adjustment-quantity"
-                inputMode="numeric"
-                min="1"
-                onChange={(event) => setQuantityChange(event.target.value)}
-                type="number"
-                value={quantityChange}
+                aria-label="Search adjustment history"
+                onChange={(e) => {
+                  setHistorySearch(e.target.value);
+                  setHistoryPage(1);
+                }}
+                placeholder="Search by reason or product…"
+                value={historySearch}
               />
-            </label>
-            <label className="grid gap-2" htmlFor="inventory-adjustment-reason">
-              <span className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
-                Reason
-              </span>
-              <KisokTextarea
-                className="min-h-28 w-full resize-y"
-                id="inventory-adjustment-reason"
-                onChange={(event) => setReason(event.target.value)}
-                placeholder="Describe the stock count or received delivery."
-                value={reason}
-              />
-            </label>
+            </div>
+            <InventoryHistoryFilter
+              onTypeChange={(type) => {
+                setHistoryType(type);
+                setHistoryPage(1);
+              }}
+              selectedType={historyType}
+            />
           </div>
-          <KisokDialogFooter>
-            <KisokButton
-              disabled={submitting}
-              onClick={() => setAdjustmentOpen(false)}
-              variant="quiet"
-            >
-              Cancel
-            </KisokButton>
-            <KisokButton
-              disabled={submitting || !selectedVariantId || !reason.trim()}
-              onClick={() => void submitAdjustment()}
-            >
-              {submitting ? 'Saving…' : 'Save adjustment'}
-            </KisokButton>
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
+
+          {historyLoading && historyRows.length === 0 ? (
+            <p className="py-12 text-center text-muted-foreground text-sm" role="status">
+              Loading adjustment history…
+            </p>
+          ) : (
+            <InventoryHistoryTable
+              currentPage={historyPage}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={setHistoryPage}
+              rows={paginatedHistoryRows}
+              totalItems={filteredHistoryRows.length}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Unified Adjustment Modal */}
+      <InventoryAdjustmentDialog
+        error={dialogError}
+        isOpen={Boolean(dialogTarget)}
+        isWorking={isWorking}
+        onApplyChange={handleApplyChange}
+        onCancel={() => {
+          if (!isWorking) setDialogTarget(null);
+        }}
+        onSetQuantity={handleSetQuantity}
+        target={dialogTarget}
+      />
     </section>
   );
 }

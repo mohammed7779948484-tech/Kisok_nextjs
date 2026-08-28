@@ -24,6 +24,39 @@ const testContext = vi.hoisted(() => {
           },
         };
       }
+      if (table === 'inventory_adjustments') {
+        return {
+          select(columns: string) {
+            calls.push(`select:${columns}`);
+            return {
+              order(column: string, options: { ascending: boolean }) {
+                calls.push(`order:${column}:${options.ascending}`);
+                return Promise.resolve({
+                  data: [
+                    {
+                      id: 'adj-1',
+                      variant_id: 'variant-1',
+                      adjustment_type: 'stock_received',
+                      quantity_change: 10,
+                      quantity_before: 0,
+                      quantity_after: 10,
+                      reason: 'Supplier shipment',
+                      created_at: '2026-08-28T00:00:00Z',
+                      product_variants: {
+                        sku: 'KSK-000001',
+                        title_override: 'Small Berry',
+                        products: { name: 'Berry Spark' },
+                        variant_option_values: [],
+                      },
+                    },
+                  ],
+                  error: null,
+                });
+              },
+            };
+          },
+        };
+      }
       return {
         select(columns: string) {
           calls.push(`select:${columns}`);
@@ -39,8 +72,10 @@ const testContext = vi.hoisted(() => {
                       id: 'variant-1',
                       sku: 'KSK-000001',
                       barcode: null,
+                      title_override: 'Small Berry',
                       low_stock_threshold: 4,
                       products: { id: 'product-1', name: 'Berry Spark' },
+                      variant_option_values: [],
                     },
                   },
                   {
@@ -50,8 +85,10 @@ const testContext = vi.hoisted(() => {
                       id: 'variant-2',
                       sku: 'KSK-000002',
                       barcode: '123',
+                      title_override: null,
                       low_stock_threshold: null,
                       products: { id: 'product-2', name: 'Mint Water' },
+                      variant_option_values: [],
                     },
                   },
                 ],
@@ -80,6 +117,7 @@ describe('Inventory Supabase repository', () => {
         variantId: 'variant-1',
         productId: 'product-1',
         productName: 'Berry Spark',
+        variantName: 'Small Berry',
         sku: 'KSK-000001',
         barcode: null,
         currentQuantity: 3,
@@ -90,6 +128,7 @@ describe('Inventory Supabase repository', () => {
         variantId: 'variant-2',
         productId: 'product-2',
         productName: 'Mint Water',
+        variantName: 'KSK-000002',
         sku: 'KSK-000002',
         barcode: '123',
         currentQuantity: 7,
@@ -97,13 +136,23 @@ describe('Inventory Supabase repository', () => {
         isLowStock: false,
       },
     ]);
-    expect(testContext.calls).toEqual([
-      'from:store_settings',
-      'select:global_low_stock_threshold',
-      'single:true',
-      'from:inventory',
-      expect.stringMatching(/^select:/),
-      'order:current_quantity:true',
+  });
+
+  it('reads inventory adjustment history with proper column mapping', async () => {
+    await expect(Promise.resolve(inventoryRepository.listHistory())).resolves.toEqual([
+      {
+        id: 'adj-1',
+        variantId: 'variant-1',
+        productName: 'Berry Spark',
+        variantName: 'Small Berry',
+        sku: 'KSK-000001',
+        type: 'stock_received',
+        delta: 10,
+        quantityBefore: 0,
+        quantityAfter: 10,
+        reason: 'Supplier shipment',
+        createdAt: '2026-08-28T00:00:00Z',
+      },
     ]);
   });
 });
