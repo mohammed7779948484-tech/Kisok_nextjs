@@ -10,6 +10,7 @@ const testContext = vi.hoisted(() => ({
   listBrands: vi.fn(),
   listCategories: vi.fn(),
   listOptionTypes: vi.fn(),
+  routerPush: vi.fn(),
   routerReplace: vi.fn(),
 }));
 
@@ -29,7 +30,7 @@ vi.mock('@/features/media-library/repositories', () => ({
 
 vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: testContext.routerPush,
     replace: testContext.routerReplace,
   }),
 }));
@@ -54,7 +55,7 @@ function createWrapper() {
 }
 
 describe('useProductEditorWorkflow', () => {
-  it('creates one draft with its selected cover asset and then navigates to its edit route', async () => {
+  it('creates one draft with its selected cover asset and then navigates to its edit route or catalog', async () => {
     testContext.listAssets.mockResolvedValue([]);
     testContext.listBrands.mockResolvedValue([]);
     testContext.listCategories.mockResolvedValue([]);
@@ -70,7 +71,7 @@ describe('useProductEditorWorkflow', () => {
       result.current.form.setValue('name', 'Citrus Spark');
       result.current.form.setValue('coverMediaAssetId', 'media-1');
     });
-    await act(async () => result.current.save());
+    await act(async () => result.current.save('return'));
 
     expect(testContext.createProduct).toHaveBeenCalledTimes(1);
     expect(testContext.createProduct).toHaveBeenCalledWith(
@@ -80,7 +81,9 @@ describe('useProductEditorWorkflow', () => {
         name: 'Citrus Spark',
       }),
     );
-    expect(testContext.routerReplace).toHaveBeenCalledWith('/admin/products/product-1/edit');
+    expect(testContext.routerPush).toHaveBeenCalledWith(
+      '/admin/products?toast=created&name=Citrus%20Spark',
+    );
   });
 
   it('blocks another create and exposes the saved draft identifier after category assignment fails', async () => {

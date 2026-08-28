@@ -161,7 +161,7 @@ export function useProductEditorWorkflow({ mode, productId }: ProductEditorWorkf
     data.references.status === 'ready' &&
     (mode === 'create' || data.categoryIds.status === 'ready');
 
-  async function save() {
+  async function save(target: 'return' | 'continue' = 'return') {
     await form.handleSubmit(async (valuesToSave) => {
       if (!canWriteRelations) {
         setSaveError(
@@ -191,7 +191,13 @@ export function useProductEditorWorkflow({ mode, productId }: ProductEditorWorkf
             shortDescription: optionalText(valuesToSave.shortDescription),
           });
           form.reset(productEditorDefaultValues);
-          router.replace(`/admin/products/${created.id}/edit`);
+          if (target === 'continue') {
+            router.push(`/admin/products/${created.id}/edit?toast=created&tab=variants`);
+          } else {
+            router.push(
+              `/admin/products?toast=created&name=${encodeURIComponent(valuesToSave.name)}`,
+            );
+          }
           return;
         }
         if (!productId) throw new Error('Missing Product id.');
@@ -210,7 +216,13 @@ export function useProductEditorWorkflow({ mode, productId }: ProductEditorWorkf
         if (persisted) {
           form.reset(toFormValues({ ...persisted, ...valuesToSave }, valuesToSave.categoryIds));
         }
-        setSaveMessage('Product saved.');
+        if (target === 'return') {
+          router.push(
+            `/admin/products?toast=updated&name=${encodeURIComponent(valuesToSave.name)}`,
+          );
+          return;
+        }
+        setSaveMessage('Product changes saved successfully.');
         await data.refetch();
       } catch (error) {
         if (error instanceof ProductDraftCreatedError) {

@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+import { CircleCheckIcon } from 'lucide-react';
 
 import { MediaPickerDialog } from '@/features/media-library/components/MediaPickerDialog';
 import { VariantMediaPicker } from '@/features/media-library/components/VariantMediaPicker';
@@ -53,6 +55,7 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
   const confirmLeave = useConfirmLeave();
   const { upload, uploading, error: uploadError } = useMediaUpload();
   const [activeTab, setActiveTab] = useState<ProductEditorTab>('details');
+  const [customNotice, setCustomNotice] = useState<string | null>(null);
   const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
   const [variantDialog, setVariantDialog] = useState<VariantDialogState>({ open: false });
   const [optionsVariant, setOptionsVariant] = useState<VariantRecord | null>(null);
@@ -60,8 +63,22 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
   const variantDeletion = useVariantDeletion({
     onCompleted: async () => {
       await workflow.data.refetchVariants();
+      setCustomNotice('Variant deleted successfully.');
     },
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('toast') === 'created') {
+      setCustomNotice(
+        'Product draft created successfully. You can now add and configure Variants.',
+      );
+    }
+    if (params.get('tab') === 'variants') {
+      setActiveTab('variants');
+    }
+  }, []);
 
   const loadError = getLoadError(mode, workflow.data);
   const isLoading =
@@ -82,7 +99,7 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
         isSaving={workflow.isSaving}
         mode={mode}
         onLeave={workflow.leaveEditor}
-        onSave={() => void workflow.save()}
+        onSave={(target) => void workflow.save(target)}
         productId={productId}
         productName={workflow.data.product.data?.name}
         saveDisabled={!workflow.canSave}
@@ -125,10 +142,26 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
           ) : null}
         </div>
       ) : null}
-      {workflow.saveMessage ? (
-        <p className="mt-6 text-sm text-foreground" role="status">
-          {workflow.saveMessage}
-        </p>
+      {workflow.saveMessage || customNotice ? (
+        <div
+          className="mt-6 flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-400"
+          role="status"
+        >
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <CircleCheckIcon className="size-4 shrink-0 text-emerald-400" />
+            <span>{workflow.saveMessage ?? customNotice}</span>
+          </div>
+          <button
+            aria-label="Dismiss notice"
+            className="text-muted-foreground hover:text-foreground cursor-pointer text-xs"
+            onClick={() => {
+              setCustomNotice(null);
+            }}
+            type="button"
+          >
+            ✕
+          </button>
+        </div>
       ) : null}
 
       {!(isLoading || loadError) && workflow.data.references.status === 'ready' ? (
@@ -205,6 +238,7 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
           onCreate={async (input) => {
             await productCatalogRepository.createVariant(input);
             await refreshVariants();
+            setCustomNotice('Variant created successfully.');
           }}
           onOpenChange={(open) => {
             if (!open) setVariantDialog({ open: false });
@@ -222,6 +256,7 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
           onUpdate={async (id, input) => {
             await productCatalogRepository.updateVariant(id, input);
             await refreshVariants();
+            setCustomNotice('Variant updated successfully.');
           }}
           open
           variant={variantDialog.variant}
@@ -232,7 +267,10 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
           onOpenChange={(open) => {
             if (!open) setOptionsVariant(null);
           }}
-          onSaved={() => void workflow.data.refetchVariantOptions()}
+          onSaved={() => {
+            void workflow.data.refetchVariantOptions();
+            setCustomNotice('Variant options saved successfully.');
+          }}
           open
           optionTypes={workflow.data.references.optionTypes}
           siblingVariants={workflow.data.variants.data

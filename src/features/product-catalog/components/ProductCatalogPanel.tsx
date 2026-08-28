@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { CircleCheckIcon } from 'lucide-react';
+
 import { buttonVariants } from '@/components/ui/button';
 import {
   Table,
@@ -30,11 +32,32 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
 export function ProductCatalogPanel() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
+  const [notice, setNotice] = useState<string | null>(null);
   const debouncedSearch = useDebouncedValue(searchInput, 300);
   const { products, total, pageSize, isLoading, isError, refetch } = useProductsList({
     page,
     search: debouncedSearch,
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const toastType = params.get('toast');
+    const name = params.get('name');
+    if (toastType === 'created') {
+      setNotice(
+        name
+          ? `Product "${name}" was created successfully.`
+          : 'Product draft was created successfully.',
+      );
+    } else if (toastType === 'updated') {
+      setNotice(
+        name
+          ? `Product "${name}" was updated successfully.`
+          : 'Product changes were saved successfully.',
+      );
+    }
+  }, []);
 
   async function toggleActive(product: ProductRecord) {
     await productCatalogRepository.updateProduct(product.id, { isActive: !product.isActive });
@@ -63,6 +86,26 @@ export function ProductCatalogPanel() {
           </KisokButton>
         </div>
       </div>
+
+      {notice ? (
+        <div
+          className="mt-6 flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-400"
+          role="status"
+        >
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <CircleCheckIcon className="size-4 shrink-0 text-emerald-400" />
+            <span>{notice}</span>
+          </div>
+          <button
+            aria-label="Dismiss notice"
+            className="text-muted-foreground hover:text-foreground cursor-pointer text-xs"
+            onClick={() => setNotice(null)}
+            type="button"
+          >
+            ✕
+          </button>
+        </div>
+      ) : null}
 
       <div className="mt-6">
         <label className="sr-only" htmlFor="product-search">

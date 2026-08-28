@@ -9,7 +9,7 @@ type ProductEditorHeaderProps = {
   isSaving: boolean;
   mode: 'create' | 'edit' | 'show';
   onLeave: () => void;
-  onSave: () => void;
+  onSave: (target?: 'return' | 'continue') => void;
   productId?: string;
   productName?: string;
   saveDisabled: boolean;
@@ -41,7 +41,7 @@ export function ProductEditorHeader({
             : 'Manage Product identity, classification, Media, and Variants in one dedicated workflow.'}
         </p>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <KisokButton onClick={onLeave} type="button" variant="outline">
           Back to Products
         </KisokButton>
@@ -54,9 +54,37 @@ export function ProductEditorHeader({
           </Link>
         ) : null}
         {!isReadOnly ? (
-          <KisokButton disabled={saveDisabled} onClick={onSave} type="button">
-            {isSaving ? 'Saving…' : mode === 'create' ? 'Save draft' : 'Save Product'}
-          </KisokButton>
+          <>
+            {mode === 'create' ? (
+              <>
+                <KisokButton
+                  disabled={saveDisabled}
+                  onClick={() => onSave('continue')}
+                  type="button"
+                  variant="outline"
+                >
+                  {isSaving ? 'Saving…' : 'Save & Add Variants'}
+                </KisokButton>
+                <KisokButton disabled={saveDisabled} onClick={() => onSave('return')} type="button">
+                  {isSaving ? 'Saving…' : 'Save draft'}
+                </KisokButton>
+              </>
+            ) : (
+              <>
+                <KisokButton
+                  disabled={saveDisabled}
+                  onClick={() => onSave('continue')}
+                  type="button"
+                  variant="outline"
+                >
+                  {isSaving ? 'Saving…' : 'Save Changes'}
+                </KisokButton>
+                <KisokButton disabled={saveDisabled} onClick={() => onSave('return')} type="button">
+                  {isSaving ? 'Saving…' : 'Save & Return'}
+                </KisokButton>
+              </>
+            )}
+          </>
         ) : null}
       </div>
     </header>
