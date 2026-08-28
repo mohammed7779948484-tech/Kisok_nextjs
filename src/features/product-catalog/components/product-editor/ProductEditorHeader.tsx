@@ -54,37 +54,13 @@ export function ProductEditorHeader({
           </Link>
         ) : null}
         {!isReadOnly ? (
-          <>
-            {mode === 'create' ? (
-              <>
-                <KisokButton
-                  disabled={saveDisabled}
-                  onClick={() => onSave('continue')}
-                  type="button"
-                  variant="outline"
-                >
-                  {isSaving ? 'Saving…' : 'Save & Add Variants'}
-                </KisokButton>
-                <KisokButton disabled={saveDisabled} onClick={() => onSave('return')} type="button">
-                  {isSaving ? 'Saving…' : 'Save draft'}
-                </KisokButton>
-              </>
-            ) : (
-              <>
-                <KisokButton
-                  disabled={saveDisabled}
-                  onClick={() => onSave('continue')}
-                  type="button"
-                  variant="outline"
-                >
-                  {isSaving ? 'Saving…' : 'Save Changes'}
-                </KisokButton>
-                <KisokButton disabled={saveDisabled} onClick={() => onSave('return')} type="button">
-                  {isSaving ? 'Saving…' : 'Save & Return'}
-                </KisokButton>
-              </>
-            )}
-          </>
+          <KisokButton
+            disabled={saveDisabled}
+            onClick={() => onSave(mode === 'create' ? 'return' : 'continue')}
+            type="button"
+          >
+            {isSaving ? 'Saving…' : mode === 'create' ? 'Save draft' : 'Save Product'}
+          </KisokButton>
         ) : null}
       </div>
     </header>
