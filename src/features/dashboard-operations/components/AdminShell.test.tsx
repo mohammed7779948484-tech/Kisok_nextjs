@@ -48,7 +48,7 @@ describe('AdminShell', () => {
     );
 
     expect(screen.queryByText('Connected')).not.toBeInTheDocument();
-    expect(screen.getByText('Supabase-backed')).toBeInTheDocument();
+    expect(screen.getByText('Live')).toBeInTheDocument();
   });
 
   it('keeps administration navigation compact and horizontally reachable below desktop', () => {

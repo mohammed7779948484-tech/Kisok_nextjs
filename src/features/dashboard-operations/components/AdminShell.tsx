@@ -89,9 +89,7 @@ export function AdminShell({
                 KISOK<span className="text-primary">.</span>
               </p>
             </div>
-            <StatusPill title="Access is verified on each data operation, not by a live connection probe.">
-              Supabase-backed
-            </StatusPill>
+            <StatusPill tone="success">Live</StatusPill>
           </div>
           <nav
             className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:mt-8 lg:grid lg:gap-1 lg:overflow-visible lg:pb-0"

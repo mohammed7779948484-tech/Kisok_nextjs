@@ -13,19 +13,19 @@ export const LOCAL_AUTH_USERS: LocalAuthUserSpec[] = [
   {
     email: 'admin@kiosk.local',
     password: 'KioskLocalAdmin123!',
-    displayName: 'Local Admin',
+    displayName: 'Admin',
     role: 'admin',
   },
   {
     email: 'preparation@kiosk.local',
     password: 'KioskLocalPreparation123!',
-    displayName: 'Local Preparation',
+    displayName: 'Preparation Staff',
     role: 'preparation',
   },
   {
     email: 'customer@kiosk.local',
     password: 'KioskLocalCustomer123!',
-    displayName: 'Local Customer',
+    displayName: 'Customer',
     role: 'customer',
   },
 ];

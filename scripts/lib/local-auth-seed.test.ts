@@ -5,7 +5,7 @@ import { assertLocalApiUrl, seedLocalAuthUser } from './local-auth-seed';
 const spec = {
   email: 'admin@kiosk.local',
   password: 'KioskLocalAdmin123!',
-  displayName: 'Local Admin',
+  displayName: 'Admin',
   role: 'admin' as const,
 };
 

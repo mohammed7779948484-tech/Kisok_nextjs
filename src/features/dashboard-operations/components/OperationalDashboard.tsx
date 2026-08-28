@@ -21,8 +21,8 @@ export async function OperationalDashboard() {
   if (result.status === 'unconfigured') {
     return (
       <DashboardState
-        title="Local database is not configured"
-        body="Set the local Supabase URL and publishable key, then run the Lean V2 verification flow before using the Admin workspace."
+        title="Database is not configured"
+        body="Set the Supabase URL and publishable key, then verify the connection before using the Admin workspace."
       />
     );
   }
@@ -31,7 +31,7 @@ export async function OperationalDashboard() {
     return (
       <DashboardState
         title="Operational data is unavailable"
-        body="The workspace could not read the local Lean V2 data. Check the database status and try again."
+        body="The workspace could not read operational data. Check the database status and try again."
       />
     );
   }
