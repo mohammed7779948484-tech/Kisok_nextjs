@@ -3,8 +3,15 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 import { isProduction } from './src/lib/config/constants';
 
+const isVercelBuild = process.env.VERCEL === '1';
+
 const nextConfig: NextConfig = {
-  output: isProduction ? 'standalone' : undefined,
+  // Next.js 16.3.x + Vercel's build adapter currently conflicts with
+  // `output: 'standalone'` and can fail during onBuildComplete because
+  // `.next/next-server.js.nft.json` is not emitted. Vercel does not need the
+  // standalone artifact, so keep it only for non-Vercel production builds
+  // (for example Docker/self-hosted deployments).
+  output: isProduction && !isVercelBuild ? 'standalone' : undefined,
   reactCompiler: false,
   poweredByHeader: false,
   images: {
