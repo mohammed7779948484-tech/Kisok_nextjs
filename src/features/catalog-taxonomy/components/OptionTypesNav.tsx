@@ -57,7 +57,7 @@ export function OptionTypesNav({
   onPageChange,
 }: OptionTypesNavProps) {
   return (
-    <div className="min-w-0 border border-border bg-card p-5">
+    <div className="min-w-0 rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center justify-between border-border border-b pb-4">
         <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
           Option Types ({total})
@@ -95,11 +95,7 @@ export function OptionTypesNav({
                     </button>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    <StatusPill
-                      className={
-                        optionType.isActive ? undefined : 'border-destructive text-destructive'
-                      }
-                    >
+                    <StatusPill tone={optionType.isActive ? 'success' : 'destructive'}>
                       {optionType.isActive ? 'Active' : 'Inactive'}
                     </StatusPill>
                   </TableCell>

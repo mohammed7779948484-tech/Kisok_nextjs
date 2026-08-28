@@ -17,5 +17,12 @@ describe('shared UI shadcn bridge', () => {
     render(<StatusPill>Ready for review</StatusPill>);
 
     expect(screen.getByText('Ready for review')).toHaveAttribute('data-slot', 'badge');
+    expect(screen.getByText('Ready for review')).toHaveClass('border-border');
+  });
+
+  it('exposes semantic status tones without caller-owned color values', () => {
+    render(<StatusPill tone="success">Active</StatusPill>);
+
+    expect(screen.getByText('Active')).toHaveClass('text-success');
   });
 });

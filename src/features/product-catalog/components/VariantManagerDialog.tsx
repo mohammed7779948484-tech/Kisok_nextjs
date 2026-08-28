@@ -96,9 +96,7 @@ export function VariantManagerDialog({
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <StatusPill
-                    className={variant.isActive ? undefined : 'border-destructive text-destructive'}
-                  >
+                  <StatusPill tone={variant.isActive ? 'success' : 'destructive'}>
                     {variant.isActive ? 'Active' : 'Inactive'}
                   </StatusPill>
                   <KisokButton

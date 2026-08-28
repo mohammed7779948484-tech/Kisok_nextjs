@@ -32,25 +32,15 @@ export function ProductVariantCard({
   const displayName = deriveVariantDisplayName(variant.titleOverride, selections, variant.sku);
 
   return (
-    <article className="grid gap-4 border border-border p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <article className="grid gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/25 hover:bg-accent/15 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-bold text-base">{displayName}</h3>
-          <StatusPill
-            className={
-              variant.isActive ? undefined : 'border-amber-500 text-amber-700 dark:text-amber-300'
-            }
-          >
+          <StatusPill tone={variant.isActive ? 'success' : 'warning'}>
             {variant.isActive ? 'Active' : 'Draft'}
           </StatusPill>
           {eligibility ? (
-            <StatusPill
-              className={
-                eligibility.isCustomerEligible
-                  ? 'border-emerald-600 text-emerald-700 dark:text-emerald-300'
-                  : 'border-amber-500 text-amber-700 dark:text-amber-300'
-              }
-            >
+            <StatusPill tone={eligibility.isCustomerEligible ? 'success' : 'warning'}>
               {eligibility.isCustomerEligible ? 'Customer eligible' : 'Customer hidden'}
             </StatusPill>
           ) : null}
@@ -72,9 +62,7 @@ export function ProductVariantCard({
           </div>
         </dl>
         {eligibility && !eligibility.isCustomerEligible ? (
-          <p className="mt-3 text-amber-700 text-xs dark:text-amber-300">
-            {eligibility.reasons.join(' ')}
-          </p>
+          <p className="mt-3 text-warning text-xs">{eligibility.reasons.join(' ')}</p>
         ) : null}
         {selections.length > 0 ? (
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -102,7 +90,7 @@ export function ProductVariantCard({
           <KisokButton onClick={onEdit} size="sm" type="button" variant="quiet">
             Edit
           </KisokButton>
-          <KisokButton onClick={onDelete} size="sm" type="button" variant="quiet">
+          <KisokButton onClick={onDelete} size="sm" type="button" variant="destructive">
             Delete
           </KisokButton>
         </div>

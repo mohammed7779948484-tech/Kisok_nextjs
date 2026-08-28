@@ -86,7 +86,7 @@ export function ProductClassificationSection({
             </SelectContent>
           </Select>
           {brands.find((brand) => brand.id === selectedBrandId && !brand.isActive) ? (
-            <p className="text-amber-700 text-sm dark:text-amber-300">
+            <p className="text-warning text-sm">
               This Product keeps an inactive Brand assignment and cannot be customer-visible until
               it is changed or reactivated.
             </p>

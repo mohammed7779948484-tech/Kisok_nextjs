@@ -70,7 +70,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={getLocaleDirection(locale)} suppressHydrationWarning={true}>
-      <body className={`${livvic.variable} bg-light antialiased dark:bg-dark`}>
+      <body className={`${livvic.variable} antialiased`}>
         <RootProvider locale={locale} messages={messages} timeZone={timeZone}>
           <HttpClientBundleSentinel />
           {children}

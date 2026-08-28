@@ -34,7 +34,9 @@ export function ProductEditorHeader({
           Product catalog /{' '}
           {mode === 'create' ? 'new draft' : mode === 'show' ? 'read-only' : 'edit'}
         </p>
-        <h1 className="mt-2 font-black text-4xl tracking-[-0.08em] sm:text-5xl">{title}</h1>
+        <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+          {title}
+        </h1>
         <p className="mt-3 max-w-2xl text-muted-foreground text-sm">
           {mode === 'create'
             ? 'Save an inactive Product draft first. Configure Variants and customer visibility before activation.'

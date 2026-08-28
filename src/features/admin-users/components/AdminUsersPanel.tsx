@@ -476,25 +476,25 @@ export function AdminUsersPanel() {
   }
 
   return (
-    <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             Access control / hosted data
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Team access</h1>
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+            Team access
+          </h1>
         </div>
         <div className="flex gap-2">
-          <KisokButton onClick={() => setCreateOpen(true)} variant="outline">
-            Add team member
-          </KisokButton>
+          <KisokButton onClick={() => setCreateOpen(true)}>Add team member</KisokButton>
           <KisokButton onClick={() => void refresh()} variant="outline">
             Refresh
           </KisokButton>
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 max-w-lg">
         <Label className="sr-only" htmlFor="admin-user-search">
           Search team
         </Label>
@@ -526,10 +526,10 @@ export function AdminUsersPanel() {
         <div className="mt-6 divide-y divide-border border-border border-y">
           {users.map((user) => (
             <article
-              className="grid gap-3 py-5 sm:grid-cols-[auto_1fr_0.7fr_auto] sm:items-center"
+              className="grid gap-3 py-5 transition-colors hover:bg-accent/20 sm:grid-cols-[auto_1fr_0.7fr_auto] sm:items-center sm:px-3"
               key={user.id}
             >
-              <div className="flex size-10 items-center justify-center bg-muted font-black text-sm">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 font-black text-primary text-sm">
                 {user.displayName
                   .split(' ')
                   .map((part) => part[0])
@@ -543,9 +543,7 @@ export function AdminUsersPanel() {
                 {roleLabel(user.role)}
               </p>
               <div className="flex flex-wrap items-center justify-end gap-2">
-                <StatusPill
-                  className={user.isActive ? undefined : 'border-destructive text-destructive'}
-                >
+                <StatusPill tone={user.isActive ? 'success' : 'destructive'}>
                   {user.isActive ? 'Active' : 'Paused'}
                 </StatusPill>
                 <KisokButton

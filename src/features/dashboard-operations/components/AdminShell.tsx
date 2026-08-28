@@ -4,6 +4,19 @@ import { useEffect, useState } from 'react';
 
 import { usePathname, useRouter } from 'next/navigation';
 
+import {
+  BoxesIcon,
+  GalleryVerticalEndIcon,
+  GaugeIcon,
+  ImagesIcon,
+  Layers3Icon,
+  PackageSearchIcon,
+  Settings2Icon,
+  ShapesIcon,
+  ShoppingBagIcon,
+  UsersIcon,
+} from 'lucide-react';
+
 import { Button, buttonVariants } from '@/components/ui/button';
 import { OrderNotificationCenter, useOrderRealtimeNotifications } from '@/features/orders';
 import { signOutCurrentUser } from '@/infrastructure/supabase/auth/browser';
@@ -11,16 +24,16 @@ import { GuardedLink } from '@/shared/navigation/UnsavedChangesGuard';
 import { StatusPill } from '@/shared/ui';
 
 const navigation = [
-  { href: '/admin', label: 'Overview' },
-  { href: '/admin/products', label: 'Products' },
-  { href: '/admin/catalog/brands', label: 'Brands' },
-  { href: '/admin/catalog/categories', label: 'Categories' },
-  { href: '/admin/catalog/options', label: 'Option library' },
-  { href: '/admin/inventory', label: 'Inventory' },
-  { href: '/admin/orders', label: 'Orders' },
-  { href: '/admin/media', label: 'Media' },
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/settings', label: 'Settings' },
+  { href: '/admin', icon: GaugeIcon, label: 'Overview' },
+  { href: '/admin/products', icon: PackageSearchIcon, label: 'Products' },
+  { href: '/admin/catalog/brands', icon: ShapesIcon, label: 'Brands' },
+  { href: '/admin/catalog/categories', icon: Layers3Icon, label: 'Categories' },
+  { href: '/admin/catalog/options', icon: BoxesIcon, label: 'Option library' },
+  { href: '/admin/inventory', icon: GalleryVerticalEndIcon, label: 'Inventory' },
+  { href: '/admin/orders', icon: ShoppingBagIcon, label: 'Orders' },
+  { href: '/admin/media', icon: ImagesIcon, label: 'Media' },
+  { href: '/admin/users', icon: UsersIcon, label: 'Users' },
+  { href: '/admin/settings', icon: Settings2Icon, label: 'Settings' },
 ] as const;
 
 export function AdminShell({
@@ -65,20 +78,25 @@ export function AdminShell({
 
   return (
     <main className="min-h-dvh bg-background text-foreground">
-      <div className="mx-auto grid min-h-dvh max-w-[1720px] lg:grid-cols-[248px_1fr]">
-        <aside className="border-border border-b bg-sidebar p-5 lg:border-r lg:border-b-0 lg:p-6">
+      <div className="mx-auto grid min-h-dvh max-w-[1800px] lg:grid-cols-[264px_1fr]">
+        <aside className="border-border border-b bg-sidebar/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-dvh lg:overflow-y-auto lg:border-r lg:border-b-0 lg:p-6">
           <div className="flex items-start justify-between gap-4 lg:block">
             <div>
               <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
                 Kisok / Admin
               </p>
-              <p className="mt-2 font-black text-3xl tracking-[-0.08em]">KISOK.</p>
+              <p className="mt-2 font-black text-3xl tracking-[-0.06em]">
+                KISOK<span className="text-primary">.</span>
+              </p>
             </div>
             <StatusPill title="Access is verified on each data operation, not by a live connection probe.">
               Supabase-backed
             </StatusPill>
           </div>
-          <nav className="mt-8 grid gap-1" aria-label="Administration sections">
+          <nav
+            className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:mt-8 lg:grid lg:gap-1 lg:overflow-visible lg:pb-0"
+            aria-label="Administration sections"
+          >
             {navigation.map((item) => {
               const href = `/${locale}${item.href}`;
               const active = item.href === '/admin' ? pathname === href : pathname.startsWith(href);
@@ -88,15 +106,19 @@ export function AdminShell({
                 <GuardedLink
                   aria-current={active ? 'page' : undefined}
                   className={buttonVariants({
-                    className: 'h-10 w-full justify-between rounded-none px-3 text-left',
+                    className:
+                      'h-10 min-w-fit justify-between gap-2 rounded-lg px-3 text-left shadow-none lg:w-full',
                     variant: active ? 'secondary' : 'ghost',
                   })}
                   href={href}
                   key={item.href}
                 >
-                  <span>{item.label}</span>
+                  <span className="flex items-center gap-2.5">
+                    <item.icon aria-hidden="true" className="size-4" />
+                    <span>{item.label}</span>
+                  </span>
                   {isOrders && unreadCount > 0 ? (
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 font-mono text-[10px] font-bold text-white animate-pulse">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success font-mono text-[10px] font-bold text-background motion-safe:animate-pulse">
                       {unreadCount}
                     </span>
                   ) : null}
@@ -107,7 +129,7 @@ export function AdminShell({
         </aside>
 
         <div className="min-w-0">
-          <header className="flex items-center justify-between gap-4 border-border border-b px-5 py-4 sm:px-8">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-border border-b bg-background/85 px-5 py-3 backdrop-blur-xl sm:px-8">
             <div>
               <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
                 Admin workspace
@@ -134,7 +156,7 @@ export function AdminShell({
               {signOutError}
             </p>
           ) : null}
-          <div className="p-5 sm:p-8 lg:p-10">{children}</div>
+          <div className="p-4 sm:p-7 lg:p-10">{children}</div>
         </div>
       </div>
     </main>

@@ -52,7 +52,7 @@ export function InventoryHistoryTable({
 
   if (rows.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-14 text-center">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/25 px-5 py-14 text-center">
         <p className="font-semibold text-foreground text-sm">
           No adjustment history records available
         </p>
@@ -65,7 +65,7 @@ export function InventoryHistoryTable({
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-md border border-border bg-card">
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
@@ -126,7 +126,7 @@ export function InventoryHistoryTable({
                   <TableCell className="text-right">
                     <span
                       className={`font-bold font-mono text-sm ${
-                        isPositive ? 'text-emerald-500' : 'text-destructive'
+                        isPositive ? 'text-success' : 'text-destructive'
                       }`}
                     >
                       {isPositive ? `+${row.delta}` : row.delta}
@@ -153,7 +153,7 @@ export function InventoryHistoryTable({
       </div>
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-between border-border border-t pt-4">
+        <div className="flex flex-col gap-3 border-border border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-muted-foreground text-xs">
             Showing {(currentPage - 1) * itemsPerPage + 1}–
             {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} entries

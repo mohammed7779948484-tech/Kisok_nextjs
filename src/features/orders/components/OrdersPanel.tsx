@@ -130,13 +130,15 @@ export function OrdersPanel() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 rounded-2xl border border-border bg-card/65 p-4 shadow-panel sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
             Fulfillment queue / hosted data
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Order queue</h1>
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+            Order queue
+          </h1>
           <p className="mt-3 max-w-xl text-muted-foreground text-sm leading-6">
             Work operational records through their Lean V2 status lifecycle.
           </p>
@@ -174,10 +176,25 @@ export function OrdersPanel() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
           {orders.map((order) => (
-            <article className="border border-border bg-card p-5" key={order.id}>
+            <article
+              className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-panel motion-reduce:transform-none"
+              key={order.id}
+            >
               <div className="flex items-center justify-between gap-3">
                 <p className="font-mono text-muted-foreground text-xs">{order.displayNumber}</p>
-                <StatusPill>{statusLabel(order.status)}</StatusPill>
+                <StatusPill
+                  tone={
+                    order.status === 'completed'
+                      ? 'success'
+                      : order.status === 'cancelled'
+                        ? 'destructive'
+                        : order.status === 'ready'
+                          ? 'info'
+                          : 'warning'
+                  }
+                >
+                  {statusLabel(order.status)}
+                </StatusPill>
               </div>
               <p className="mt-8 font-black text-4xl tracking-[-0.07em]">{order.itemCount}</p>
               <p className="mt-1 text-muted-foreground text-xs uppercase tracking-[0.15em]">
@@ -222,7 +239,7 @@ export function OrdersPanel() {
                   <KisokButton
                     disabled={updatingOrderId === order.id}
                     onClick={() => openCancellation(order)}
-                    variant="quiet"
+                    variant="destructive"
                   >
                     Cancel order
                   </KisokButton>
@@ -291,6 +308,7 @@ export function OrdersPanel() {
             <KisokButton
               disabled={updatingOrderId !== null || !cancellationReason.trim()}
               onClick={() => void cancelOrder()}
+              variant="destructive"
             >
               {updatingOrderId !== null ? 'Cancelling…' : 'Confirm cancellation'}
             </KisokButton>

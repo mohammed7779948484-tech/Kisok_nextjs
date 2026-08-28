@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { CircleCheckIcon } from 'lucide-react';
+import { CircleCheckIcon, XIcon } from 'lucide-react';
 
 import { MediaPickerDialog } from '@/features/media-library/components/MediaPickerDialog';
 import { VariantMediaPicker } from '@/features/media-library/components/VariantMediaPicker';
@@ -93,7 +93,7 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
   }
 
   return (
-    <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       <ProductEditorHeader
         isReadOnly={workflow.isReadOnly}
         isSaving={workflow.isSaving}
@@ -144,11 +144,11 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
       ) : null}
       {workflow.saveMessage || customNotice ? (
         <div
-          className="mt-6 flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-400"
+          className="mt-6 flex items-center justify-between rounded-xl border border-success/30 bg-success/10 p-4 text-success"
           role="status"
         >
           <div className="flex items-center gap-2 text-sm font-medium">
-            <CircleCheckIcon className="size-4 shrink-0 text-emerald-400" />
+            <CircleCheckIcon aria-hidden="true" className="size-4 shrink-0" />
             <span>{workflow.saveMessage ?? customNotice}</span>
           </div>
           <button
@@ -159,7 +159,7 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
             }}
             type="button"
           >
-            ✕
+            <XIcon aria-hidden="true" className="size-4" />
           </button>
         </div>
       ) : null}
@@ -289,10 +289,12 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
       />
       {mediaVariant ? (
         <KisokDialog onOpenChange={(open) => !open && setMediaVariant(null)} open>
-          <KisokDialogContent className="max-w-5xl">
-            <KisokDialogHeader>
-              <KisokDialogTitle>Variant Media · {mediaVariant.sku}</KisokDialogTitle>
-              <KisokDialogDescription>
+          <KisokDialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-4 p-5 sm:max-w-4xl sm:p-6">
+            <KisokDialogHeader className="border-border border-b pb-3">
+              <KisokDialogTitle className="font-bold text-xl">
+                Variant Media · {mediaVariant.sku}
+              </KisokDialogTitle>
+              <KisokDialogDescription className="text-muted-foreground text-xs sm:text-sm">
                 Attach existing Media, upload a new asset, reorder it, or choose the primary image
                 for this Variant.
               </KisokDialogDescription>

@@ -47,21 +47,25 @@ export function MediaLibraryPanel() {
     try {
       await deleteMediaAsset(asset.id);
       await refresh();
-    } catch {
-      setError(`The Media Asset ${asset.publicId} could not be deleted.`);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : `The Media Asset ${asset.publicId} could not be deleted.`,
+      );
     } finally {
       setDeletingId(null);
     }
   }
 
   return (
-    <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             Media library / hosted metadata
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
             Asset register
           </h1>
         </div>
@@ -78,7 +82,7 @@ export function MediaLibraryPanel() {
           <KisokButton
             disabled={uploading}
             onClick={() => fileInputRef.current?.click()}
-            variant="outline"
+            variant="default"
           >
             {uploading ? 'Uploading…' : 'Upload'}
           </KisokButton>
@@ -108,10 +112,13 @@ export function MediaLibraryPanel() {
       ) : assets.length === 0 ? (
         <p className="mt-6 text-muted-foreground text-sm">No Media Assets are available.</p>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {assets.map((asset) => (
-            <article className="border border-border p-3" key={asset.id}>
-              <div className="flex aspect-square items-center justify-center overflow-hidden bg-muted">
+            <article
+              className="group rounded-2xl border border-border bg-card p-3 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-panel motion-reduce:transform-none"
+              key={asset.id}
+            >
+              <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-muted">
                 <img
                   alt={asset.publicId}
                   className="h-full w-full object-cover"
@@ -125,13 +132,13 @@ export function MediaLibraryPanel() {
                 {asset.format ?? 'unknown'} · {asset.width ?? '?'}×{asset.height ?? '?'}
               </p>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <StatusPill>Hosted asset</StatusPill>
+                <StatusPill tone="info">Hosted asset</StatusPill>
                 <KisokButton
                   aria-label={`Delete ${asset.publicId}`}
                   disabled={deletingId === asset.id}
                   onClick={() => void removeAsset(asset)}
                   size="sm"
-                  variant="quiet"
+                  variant="destructive"
                 >
                   {deletingId === asset.id ? 'Deleting…' : 'Delete'}
                 </KisokButton>

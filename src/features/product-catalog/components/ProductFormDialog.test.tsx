@@ -45,7 +45,7 @@ describe('ProductFormDialog', () => {
 
     await user.type(screen.getByLabelText('Product name'), 'Berry Spark');
     await user.selectOptions(screen.getByLabelText('Brand'), 'brand-1');
-    await user.click(screen.getByLabelText('Coffee'));
+    await user.click(screen.getByRole('checkbox', { name: 'Coffee' }));
     await user.click(screen.getByRole('button', { name: 'Save product' }));
 
     await waitFor(() =>
@@ -58,6 +58,25 @@ describe('ProductFormDialog', () => {
       }),
     );
     expect(onSaved).toHaveBeenCalled();
+  });
+
+  it('selects a Category when its visible label is clicked', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ProductFormDialog
+        brands={BRANDS}
+        categories={CATEGORIES}
+        mode="create"
+        onOpenChange={() => undefined}
+        onSaved={() => undefined}
+        open
+      />,
+    );
+
+    await user.click(screen.getByText('Coffee'));
+
+    expect(screen.getByRole('checkbox', { name: 'Coffee' })).toBeChecked();
   });
 
   it('prefills the Edit form from the Product and its current Categories', async () => {
@@ -91,8 +110,8 @@ describe('ProductFormDialog', () => {
 
     expect(screen.getByLabelText('Product name')).toHaveValue('Berry Spark');
     expect(screen.getByLabelText('Brand')).toHaveValue('brand-1');
-    await waitFor(() => expect(screen.getByLabelText('Tea')).toBeChecked());
-    expect(screen.getByLabelText('Coffee')).not.toBeChecked();
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Tea' })).toBeChecked());
+    expect(screen.getByRole('checkbox', { name: 'Coffee' })).not.toBeChecked();
   });
 
   it('updates a Product, reassigns Categories, and can deactivate it', async () => {
@@ -127,9 +146,9 @@ describe('ProductFormDialog', () => {
       />,
     );
 
-    await waitFor(() => expect(screen.getByLabelText('Coffee')).toBeChecked());
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Coffee' })).toBeChecked());
     await user.click(screen.getByRole('checkbox', { name: 'Active' }));
-    await user.click(screen.getByLabelText('Tea'));
+    await user.click(screen.getByRole('checkbox', { name: 'Tea' }));
     await user.click(screen.getByRole('button', { name: 'Save product' }));
 
     await waitFor(() =>

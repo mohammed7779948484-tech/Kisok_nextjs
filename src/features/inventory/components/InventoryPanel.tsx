@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { XIcon } from 'lucide-react';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InventoryAdjustmentInput } from '@/infrastructure/supabase/inventory/adapter';
 import { KisokButton, KisokInput } from '@/shared/ui';
@@ -205,15 +207,15 @@ export function InventoryPanel() {
   }
 
   return (
-    <section className="space-y-6 border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="space-y-6 rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       {/* Toast Notification */}
       {successMessage ? (
         <aside
           aria-live="polite"
-          className="fixed top-6 right-6 z-50 flex items-center gap-3 rounded-lg border border-emerald-500/40 bg-card px-4 py-3 shadow-xl ring-1 ring-emerald-500/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4"
+          className="fixed top-6 right-6 z-50 flex max-w-[calc(100vw-3rem)] items-center gap-3 rounded-xl border border-success/35 bg-card px-4 py-3 shadow-overlay ring-1 ring-success/15 backdrop-blur-md motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-4"
           role="status"
         >
-          <span className="flex size-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="flex size-2.5 rounded-full bg-success motion-safe:animate-pulse" />
           <p className="font-medium text-foreground text-sm">{successMessage}</p>
           <button
             aria-label="Close notification"
@@ -221,7 +223,7 @@ export function InventoryPanel() {
             onClick={() => setSuccessMessage(null)}
             type="button"
           >
-            ✕
+            <XIcon aria-hidden="true" className="size-4" />
           </button>
         </aside>
       ) : null}
@@ -232,7 +234,9 @@ export function InventoryPanel() {
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             Inventory management / Lean V2
           </p>
-          <h1 className="mt-2 font-black text-4xl tracking-[-0.06em] sm:text-5xl">Stock control</h1>
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+            Stock control
+          </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

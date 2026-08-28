@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { CircleCheckIcon } from 'lucide-react';
+import { CircleCheckIcon, XIcon } from 'lucide-react';
 
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -67,18 +67,18 @@ export function ProductCatalogPanel() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
             Product catalog / hosted data
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
             Product catalog
           </h1>
         </div>
         <div className="flex gap-2">
-          <Link className={buttonVariants({ variant: 'outline' })} href="/admin/products/create">
+          <Link className={buttonVariants()} href="/admin/products/create">
             New product
           </Link>
           <KisokButton onClick={() => void refetch()} variant="outline">
@@ -89,11 +89,11 @@ export function ProductCatalogPanel() {
 
       {notice ? (
         <div
-          className="mt-6 flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-400"
+          className="mt-6 flex items-center justify-between rounded-xl border border-success/30 bg-success/10 p-4 text-success"
           role="status"
         >
           <div className="flex items-center gap-2 text-sm font-medium">
-            <CircleCheckIcon className="size-4 shrink-0 text-emerald-400" />
+            <CircleCheckIcon aria-hidden="true" className="size-4 shrink-0" />
             <span>{notice}</span>
           </div>
           <button
@@ -102,12 +102,12 @@ export function ProductCatalogPanel() {
             onClick={() => setNotice(null)}
             type="button"
           >
-            ✕
+            <XIcon aria-hidden="true" className="size-4" />
           </button>
         </div>
       ) : null}
 
-      <div className="mt-6">
+      <div className="mt-6 max-w-lg">
         <label className="sr-only" htmlFor="product-search">
           Search products
         </label>
@@ -160,11 +160,7 @@ export function ProductCatalogPanel() {
                     {product.variantCount}
                   </TableCell>
                   <TableCell>
-                    <StatusPill
-                      className={
-                        product.isActive ? undefined : 'border-destructive text-destructive'
-                      }
-                    >
+                    <StatusPill tone={product.isActive ? 'success' : 'destructive'}>
                       {product.isActive ? 'Active' : 'Inactive'}
                     </StatusPill>
                   </TableCell>

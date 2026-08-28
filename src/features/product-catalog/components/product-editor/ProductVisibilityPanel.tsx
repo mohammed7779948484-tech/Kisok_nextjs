@@ -18,23 +18,15 @@ export function ProductVisibilityPanel({
   variantsCount,
 }: ProductVisibilityPanelProps) {
   return (
-    <aside className="h-fit border border-border p-5 xl:sticky xl:top-5">
+    <aside className="h-fit rounded-2xl border border-border bg-muted/30 p-5 xl:sticky xl:top-24">
       <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
         Product readiness
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <StatusPill
-          className={isActive ? undefined : 'border-amber-500 text-amber-700 dark:text-amber-300'}
-        >
+        <StatusPill tone={isActive ? 'success' : 'warning'}>
           {isActive ? 'Active' : 'Draft'}
         </StatusPill>
-        <StatusPill
-          className={
-            visibility.isCustomerVisible
-              ? undefined
-              : 'border-amber-500 text-amber-700 dark:text-amber-300'
-          }
-        >
+        <StatusPill tone={visibility.isCustomerVisible ? 'success' : 'warning'}>
           {visibility.isCustomerVisible ? 'Customer visible' : 'Customer hidden'}
         </StatusPill>
       </div>

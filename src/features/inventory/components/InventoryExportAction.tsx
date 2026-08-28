@@ -1,5 +1,7 @@
 'use client';
 
+import { DownloadIcon } from 'lucide-react';
+
 import { KisokButton } from '@/shared/ui';
 
 export interface InventoryExportActionProps {
@@ -25,7 +27,8 @@ export function InventoryExportAction({
         type="button"
         variant="outline"
       >
-        <span className="font-mono text-xs">📥 Export History CSV</span>
+        <DownloadIcon aria-hidden="true" />
+        <span className="font-mono text-xs">Export History CSV</span>
       </KisokButton>
     );
   }
@@ -39,7 +42,8 @@ export function InventoryExportAction({
       type="button"
       variant="outline"
     >
-      <span className="font-mono text-xs">📥 Export Stock CSV</span>
+      <DownloadIcon aria-hidden="true" />
+      <span className="font-mono text-xs">Export Stock CSV</span>
     </KisokButton>
   );
 }

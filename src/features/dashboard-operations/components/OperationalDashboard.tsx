@@ -37,33 +37,37 @@ export async function OperationalDashboard() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
             Operations control
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Store pulse</h1>
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+            Store pulse
+          </h1>
           <p className="mt-3 max-w-xl text-muted-foreground text-sm leading-6">
             A compact view of catalog health, stock availability, fulfillment, and shared media.
           </p>
         </div>
-        <StatusPill>Operational snapshot</StatusPill>
+        <StatusPill tone="success">Operational snapshot</StatusPill>
       </div>
 
-      <div className="grid gap-px border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid overflow-hidden rounded-2xl border border-border bg-border shadow-panel sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([key, label]) => (
-          <div className="bg-card p-5" key={key}>
+          <div className="bg-card p-5 transition-colors hover:bg-accent/25" key={key}>
             <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
               {label}
             </p>
-            <p className="mt-3 font-black text-4xl tracking-[-0.07em]">{result.snapshot[key]}</p>
+            <p className="mt-3 font-black text-4xl tracking-[-0.05em] tabular-nums">
+              {result.snapshot[key]}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="border border-border bg-card p-5 sm:p-7">
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-panel sm:p-7">
           <div className="flex items-center justify-between gap-4 border-border border-b pb-4">
             <div>
               <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
@@ -83,7 +87,7 @@ export async function OperationalDashboard() {
               result.snapshot.recentOrders.map((order) => (
                 <div className="flex items-center justify-between gap-4 py-4" key={order.id}>
                   <span className="font-mono text-sm">#{order.displayNumber}</span>
-                  <StatusPill>{order.status}</StatusPill>
+                  <StatusPill tone="info">{order.status}</StatusPill>
                 </div>
               ))
             ) : (
@@ -91,7 +95,7 @@ export async function OperationalDashboard() {
             )}
           </div>
         </section>
-        <section className="border border-border bg-muted/30 p-5 sm:p-7">
+        <section className="rounded-2xl border border-border bg-muted/45 p-5 sm:p-7">
           <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
             Next checks
           </p>
@@ -115,9 +119,11 @@ export async function OperationalDashboard() {
 
 function DashboardState({ title, body }: { title: string; body: string }) {
   return (
-    <section className="border border-border bg-card p-6 sm:p-8">
-      <StatusPill>Action required</StatusPill>
-      <h1 className="mt-5 font-black text-5xl tracking-[-0.08em] sm:text-6xl">{title}</h1>
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-panel sm:p-8">
+      <StatusPill tone="warning">Action required</StatusPill>
+      <h1 className="mt-5 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+        {title}
+      </h1>
       <p className="mt-5 max-w-2xl text-muted-foreground text-sm leading-7">{body}</p>
     </section>
   );

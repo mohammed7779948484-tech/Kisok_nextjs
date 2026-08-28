@@ -163,7 +163,7 @@ export function InventoryAdjustmentDialog({
                     }
                     value={applyForm.watch('adjustmentType')}
                   >
-                    <SelectTrigger id="adjustment-type">
+                    <SelectTrigger className="w-full" id="adjustment-type">
                       <SelectValue placeholder="Select adjustment type" />
                     </SelectTrigger>
                     <SelectContent>

@@ -348,18 +348,20 @@ export function CatalogTaxonomyPanel() {
   }
 
   return (
-    <section className="border border-border bg-card p-5 text-card-foreground sm:p-7">
+    <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             Catalog taxonomy / hosted data
           </p>
-          <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">Categories</h1>
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+            Categories
+          </h1>
         </div>
         <div className="flex gap-2">
           <KisokButton
             onClick={() => setDialogState({ mode: 'create', open: true })}
-            variant="outline"
+            variant="default"
           >
             Add category
           </KisokButton>
@@ -369,7 +371,7 @@ export function CatalogTaxonomyPanel() {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 max-w-lg">
         <Label className="sr-only" htmlFor="category-search">
           Search categories
         </Label>
@@ -439,11 +441,7 @@ export function CatalogTaxonomyPanel() {
                     {category.parentId ? 'Child' : 'Root'}
                   </TableCell>
                   <TableCell>
-                    <StatusPill
-                      className={
-                        category.isActive ? undefined : 'border-destructive text-destructive'
-                      }
-                    >
+                    <StatusPill tone={category.isActive ? 'success' : 'destructive'}>
                       {category.isActive ? 'Active' : 'Inactive'}
                     </StatusPill>
                   </TableCell>

@@ -1,5 +1,7 @@
 'use client';
 
+import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
+
 import { KisokButton } from '@/shared/ui';
 
 export interface ReorderButtonGroupProps {
@@ -37,7 +39,7 @@ export function ReorderButtonGroup({
         type="button"
         variant="quiet"
       >
-        ▲
+        <ArrowUpIcon aria-hidden="true" />
       </KisokButton>
       <KisokButton
         aria-label={`Move ${itemName} down`}
@@ -47,7 +49,7 @@ export function ReorderButtonGroup({
         type="button"
         variant="quiet"
       >
-        ▼
+        <ArrowDownIcon aria-hidden="true" />
       </KisokButton>
     </div>
   );

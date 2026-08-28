@@ -50,4 +50,16 @@ describe('AdminShell', () => {
     expect(screen.queryByText('Connected')).not.toBeInTheDocument();
     expect(screen.getByText('Supabase-backed')).toBeInTheDocument();
   });
+
+  it('keeps administration navigation compact and horizontally reachable below desktop', () => {
+    render(
+      <AdminShell displayName="Admin" locale="en">
+        <p>Workspace</p>
+      </AdminShell>,
+    );
+
+    expect(screen.getByRole('navigation', { name: 'Administration sections' })).toHaveClass(
+      'overflow-x-auto',
+    );
+  });
 });

@@ -8,7 +8,10 @@ describe('Kisok shadcn button', () => {
     render(<Button variant="quiet">Review local change</Button>);
 
     expect(screen.getByRole('button', { name: 'Review local change' })).toHaveClass(
-      'border-[#484848]',
+      'border-border',
+    );
+    expect(screen.getByRole('button', { name: 'Review local change' })).toHaveClass(
+      'text-muted-foreground',
     );
   });
 });

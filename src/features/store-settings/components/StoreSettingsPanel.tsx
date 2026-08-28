@@ -113,13 +113,13 @@ export function StoreSettingsPanel() {
 
   return (
     <section className="grid gap-4 lg:grid-cols-[1.18fr_0.82fr]">
-      <div className="border border-border bg-card p-5 sm:p-7">
+      <div className="rounded-2xl border border-border bg-card/90 p-4 shadow-panel sm:p-7">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
               Store settings / hosted data
             </p>
-            <h1 className="mt-2 font-black text-5xl tracking-[-0.08em] sm:text-6xl">
+            <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
               Store defaults
             </h1>
           </div>
@@ -174,7 +174,7 @@ export function StoreSettingsPanel() {
         ) : null}
       </div>
 
-      <div className="flex min-h-72 flex-col justify-between bg-primary p-6 text-primary-foreground sm:p-8">
+      <div className="flex min-h-72 flex-col justify-between overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground shadow-panel sm:p-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em]">Operational data</p>
         <div>
           <p className="font-black text-4xl tracking-[-0.07em]">Store settings</p>
@@ -183,7 +183,12 @@ export function StoreSettingsPanel() {
             panel does not claim an independent connection health check.
           </p>
           <div className="mt-4 flex items-center gap-2">
-            <StatusPill>Supabase-backed</StatusPill>
+            <StatusPill
+              className="border-primary-foreground/30 text-primary-foreground"
+              tone="info"
+            >
+              Supabase-backed
+            </StatusPill>
           </div>
         </div>
       </div>

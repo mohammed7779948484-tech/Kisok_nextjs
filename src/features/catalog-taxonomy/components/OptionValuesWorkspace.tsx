@@ -48,7 +48,7 @@ export function OptionValuesWorkspace({
   isReordering = false,
 }: OptionValuesWorkspaceProps) {
   return (
-    <div className="min-w-0 border border-border bg-card p-5">
+    <div className="min-w-0 rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center justify-between gap-4 border-border border-b pb-4">
         <div>
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
@@ -93,9 +93,7 @@ export function OptionValuesWorkspace({
                 <TableRow key={value.id}>
                   <TableCell className="font-medium whitespace-nowrap">{value.value}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    <StatusPill
-                      className={value.isActive ? undefined : 'border-destructive text-destructive'}
-                    >
+                    <StatusPill tone={value.isActive ? 'success' : 'destructive'}>
                       {value.isActive ? 'Active' : 'Inactive'}
                     </StatusPill>
                   </TableCell>

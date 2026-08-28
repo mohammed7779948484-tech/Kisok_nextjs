@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { BellIcon, BellOffIcon } from 'lucide-react';
+
 import { KisokButton, StatusPill } from '@/shared/ui';
 
 import type { IncomingOrderNotification } from '../hooks/useOrderRealtimeNotifications';
@@ -68,7 +70,11 @@ export function OrderNotificationCenter({
         variant="quiet"
       >
         <span className="flex items-center gap-1.5 font-mono text-xs">
-          <span>{soundEnabled ? '🔔' : '🔕'}</span>
+          {soundEnabled ? (
+            <BellIcon aria-hidden="true" className="size-3.5" />
+          ) : (
+            <BellOffIcon aria-hidden="true" className="size-3.5" />
+          )}
           <span className="hidden sm:inline">{soundEnabled ? 'Sound ON' : 'Sound OFF'}</span>
         </span>
       </KisokButton>
@@ -77,17 +83,17 @@ export function OrderNotificationCenter({
       {latestOrder ? (
         <aside
           aria-live="polite"
-          className="fixed top-5 right-5 z-50 flex max-w-sm flex-col gap-3 rounded-lg border border-primary/40 bg-card p-4 shadow-xl ring-1 ring-primary/20 backdrop-blur-md transition-all animate-in fade-in slide-in-from-top-4"
+          className="fixed top-5 right-5 z-50 flex max-w-[calc(100vw-2.5rem)] flex-col gap-3 rounded-2xl border border-primary/35 bg-card p-4 shadow-overlay ring-1 ring-primary/15 backdrop-blur-md transition-all motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-4 sm:max-w-sm"
           role="status"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="flex size-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="flex size-2.5 rounded-full bg-success motion-safe:animate-pulse" />
               <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
                 Incoming Order
               </p>
             </div>
-            <StatusPill>New</StatusPill>
+            <StatusPill tone="success">New</StatusPill>
           </div>
 
           <div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import {
   KisokButton,
   KisokDialog,
@@ -119,19 +120,19 @@ export function ProductFormDialog({
             <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
               Brand
             </span>
-            <select
-              className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            <NativeSelect
+              className="w-full"
               id="product-brand"
               onChange={(event) => setBrandId(event.target.value)}
               value={brandId}
             >
-              <option value="">Unassigned</option>
+              <NativeSelectOption value="">Unassigned</NativeSelectOption>
               {brands.map((brand) => (
-                <option key={brand.id} value={brand.id}>
+                <NativeSelectOption key={brand.id} value={brand.id}>
                   {brand.name}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <fieldset className="grid gap-2">
             <legend className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
@@ -142,23 +143,30 @@ export function ProductFormDialog({
                 Loading categories…
               </p>
             ) : (
-              <div className="grid gap-2">
+              <div className="grid max-h-48 gap-1 overflow-y-auto rounded-xl border border-border bg-muted/25 p-2">
                 {categories.map((category) => (
-                  <label className="flex items-center gap-2 text-sm" key={category.id}>
-                    <input
-                      aria-label={category.name}
+                  <div
+                    className="flex min-h-10 items-center gap-3 rounded-lg px-2 text-sm hover:bg-accent/40"
+                    key={category.id}
+                  >
+                    <Checkbox
                       checked={categoryIds.includes(category.id)}
-                      onChange={(event) =>
+                      id={`product-category-${category.id}`}
+                      onCheckedChange={(checked) =>
                         setCategoryIds((current) =>
-                          event.target.checked
+                          checked === true
                             ? [...current, category.id]
                             : current.filter((id) => id !== category.id),
                         )
                       }
-                      type="checkbox"
                     />
-                    <span>{category.parentId ? `↳ ${category.name}` : category.name}</span>
-                  </label>
+                    <Label
+                      className="min-h-10 flex-1 cursor-pointer"
+                      htmlFor={`product-category-${category.id}`}
+                    >
+                      {category.parentId ? `↳ ${category.name}` : category.name}
+                    </Label>
+                  </div>
                 ))}
               </div>
             )}
@@ -173,15 +181,16 @@ export function ProductFormDialog({
               value={shortDescription}
             />
           </label>
-          <label className="flex items-center gap-2 text-sm" htmlFor="product-featured">
-            <input
+          <div className="flex min-h-10 items-center gap-3 text-sm">
+            <Checkbox
               checked={isFeatured}
               id="product-featured"
-              onChange={(event) => setIsFeatured(event.target.checked)}
-              type="checkbox"
+              onCheckedChange={(checked) => setIsFeatured(checked === true)}
             />
-            Feature this product
-          </label>
+            <Label className="cursor-pointer" htmlFor="product-featured">
+              Feature this product
+            </Label>
+          </div>
           {mode === 'edit' ? (
             <div className="flex items-center gap-2">
               <Checkbox
