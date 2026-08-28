@@ -41,9 +41,11 @@ import {
 import { useBrandForm } from '../hooks/useBrandForm';
 import { useBrandReorder } from '../hooks/useBrandReorder';
 import { BRANDS_PAGE_SIZE, useBrandsList } from '../hooks/useBrandsList';
+import { formatDisplayRank } from '../lib/reorder';
 import { type BrandFormValues, brandFormDefaultValues } from '../schemas/brand.schema';
 import type { BrandRecord } from '../types';
 import { ConfirmActionDialog } from './ConfirmActionDialog';
+import { ReorderButtonGroup } from './ReorderButtonGroup';
 
 /** Debounced-as-you-type search: one deliberate pattern, not a live-effect
  * search plus a redundant "Search" button. */
@@ -346,27 +348,18 @@ export function BrandsPanel() {
                   </StatusPill>
                 </TableCell>
                 <TableCell className="text-right font-mono text-muted-foreground text-xs">
-                  {brand.displayOrder}
+                  {formatDisplayRank((page - 1) * BRANDS_PAGE_SIZE + index)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <KisokButton
-                    aria-label={`Move ${brand.name} up`}
-                    disabled={isReordering || index === 0}
-                    onClick={() => void moveBrand(brand, 'up')}
-                    size="sm"
-                    variant="quiet"
-                  >
-                    ▲
-                  </KisokButton>
-                  <KisokButton
-                    aria-label={`Move ${brand.name} down`}
-                    disabled={isReordering || index === brands.length - 1}
-                    onClick={() => void moveBrand(brand, 'down')}
-                    size="sm"
-                    variant="quiet"
-                  >
-                    ▼
-                  </KisokButton>
+                  <ReorderButtonGroup
+                    hasActiveSearch={Boolean(debouncedSearch.trim())}
+                    isFirst={(page - 1) * BRANDS_PAGE_SIZE + index === 0}
+                    isLast={(page - 1) * BRANDS_PAGE_SIZE + index === total - 1}
+                    isReordering={isReordering}
+                    itemName={brand.name}
+                    onMoveDown={() => void moveBrand(brand, 'down')}
+                    onMoveUp={() => void moveBrand(brand, 'up')}
+                  />
                 </TableCell>
                 <TableCell className="text-right">
                   <KisokButton

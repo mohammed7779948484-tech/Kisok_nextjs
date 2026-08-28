@@ -41,9 +41,11 @@ import {
 import { CATEGORIES_PAGE_SIZE, useCategoriesList } from '../hooks/useCategoriesList';
 import { useCategoryForm } from '../hooks/useCategoryForm';
 import { useCategoryReorder } from '../hooks/useCategoryReorder';
+import { formatDisplayRank, organizeCategoriesHierarchy } from '../lib/reorder';
 import { type CategoryFormValues, categoryFormDefaultValues } from '../schemas/category.schema';
 import type { CategoryRecord } from '../types';
 import { ConfirmActionDialog } from './ConfirmActionDialog';
+import { ReorderButtonGroup } from './ReorderButtonGroup';
 
 /** Debounced-as-you-type search — same pattern as `BrandsPanel`. */
 function useDebouncedValue<T>(value: T, delayMs: number): T {
@@ -410,78 +412,73 @@ export function CatalogTaxonomyPanel() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell className="font-medium">
-                  <div className={`flex items-center gap-3 ${category.parentId ? 'pl-6' : ''}`}>
-                    {category.imageUrl ? (
-                      <img
-                        alt={category.name}
-                        className="size-8 shrink-0 rounded-md border border-border object-cover bg-muted"
-                        src={category.imageUrl}
-                      />
-                    ) : (
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-mono text-[11px] font-semibold text-muted-foreground uppercase">
-                        {category.name.slice(0, 2)}
-                      </div>
-                    )}
-                    <span>{category.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-xs">
-                  {category.parentId ? 'Child' : 'Root'}
-                </TableCell>
-                <TableCell>
-                  <StatusPill
-                    className={
-                      category.isActive ? undefined : 'border-destructive text-destructive'
-                    }
-                  >
-                    {category.isActive ? 'Active' : 'Inactive'}
-                  </StatusPill>
-                </TableCell>
-                <TableCell className="text-right font-mono text-muted-foreground text-xs">
-                  {category.displayOrder}
-                </TableCell>
-                <TableCell className="text-right">
-                  <KisokButton
-                    aria-label={`Move ${category.name} up`}
-                    disabled={isReordering}
-                    onClick={() => void moveCategory(category, 'up')}
-                    size="sm"
-                    variant="quiet"
-                  >
-                    ▲
-                  </KisokButton>
-                  <KisokButton
-                    aria-label={`Move ${category.name} down`}
-                    disabled={isReordering}
-                    onClick={() => void moveCategory(category, 'down')}
-                    size="sm"
-                    variant="quiet"
-                  >
-                    ▼
-                  </KisokButton>
-                </TableCell>
-                <TableCell className="text-right">
-                  <KisokButton
-                    onClick={() => setDialogState({ category, mode: 'edit', open: true })}
-                    size="sm"
-                    variant="quiet"
-                  >
-                    Edit
-                  </KisokButton>
-                  <KisokButton
-                    aria-label={`${category.isActive ? 'Deactivate' : 'Activate'} ${category.name}`}
-                    onClick={() => toggleActive(category)}
-                    size="sm"
-                    variant="quiet"
-                  >
-                    {category.isActive ? 'Deactivate' : 'Activate'}
-                  </KisokButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {organizeCategoriesHierarchy(categories).map((category, _, array) => {
+              const siblings = array.filter((c) => c.parentId === category.parentId);
+              const siblingIdx = siblings.findIndex((c) => c.id === category.id);
+              const displayRank = formatDisplayRank(siblingIdx >= 0 ? siblingIdx : 0);
+
+              return (
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">
+                    <div className={`flex items-center gap-3 ${category.parentId ? 'pl-6' : ''}`}>
+                      {category.imageUrl ? (
+                        <img
+                          alt={category.name}
+                          className="size-8 shrink-0 rounded-md border border-border object-cover bg-muted"
+                          src={category.imageUrl}
+                        />
+                      ) : (
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+                          {category.name.slice(0, 2)}
+                        </div>
+                      )}
+                      <span>{category.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-xs">
+                    {category.parentId ? 'Child' : 'Root'}
+                  </TableCell>
+                  <TableCell>
+                    <StatusPill
+                      className={
+                        category.isActive ? undefined : 'border-destructive text-destructive'
+                      }
+                    >
+                      {category.isActive ? 'Active' : 'Inactive'}
+                    </StatusPill>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-muted-foreground text-xs">
+                    {displayRank}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ReorderButtonGroup
+                      hasActiveSearch={Boolean(debouncedSearch.trim())}
+                      isReordering={isReordering}
+                      itemName={category.name}
+                      onMoveDown={() => void moveCategory(category, 'down')}
+                      onMoveUp={() => void moveCategory(category, 'up')}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <KisokButton
+                      onClick={() => setDialogState({ category, mode: 'edit', open: true })}
+                      size="sm"
+                      variant="quiet"
+                    >
+                      Edit
+                    </KisokButton>
+                    <KisokButton
+                      aria-label={`${category.isActive ? 'Deactivate' : 'Activate'} ${category.name}`}
+                      onClick={() => toggleActive(category)}
+                      size="sm"
+                      variant="quiet"
+                    >
+                      {category.isActive ? 'Deactivate' : 'Activate'}
+                    </KisokButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}

@@ -185,7 +185,7 @@ export function OptionLibraryPanel() {
       ) : optionTypes.length === 0 ? (
         <p className="mt-6 text-muted-foreground text-sm">No Option Types match this search.</p>
       ) : (
-        <div className="mt-6 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
           <OptionTypesNav
             isReordering={isReorderingOptionType}
             onMoveType={moveOptionType}

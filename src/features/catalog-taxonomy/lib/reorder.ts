@@ -21,3 +21,42 @@ export function computeReorderedIds(
   ids.splice(targetIndex, 0, moved);
   return ids;
 }
+
+/**
+ * Organizes flat categories list into a hierarchical tree view:
+ * Root categories are sorted by displayOrder, and each root category is
+ * immediately followed by its subcategories sorted by displayOrder.
+ */
+export function organizeCategoriesHierarchy<
+  T extends { id: string; parentId: string | null; displayOrder: number },
+>(categories: T[]): T[] {
+  const roots = categories
+    .filter((category) => category.parentId === null)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+
+  const result: T[] = [];
+  for (const root of roots) {
+    result.push(root);
+    const children = categories
+      .filter((category) => category.parentId === root.id)
+      .sort((a, b) => a.displayOrder - b.displayOrder);
+    result.push(...children);
+  }
+
+  // Handle any orphaned categories whose parent is not in the list
+  const handledIds = new Set(result.map((category) => category.id));
+  const orphans = categories
+    .filter((category) => !handledIds.has(category.id))
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+  result.push(...orphans);
+
+  return result;
+}
+
+/**
+ * Formats a 0-based visual index into a user-friendly rank `#1`, `#2`, ...
+ * instead of raw internal database sequence counters (like 10450).
+ */
+export function formatDisplayRank(zeroBasedIndex: number): string {
+  return `#${zeroBasedIndex + 1}`;
+}

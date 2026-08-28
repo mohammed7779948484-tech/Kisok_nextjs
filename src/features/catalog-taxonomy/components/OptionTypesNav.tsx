@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/table';
 import { KisokButton, StatusPill } from '@/shared/ui';
 
+import { ReorderButtonGroup } from './ReorderButtonGroup';
+
 export interface OptionTypeItem {
   id: string;
   name: string;
@@ -55,7 +57,7 @@ export function OptionTypesNav({
   onPageChange,
 }: OptionTypesNavProps) {
   return (
-    <div className="border border-border bg-card p-5">
+    <div className="min-w-0 border border-border bg-card p-5">
       <div className="flex items-center justify-between border-border border-b pb-4">
         <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.16em]">
           Option Types ({total})
@@ -65,85 +67,75 @@ export function OptionTypesNav({
         </KisokButton>
       </div>
 
-      <Table className="mt-4">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Reorder</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {optionTypes.map((optionType) => {
-            const isSelected = optionType.id === selectedOptionTypeId;
-            return (
-              <TableRow
-                className={isSelected ? 'bg-muted/70 font-medium' : undefined}
-                key={optionType.id}
-              >
-                <TableCell>
-                  <button
-                    className="w-full text-left font-medium hover:underline cursor-pointer"
-                    onClick={() => onSelectType(optionType.id)}
-                    type="button"
-                  >
-                    {optionType.name}
-                  </button>
-                </TableCell>
-                <TableCell>
-                  <StatusPill
-                    className={
-                      optionType.isActive ? undefined : 'border-destructive text-destructive'
-                    }
-                  >
-                    {optionType.isActive ? 'Active' : 'Inactive'}
-                  </StatusPill>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <KisokButton
-                      aria-label={`Move ${optionType.name} up`}
-                      disabled={isReordering}
-                      onClick={() => onMoveType(optionType, 'up')}
-                      size="sm"
-                      variant="quiet"
+      <div className="w-full overflow-x-auto">
+        <Table className="mt-4">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="whitespace-nowrap">Type</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Reorder</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {optionTypes.map((optionType, idx) => {
+              const isSelected = optionType.id === selectedOptionTypeId;
+              return (
+                <TableRow
+                  className={isSelected ? 'bg-muted/70 font-medium' : undefined}
+                  key={optionType.id}
+                >
+                  <TableCell className="font-medium whitespace-nowrap">
+                    <button
+                      className="text-left font-medium hover:underline cursor-pointer"
+                      onClick={() => onSelectType(optionType.id)}
+                      type="button"
                     >
-                      ▲
-                    </KisokButton>
-                    <KisokButton
-                      aria-label={`Move ${optionType.name} down`}
-                      disabled={isReordering}
-                      onClick={() => onMoveType(optionType, 'down')}
-                      size="sm"
-                      variant="quiet"
+                      {optionType.name}
+                    </button>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <StatusPill
+                      className={
+                        optionType.isActive ? undefined : 'border-destructive text-destructive'
+                      }
                     >
-                      ▼
-                    </KisokButton>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <KisokButton onClick={() => onOpenEdit(optionType)} size="sm" variant="quiet">
-                      Edit
-                    </KisokButton>
-                    <KisokButton
-                      aria-label={`${
-                        optionType.isActive ? 'Deactivate' : 'Activate'
-                      } ${optionType.name}`}
-                      onClick={() => onToggleActive(optionType)}
-                      size="sm"
-                      variant="quiet"
-                    >
-                      {optionType.isActive ? 'Deactivate' : 'Activate'}
-                    </KisokButton>
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                      {optionType.isActive ? 'Active' : 'Inactive'}
+                    </StatusPill>
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
+                    <ReorderButtonGroup
+                      isFirst={idx === 0}
+                      isLast={idx === optionTypes.length - 1}
+                      isReordering={isReordering}
+                      itemName={optionType.name}
+                      onMoveDown={() => onMoveType(optionType, 'down')}
+                      onMoveUp={() => onMoveType(optionType, 'up')}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1">
+                      <KisokButton onClick={() => onOpenEdit(optionType)} size="sm" variant="quiet">
+                        Edit
+                      </KisokButton>
+                      <KisokButton
+                        aria-label={`${
+                          optionType.isActive ? 'Deactivate' : 'Activate'
+                        } ${optionType.name}`}
+                        onClick={() => onToggleActive(optionType)}
+                        size="sm"
+                        variant="quiet"
+                      >
+                        {optionType.isActive ? 'Deactivate' : 'Activate'}
+                      </KisokButton>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
       {totalPages > 1 ? (
         <Pagination className="mt-4 justify-start">
