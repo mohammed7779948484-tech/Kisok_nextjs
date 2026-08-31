@@ -14,8 +14,10 @@ import type { InventoryRecord } from '../types';
 
 export interface InventoryStockTableProps {
   currentPage: number;
+  isFiltered?: boolean;
   itemsPerPage: number;
   onAdjust: (row: InventoryRecord) => void;
+  onClearFilters?: () => void;
   onPageChange: (page: number) => void;
   rows: InventoryRecord[];
   totalItems: number;
@@ -23,8 +25,10 @@ export interface InventoryStockTableProps {
 
 export function InventoryStockTable({
   currentPage,
+  isFiltered = false,
   itemsPerPage,
   onAdjust,
+  onClearFilters,
   onPageChange,
   rows,
   totalItems,
@@ -35,11 +39,26 @@ export function InventoryStockTable({
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/25 px-5 py-14 text-center">
         <p className="font-semibold text-foreground text-sm">
-          No inventory records match your criteria
+          {isFiltered
+            ? 'No inventory records match your filters'
+            : 'No inventory records exist yet'}
         </p>
         <p className="mt-1 text-muted-foreground text-xs">
-          Try clearing search filters or check your catalog variants.
+          {isFiltered
+            ? 'Try clearing search filters or checking spelling.'
+            : 'Variants created in the product catalog will automatically appear in inventory.'}
         </p>
+        {isFiltered && onClearFilters ? (
+          <KisokButton
+            className="mt-4"
+            onClick={onClearFilters}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Clear filters
+          </KisokButton>
+        ) : null}
       </div>
     );
   }
@@ -78,19 +97,21 @@ export function InventoryStockTable({
               >
                 <TableCell>
                   <div className="space-y-1">
-                    <p className="font-bold text-foreground text-sm">{row.productName}</p>
+                    <p className="font-bold text-foreground text-sm break-words">
+                      {row.productName}
+                    </p>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="inline-block rounded-md border border-border bg-muted/60 px-2 py-0.5 font-medium text-foreground text-xs">
                         {row.variantName}
                       </span>
-                      <span className="font-mono text-muted-foreground text-[10px]">
+                      <span className="font-mono text-muted-foreground text-[10px] break-all">
                         SKU: {row.sku}
                       </span>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="font-mono text-muted-foreground text-xs">
+                  <span className="font-mono text-muted-foreground text-xs break-all">
                     {row.barcode || '—'}
                   </span>
                 </TableCell>
@@ -103,8 +124,20 @@ export function InventoryStockTable({
                   {row.lowStockThreshold}
                 </TableCell>
                 <TableCell className="text-center">
-                  <StatusPill tone={row.isLowStock ? 'destructive' : 'success'}>
-                    {row.isLowStock ? 'Review' : 'Healthy'}
+                  <StatusPill
+                    tone={
+                      row.currentQuantity === 0
+                        ? 'destructive'
+                        : row.isLowStock
+                          ? 'warning'
+                          : 'success'
+                    }
+                  >
+                    {row.currentQuantity === 0
+                      ? 'Out of stock'
+                      : row.isLowStock
+                        ? 'Low stock'
+                        : 'Healthy'}
                   </StatusPill>
                 </TableCell>
                 <TableCell className="text-right">

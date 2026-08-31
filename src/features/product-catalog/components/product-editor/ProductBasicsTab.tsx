@@ -1,3 +1,5 @@
+'use client';
+
 import type { UseFormReturn } from 'react-hook-form';
 
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,37 +33,45 @@ export function ProductBasicsTab({
         </p>
       </div>
       <div className="mt-5 grid gap-5">
-        <label className="grid gap-2" htmlFor="product-name">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-            Product name
-          </span>
-          <KisokInput disabled={isReadOnly} id="product-name" {...form.register('name')} />
+        <div className="grid gap-2">
+          <Label htmlFor="product-name">Product name</Label>
+          <KisokInput
+            aria-describedby={form.formState.errors.name ? 'product-name-error' : undefined}
+            aria-invalid={Boolean(form.formState.errors.name)}
+            disabled={isReadOnly}
+            id="product-name"
+            {...form.register('name')}
+          />
           {form.formState.errors.name ? (
-            <span className="text-destructive text-sm">{form.formState.errors.name.message}</span>
+            <span className="text-destructive text-sm" id="product-name-error" role="alert">
+              {form.formState.errors.name.message}
+            </span>
           ) : null}
-        </label>
-        <label className="grid gap-2" htmlFor="product-description">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-            Description
-          </span>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="product-description">Description</Label>
           <KisokTextarea
             disabled={isReadOnly}
             id="product-description"
             {...form.register('shortDescription')}
           />
-        </label>
-        <label className="grid gap-2" htmlFor="product-keywords">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-            Search keywords
-          </span>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="product-keywords">Search keywords</Label>
           <KisokInput
+            aria-describedby="product-keywords-help"
             disabled={isReadOnly}
             id="product-keywords"
             placeholder="e.g. berry, sparkling, seasonal"
             {...form.register('searchKeywords')}
           />
-          <span className="text-muted-foreground text-xs">Separate keywords with commas.</span>
-        </label>
+          <span className="text-muted-foreground text-xs" id="product-keywords-help">
+            Separate keywords with commas.
+          </span>
+        </div>
+
         <div className="flex flex-wrap gap-6">
           <div className="flex items-center gap-2">
             <Checkbox

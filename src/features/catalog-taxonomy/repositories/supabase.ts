@@ -43,12 +43,17 @@ function mapOptionType(row: {
     name: row.name,
     isActive: row.is_active,
     displayOrder: row.display_order,
-    values: row.option_values.map((value) => ({
-      id: value.id,
-      value: value.value,
-      isActive: value.is_active,
-      displayOrder: value.display_order,
-    })),
+    values: (row.option_values ?? [])
+      .slice()
+      .sort(
+        (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0) || a.value.localeCompare(b.value),
+      )
+      .map((value) => ({
+        id: value.id,
+        value: value.value,
+        isActive: value.is_active,
+        displayOrder: value.display_order,
+      })),
   };
 }
 

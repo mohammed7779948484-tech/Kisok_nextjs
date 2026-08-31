@@ -76,7 +76,7 @@ describe('InventoryAdjustmentDialog', () => {
     await user.click(setQuantityTab);
 
     const finalQuantityInput = screen.getByRole('spinbutton', { name: /final quantity/i });
-    const reasonInput = screen.getByPlaceholderText(/physical recount/i);
+    const reasonInput = screen.getByPlaceholderText(/physical/i);
 
     await user.clear(finalQuantityInput);
     await user.type(finalQuantityInput, '30');

@@ -8,14 +8,6 @@ import { Controller } from 'react-hook-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
   Table,
   TableBody,
   TableCell,
@@ -27,6 +19,7 @@ import { MediaPickerDialog } from '@/features/media-library/components/MediaPick
 import { useMediaUpload } from '@/features/media-library/hooks/useMediaUpload';
 import type { MediaAssetRecord } from '@/features/media-library/types';
 import {
+  CompactPagination,
   KisokButton,
   KisokDialog,
   KisokDialogContent,
@@ -385,29 +378,13 @@ export function BrandsPanel() {
       )}
 
       {totalPages > 1 ? (
-        <Pagination className="mt-6 justify-start">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                aria-disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink isActive={pageNumber === page} onClick={() => setPage(pageNumber)}>
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                aria-disabled={page >= totalPages}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <div className="mt-6 flex items-center justify-between border-border border-t pt-4">
+          <p className="font-mono text-muted-foreground text-xs">
+            Showing {(page - 1) * BRANDS_PAGE_SIZE + 1}–{Math.min(page * BRANDS_PAGE_SIZE, total)}{' '}
+            of {total} brands
+          </p>
+          <CompactPagination onPageChange={setPage} page={page} totalPages={totalPages} />
+        </div>
       ) : null}
 
       <BrandFormDialog

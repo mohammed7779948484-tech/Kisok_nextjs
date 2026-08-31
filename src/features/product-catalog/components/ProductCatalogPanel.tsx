@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ConfirmActionDialog } from '@/features/catalog-taxonomy/components/ConfirmActionDialog';
 import { Link } from '@/i18n/navigation';
 import { CompactPagination, KisokButton, KisokInput, StatusPill } from '@/shared/ui';
 
@@ -33,6 +34,7 @@ export function ProductCatalogPanel() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [notice, setNotice] = useState<string | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<ProductRecord | null>(null);
   const debouncedSearch = useDebouncedValue(searchInput, 300);
   const { products, total, pageSize, isLoading, isError, refetch } = useProductsList({
     page,
@@ -50,17 +52,21 @@ export function ProductCatalogPanel() {
           ? `Product "${name}" was created successfully.`
           : 'Product draft was created successfully.',
       );
+      window.history.replaceState({}, '', window.location.pathname);
     } else if (toastType === 'updated') {
       setNotice(
         name
           ? `Product "${name}" was updated successfully.`
           : 'Product changes were saved successfully.',
       );
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
-  async function toggleActive(product: ProductRecord) {
-    await productCatalogRepository.updateProduct(product.id, { isActive: !product.isActive });
+  async function confirmDeactivate() {
+    if (!deactivateTarget) return;
+    await productCatalogRepository.updateProduct(deactivateTarget.id, { isActive: false });
+    setDeactivateTarget(null);
     await refetch();
   }
 
@@ -98,7 +104,7 @@ export function ProductCatalogPanel() {
           </div>
           <button
             aria-label="Dismiss notice"
-            className="text-muted-foreground hover:text-foreground cursor-pointer text-xs"
+            className="cursor-pointer text-muted-foreground text-xs hover:text-foreground"
             onClick={() => setNotice(null)}
             type="button"
           >
@@ -117,7 +123,7 @@ export function ProductCatalogPanel() {
             setSearchInput(event.target.value);
             setPage(1);
           }}
-          placeholder="Search products"
+          placeholder="Search product, brand, SKU, or barcode…"
           value={searchInput}
         />
       </div>
@@ -136,7 +142,39 @@ export function ProductCatalogPanel() {
           </KisokButton>
         </div>
       ) : products.length === 0 ? (
-        <p className="mt-6 text-muted-foreground text-sm">No products are available.</p>
+        debouncedSearch.trim() ? (
+          <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/25 px-5 py-14 text-center">
+            <p className="font-semibold text-foreground text-sm">No products match your search</p>
+            <p className="mt-1 text-muted-foreground text-xs">
+              No products match &ldquo;{debouncedSearch}&rdquo;. Try adjusting your search keywords.
+            </p>
+            <KisokButton
+              className="mt-4"
+              onClick={() => {
+                setSearchInput('');
+                setPage(1);
+              }}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Clear search
+            </KisokButton>
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/25 px-5 py-14 text-center">
+            <p className="font-semibold text-foreground text-sm">No products in catalog</p>
+            <p className="mt-1 text-muted-foreground text-xs">
+              Get started by creating your first product.
+            </p>
+            <Link
+              className={buttonVariants({ className: 'mt-4', size: 'sm' })}
+              href="/admin/products/create"
+            >
+              Add first product
+            </Link>
+          </div>
+        )
       ) : (
         <div className="mt-6 overflow-x-auto">
           <Table>
@@ -152,7 +190,7 @@ export function ProductCatalogPanel() {
             <TableBody>
               {products.map((product) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-bold">{product.name}</TableCell>
+                  <TableCell className="font-bold break-words">{product.name}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {product.brandName ?? 'Unassigned'}
                   </TableCell>
@@ -183,7 +221,7 @@ export function ProductCatalogPanel() {
                       {product.isActive ? (
                         <KisokButton
                           aria-label={`Deactivate ${product.name}`}
-                          onClick={() => void toggleActive(product)}
+                          onClick={() => setDeactivateTarget(product)}
                           size="sm"
                           variant="quiet"
                         >
@@ -191,11 +229,11 @@ export function ProductCatalogPanel() {
                         </KisokButton>
                       ) : (
                         <Link
-                          aria-label={`Review activation ${product.name}`}
+                          aria-label={`Review readiness ${product.name}`}
                           className={buttonVariants({ size: 'sm', variant: 'quiet' })}
                           href={`/admin/products/${product.id}/edit`}
                         >
-                          Review activation
+                          Review readiness
                         </Link>
                       )}
                     </div>
@@ -207,11 +245,22 @@ export function ProductCatalogPanel() {
         </div>
       )}
 
-      <CompactPagination
-        className="mt-6 justify-start"
-        onPageChange={setPage}
-        page={page}
-        totalPages={totalPages}
+      {totalPages > 1 ? (
+        <CompactPagination
+          className="mt-6 justify-start"
+          onPageChange={setPage}
+          page={page}
+          totalPages={totalPages}
+        />
+      ) : null}
+
+      <ConfirmActionDialog
+        confirmLabel="Deactivate"
+        description={`Deactivating "${deactivateTarget?.name ?? 'this product'}" will hide all of its variants from customer storefronts. Active orders will not be affected. Continue?`}
+        onCancel={() => setDeactivateTarget(null)}
+        onConfirm={() => void confirmDeactivate()}
+        open={deactivateTarget !== null}
+        title={`Deactivate ${deactivateTarget?.name ?? 'Product'}`}
       />
     </section>
   );

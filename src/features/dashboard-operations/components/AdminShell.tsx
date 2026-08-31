@@ -21,7 +21,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { OrderNotificationCenter, useOrderRealtimeNotifications } from '@/features/orders';
 import { signOutCurrentUser } from '@/infrastructure/supabase/auth/browser';
 import { GuardedLink } from '@/shared/navigation/UnsavedChangesGuard';
-import { StatusPill } from '@/shared/ui';
+import { OfflineBanner, StatusPill } from '@/shared/ui';
 
 const navigation = [
   { href: '/admin', icon: GaugeIcon, label: 'Overview' },
@@ -76,6 +76,11 @@ export function AdminShell({
     }
   }
 
+  const cleanDisplayName =
+    !displayName || /^local\s+admin$/i.test(displayName.trim())
+      ? 'Admin'
+      : displayName.replace(/local\s+admin/gi, 'Admin');
+
   return (
     <main className="min-h-dvh bg-background text-foreground">
       <div className="mx-auto grid min-h-dvh max-w-[1800px] lg:grid-cols-[264px_1fr]">
@@ -127,12 +132,13 @@ export function AdminShell({
         </aside>
 
         <div className="min-w-0">
+          <OfflineBanner />
           <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-border border-b bg-background/85 px-5 py-3 backdrop-blur-xl sm:px-8">
             <div>
               <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
                 Admin workspace
               </p>
-              <p className="mt-1 font-medium text-sm">{displayName}</p>
+              <p className="mt-1 font-medium text-sm">{cleanDisplayName}</p>
             </div>
             <div className="flex items-center gap-3">
               <OrderNotificationCenter

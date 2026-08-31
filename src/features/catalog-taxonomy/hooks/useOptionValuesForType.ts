@@ -27,7 +27,10 @@ export function useOptionValuesForType(optionTypeId: string | undefined) {
   const { query, result } = useList<OptionValueRow>({
     resource: 'option_values',
     filters: optionTypeId ? [{ field: 'option_type_id', operator: 'eq', value: optionTypeId }] : [],
-    sorters: [{ field: 'display_order', order: 'asc' }],
+    sorters: [
+      { field: 'display_order', order: 'asc' },
+      { field: 'value', order: 'asc' },
+    ],
     pagination: { mode: 'off' },
     queryOptions: { enabled: Boolean(optionTypeId), retry: false },
   });

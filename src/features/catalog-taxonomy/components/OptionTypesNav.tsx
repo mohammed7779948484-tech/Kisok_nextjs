@@ -1,14 +1,6 @@
 'use client';
 
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
   Table,
   TableBody,
   TableCell,
@@ -16,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { KisokButton, StatusPill } from '@/shared/ui';
+import { CompactPagination, KisokButton, StatusPill } from '@/shared/ui';
 
 import { ReorderButtonGroup } from './ReorderButtonGroup';
 
@@ -82,12 +74,16 @@ export function OptionTypesNav({
               const isSelected = optionType.id === selectedOptionTypeId;
               return (
                 <TableRow
-                  className={isSelected ? 'bg-muted/70 font-medium' : undefined}
+                  className={
+                    isSelected
+                      ? 'border-l-4 border-l-primary bg-primary/10 font-medium'
+                      : 'border-l-4 border-l-transparent'
+                  }
                   key={optionType.id}
                 >
                   <TableCell className="font-medium whitespace-nowrap">
                     <button
-                      className="text-left font-medium hover:underline cursor-pointer"
+                      className="cursor-pointer text-left font-medium hover:underline"
                       onClick={() => onSelectType(optionType.id)}
                       type="button"
                     >
@@ -134,32 +130,12 @@ export function OptionTypesNav({
       </div>
 
       {totalPages > 1 ? (
-        <Pagination className="mt-4 justify-start">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                aria-disabled={page <= 1}
-                onClick={() => onPageChange(Math.max(1, page - 1))}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink
-                  isActive={pageNumber === page}
-                  onClick={() => onPageChange(pageNumber)}
-                >
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                aria-disabled={page >= totalPages}
-                onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <div className="mt-4 flex items-center justify-between border-border border-t pt-3">
+          <p className="font-mono text-muted-foreground text-xs">
+            Page {page} of {totalPages}
+          </p>
+          <CompactPagination onPageChange={onPageChange} page={page} totalPages={totalPages} />
+        </div>
       ) : null}
     </div>
   );

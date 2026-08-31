@@ -15,6 +15,7 @@ import type { VariantOptionValueRecord } from '../types';
  */
 export function useVariantOptionValues(variantId: string) {
   const [selections, setSelections] = useState<VariantOptionValueRecord[]>([]);
+  const [initialSelections, setInitialSelections] = useState<VariantOptionValueRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -25,7 +26,9 @@ export function useVariantOptionValues(variantId: string) {
     setIsLoading(true);
     setIsError(false);
     try {
-      setSelections(await productCatalogRepository.listVariantOptionValues(variantId));
+      const fetched = await productCatalogRepository.listVariantOptionValues(variantId);
+      setSelections(fetched);
+      setInitialSelections(fetched);
     } catch {
       setIsError(true);
     } finally {
@@ -90,10 +93,22 @@ export function useVariantOptionValues(variantId: string) {
     return false;
   }
 
+  const isDirty =
+    selections.length !== initialSelections.length ||
+    selections
+      .map((selection) => `${selection.optionTypeId}:${selection.optionValueId}`)
+      .sort()
+      .join('|') !==
+      initialSelections
+        .map((selection) => `${selection.optionTypeId}:${selection.optionValueId}`)
+        .sort()
+        .join('|');
+
   return {
     selections,
     isLoading,
     isError,
+    isDirty,
     formError,
     isSubmitting,
     submitError,

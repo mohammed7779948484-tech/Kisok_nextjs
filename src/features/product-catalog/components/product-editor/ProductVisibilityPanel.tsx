@@ -17,6 +17,10 @@ export function ProductVisibilityPanel({
   visibility,
   variantsCount,
 }: ProductVisibilityPanelProps) {
+  const readinessHeading = !isActive
+    ? 'Complete these items before activation:'
+    : 'Fix these items to restore storefront visibility:';
+
   return (
     <aside className="h-fit rounded-2xl border border-border bg-muted/30 p-5 xl:sticky xl:top-24">
       <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
@@ -27,16 +31,17 @@ export function ProductVisibilityPanel({
           {isActive ? 'Active' : 'Draft'}
         </StatusPill>
         <StatusPill tone={visibility.isCustomerVisible ? 'success' : 'warning'}>
-          {visibility.isCustomerVisible ? 'Customer visible' : 'Customer hidden'}
+          {visibility.isCustomerVisible ? 'Visible' : 'Hidden'}
         </StatusPill>
       </div>
       {visibility.isCustomerVisible ? (
         <p className="mt-4 text-sm">
-          The Product meets the current Lean V2 customer-catalog eligibility checks.
+          The Product meets all customer catalog eligibility checks and is ready for storefront
+          display.
         </p>
       ) : (
         <div className="mt-4 grid gap-2 text-muted-foreground text-sm">
-          <p className="font-medium text-foreground">Complete these items before activation:</p>
+          <p className="font-medium text-foreground">{readinessHeading}</p>
           <ul className="grid gap-2 pl-4">
             {visibility.reasons.map((reason) => (
               <li key={reason}>{reason}</li>
@@ -50,7 +55,7 @@ export function ProductVisibilityPanel({
           <dd>{categoriesCount > 0 ? `${categoriesCount} assigned` : 'Optional'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt>Cover</dt>
+          <dt>Cover image</dt>
           <dd>{hasCover ? 'Selected' : 'Optional'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">

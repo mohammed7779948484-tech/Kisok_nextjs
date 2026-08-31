@@ -28,6 +28,7 @@ export function InventoryPanel() {
   const [loading, setLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Stock table state
@@ -56,11 +57,12 @@ export function InventoryPanel() {
 
   const fetchHistory = useCallback(async (searchQuery = '') => {
     setHistoryLoading(true);
+    setHistoryError(null);
     try {
       const rows = await inventoryRepository.listHistory(searchQuery);
       setHistoryRows(rows);
     } catch {
-      // Non-fatal if history cannot be loaded
+      setHistoryError('Adjustment history could not be loaded. Check connection and try again.');
     } finally {
       setHistoryLoading(false);
     }
@@ -302,10 +304,16 @@ export function InventoryPanel() {
           ) : (
             <InventoryStockTable
               currentPage={stockPage}
+              isFiltered={Boolean(stockSearch.trim() || onlyLowStock)}
               itemsPerPage={ITEMS_PER_PAGE}
               onAdjust={(row) => {
                 setDialogError(null);
                 setDialogTarget(row);
+              }}
+              onClearFilters={() => {
+                setStockSearch('');
+                setOnlyLowStock(false);
+                setStockPage(1);
               }}
               onPageChange={setStockPage}
               rows={paginatedStockRows}
@@ -337,19 +345,16 @@ export function InventoryPanel() {
             />
           </div>
 
-          {historyLoading && historyRows.length === 0 ? (
-            <p className="py-12 text-center text-muted-foreground text-sm" role="status">
-              Loading adjustment history…
-            </p>
-          ) : (
-            <InventoryHistoryTable
-              currentPage={historyPage}
-              itemsPerPage={ITEMS_PER_PAGE}
-              onPageChange={setHistoryPage}
-              rows={paginatedHistoryRows}
-              totalItems={filteredHistoryRows.length}
-            />
-          )}
+          <InventoryHistoryTable
+            currentPage={historyPage}
+            error={historyError}
+            isLoading={historyLoading && historyRows.length === 0}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setHistoryPage}
+            onRetry={() => void fetchHistory(historySearch)}
+            rows={paginatedHistoryRows}
+            totalItems={filteredHistoryRows.length}
+          />
         </TabsContent>
       </Tabs>
 

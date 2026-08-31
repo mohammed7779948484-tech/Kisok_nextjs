@@ -83,13 +83,13 @@ describe('ProductCatalogPanel', () => {
     render(<ProductCatalogPanel />);
 
     expect(await screen.findByText('Berry Spark')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Review activation Berry Spark' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Review readiness Berry Spark' })).toHaveAttribute(
       'href',
       '/en/admin/products/product-1/edit',
     );
   });
 
-  it('activates or deactivates a Product directly from the list', async () => {
+  it('prompts confirmation modal before deactivating a Product directly from the list', async () => {
     const user = userEvent.setup();
     testContext.listProducts.mockResolvedValue([baseProduct()]);
     testContext.updateProduct.mockResolvedValue({ id: 'product-1' });
@@ -97,6 +97,13 @@ describe('ProductCatalogPanel', () => {
     render(<ProductCatalogPanel />);
     await screen.findByText('Berry Spark');
     await user.click(screen.getByRole('button', { name: 'Deactivate Berry Spark' }));
+
+    expect(await screen.findByText('Deactivate Berry Spark')).toBeInTheDocument();
+    expect(testContext.updateProduct).not.toHaveBeenCalled();
+
+    // Confirm in dialog
+    const dialog = screen.getByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Deactivate' }));
 
     await waitFor(() =>
       expect(testContext.updateProduct).toHaveBeenCalledWith('product-1', { isActive: false }),

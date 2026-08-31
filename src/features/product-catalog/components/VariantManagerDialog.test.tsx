@@ -93,6 +93,7 @@ describe('VariantManagerDialog', () => {
 
     await screen.findByText('No variants are assigned to this Product.');
     await user.click(screen.getByRole('button', { name: 'Add variant' }));
+    await user.click(screen.getByRole('button', { name: /custom title override/i }));
     await user.type(screen.getByLabelText(/title override/i), 'Single');
     await user.click(screen.getByRole('button', { name: 'Save variant' }));
 

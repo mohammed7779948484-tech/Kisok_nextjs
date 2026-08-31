@@ -20,6 +20,7 @@ describe('VariantFormDialog', () => {
     );
 
     await user.type(screen.getByLabelText('Barcode'), '0123456789');
+    await user.click(screen.getByRole('button', { name: /custom title override/i }));
     await user.type(screen.getByLabelText(/title override/i), 'Berry Single');
     await user.click(screen.getByRole('button', { name: 'Save variant' }));
 
@@ -31,6 +32,35 @@ describe('VariantFormDialog', () => {
         lowStockThreshold: 5,
       }),
     );
+  });
+
+  it('prompts confirmation when attempting to close dirty Variant form', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+
+    render(
+      <VariantFormDialog
+        mode="create"
+        onCreate={vi.fn()}
+        onOpenChange={onOpenChange}
+        open
+        productId="product-1"
+      />,
+    );
+
+    // Modify a field
+    await user.type(screen.getByLabelText('Barcode'), '999888');
+
+    // Click Cancel
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    // Discard confirmation should appear
+    expect(await screen.findByText('Discard unsaved Variant changes?')).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    // Confirm discard
+    await user.click(screen.getByRole('button', { name: 'Discard' }));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('never shows an editable SKU field — SKU is database-generated', () => {

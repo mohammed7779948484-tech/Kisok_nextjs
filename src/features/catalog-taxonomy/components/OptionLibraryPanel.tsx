@@ -41,7 +41,9 @@ export function OptionLibraryPanel() {
     refetch: refetchOptionTypes,
   } = useOptionTypesList({ page, search: debouncedSearch });
   const [selectedId, setSelectedId] = useState('');
-  const selectedOptionTypeId = selectedId || optionTypes[0]?.id || '';
+  const selectedOptionTypeId = optionTypes.some((option) => option.id === selectedId)
+    ? selectedId
+    : optionTypes[0]?.id || '';
   const selectedOptionType = optionTypes.find((option) => option.id === selectedOptionTypeId);
 
   const {

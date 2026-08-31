@@ -8,14 +8,6 @@ import { Controller } from 'react-hook-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
   Table,
   TableBody,
   TableCell,
@@ -27,6 +19,7 @@ import { MediaPickerDialog } from '@/features/media-library/components/MediaPick
 import { useMediaUpload } from '@/features/media-library/hooks/useMediaUpload';
 import type { MediaAssetRecord } from '@/features/media-library/types';
 import {
+  CompactPagination,
   KisokButton,
   KisokDialog,
   KisokDialogContent,
@@ -41,64 +34,61 @@ import {
 import { CATEGORIES_PAGE_SIZE, useCategoriesList } from '../hooks/useCategoriesList';
 import { useCategoryForm } from '../hooks/useCategoryForm';
 import { useCategoryReorder } from '../hooks/useCategoryReorder';
-import { formatDisplayRank, organizeCategoriesHierarchy } from '../lib/reorder';
 import { type CategoryFormValues, categoryFormDefaultValues } from '../schemas/category.schema';
 import type { CategoryRecord } from '../types';
 import { ConfirmActionDialog } from './ConfirmActionDialog';
 import { ReorderButtonGroup } from './ReorderButtonGroup';
 
-/** Debounced-as-you-type search — same pattern as `BrandsPanel`. */
-function useDebouncedValue<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs);
-    return () => clearTimeout(timer);
-  }, [value, delayMs]);
-  return debounced;
-}
-
-type DialogState = { open: boolean; mode: 'create' | 'edit'; category?: CategoryRecord };
+export type CategoryDialogState =
+  | { mode: 'create'; open: boolean }
+  | { mode: 'edit'; open: boolean; category: CategoryRecord };
 
 function CategoryFormDialog({
   dialogState,
   onOpenChange,
 }: {
-  dialogState: DialogState;
+  dialogState: CategoryDialogState;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { mode, category, open } = dialogState;
+  const isEdit = dialogState.mode === 'edit';
+  const category = isEdit ? dialogState.category : undefined;
+  const [parentSearchInput, setParentSearchInput] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
-  const { upload, uploading, error: uploadError } = useMediaUpload();
-  const [parentSearchInput, setParentSearchInput] = useState('');
-  const debouncedParentSearch = useDebouncedValue(parentSearchInput, 300);
+  const { uploading } = useMediaUpload();
+
   const {
-    categories: rootCategoryMatches,
+    control,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    refineCore: { onFinish },
+    register,
+    reset,
+    setValue,
+    watch,
+  } = useCategoryForm({ id: category?.id, mode: dialogState.mode });
+
+  const {
+    categories: parentCategories,
     isLoading: parentCategoriesLoading,
     isError: parentCategoriesError,
     refetch: refetchParentCategories,
   } = useCategoriesList({
     page: 1,
-    search: debouncedParentSearch,
+    pageSize: 100,
     parentId: null,
-    pageSize: CATEGORIES_PAGE_SIZE,
+    search: parentSearchInput,
   });
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-    refineCore: { onFinish },
-  } = useCategoryForm({ id: category?.id, mode });
-
-  const currentMediaAssetId = watch('image_media_asset_id');
+  const selectedImageMediaAssetId = watch('image_media_asset_id');
 
   useEffect(() => {
-    if (!open) return;
+    if (!dialogState.open) {
+      setParentSearchInput('');
+      setSelectedImageUrl(null);
+      return;
+    }
+
     if (category) {
       reset({
         name: category.name,
@@ -111,62 +101,70 @@ function CategoryFormDialog({
       reset(categoryFormDefaultValues);
       setSelectedImageUrl(null);
     }
-  }, [open, category, reset]);
+  }, [category, dialogState.open, reset]);
+
+  const parentOptions = parentCategories.filter((candidate) => candidate.id !== category?.id);
+
+  function handleSelectMedia(asset: MediaAssetRecord) {
+    setSelectedImageUrl(asset.secureUrl);
+    setValue('image_media_asset_id', asset.id, { shouldDirty: true });
+    setPickerOpen(false);
+  }
+
+  function handleRemoveMedia() {
+    setSelectedImageUrl(null);
+    setValue('image_media_asset_id', null, { shouldDirty: true });
+  }
 
   async function onSubmit(values: CategoryFormValues) {
     await onFinish(values);
     onOpenChange(false);
   }
 
-  function handleSelectMedia(asset: MediaAssetRecord) {
-    setValue('image_media_asset_id', asset.id, { shouldDirty: true });
-    setSelectedImageUrl(asset.secureUrl);
-  }
-
-  function handleRemoveMedia() {
-    setValue('image_media_asset_id', null, { shouldDirty: true });
-    setSelectedImageUrl(null);
-  }
-
-  const parentOptions = rootCategoryMatches.filter((candidate) => candidate.id !== category?.id);
-
   return (
     <>
-      <KisokDialog onOpenChange={onOpenChange} open={open}>
-        <KisokDialogContent>
+      <KisokDialog onOpenChange={onOpenChange} open={dialogState.open}>
+        <KisokDialogContent className="max-w-lg">
           <KisokDialogHeader>
             <KisokDialogTitle>
-              {mode === 'create' ? 'Add Category' : 'Edit Category'}
+              {isEdit ? `Edit Category: ${category?.name}` : 'Add category'}
             </KisokDialogTitle>
             <KisokDialogDescription>
-              Categories support one root level and one child level in the hosted Lean V2 catalog.
+              {isEdit
+                ? 'Update category settings, hierarchy position, or cover image.'
+                : 'Create a root or child category for the catalog taxonomy.'}
             </KisokDialogDescription>
           </KisokDialogHeader>
-          <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+
+          <form className="grid gap-4 py-2" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-2">
               <Label htmlFor="category-name">Category name</Label>
               <KisokInput
+                aria-describedby={errors.name ? 'category-name-error' : undefined}
                 aria-invalid={Boolean(errors.name)}
                 id="category-name"
                 {...register('name')}
               />
               {errors.name ? (
-                <p className="text-destructive text-sm">{errors.name.message}</p>
+                <p className="text-destructive text-sm" id="category-name-error" role="alert">
+                  {errors.name.message}
+                </p>
               ) : null}
             </div>
 
             <div className="grid gap-2">
               <Label>Category image</Label>
-              <div className="flex items-center gap-3">
-                <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted">
+              <div className="flex items-center gap-4">
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
                   {selectedImageUrl ? (
+                    // biome-ignore lint/a11y/useAltText: thumbnail preview
                     <img
-                      alt="Category preview"
+                      alt={category?.name ?? 'Category preview'}
                       className="h-full w-full object-cover"
                       src={selectedImageUrl}
                     />
                   ) : (
-                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                    <span className="font-mono text-[10px] text-muted-foreground uppercase">
                       No image
                     </span>
                   )}
@@ -229,6 +227,7 @@ function CategoryFormDialog({
                       aria-label="Parent category"
                       className="grid max-h-48 gap-1 overflow-y-auto rounded-md border border-border p-1"
                       role="listbox"
+                      tabIndex={0}
                     >
                       <button
                         aria-selected={field.value === null}
@@ -296,18 +295,24 @@ function CategoryFormDialog({
       </KisokDialog>
 
       <MediaPickerDialog
-        description="Choose an existing image, upload a new one, or capture a photo for this category."
         isUploading={uploading}
-        error={uploadError}
         onOpenChange={setPickerOpen}
         onSelect={handleSelectMedia}
-        onUpload={upload}
         open={pickerOpen}
-        selectedAssetId={currentMediaAssetId ?? null}
+        selectedAssetId={selectedImageMediaAssetId ?? null}
         title="Select Category Image"
       />
     </>
   );
+}
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
 }
 
 export function CatalogTaxonomyPanel() {
@@ -318,9 +323,12 @@ export function CatalogTaxonomyPanel() {
     page,
     search: debouncedSearch,
   });
-  const { mutate: updateCategory } = useUpdate();
   const { move: moveCategory, isReordering } = useCategoryReorder(() => void refetch());
-  const [dialogState, setDialogState] = useState<DialogState>({ mode: 'create', open: false });
+  const { mutate: updateCategory } = useUpdate();
+  const [dialogState, setDialogState] = useState<CategoryDialogState>({
+    mode: 'create',
+    open: false,
+  });
   const [deactivateTarget, setDeactivateTarget] = useState<CategoryRecord | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / CATEGORIES_PAGE_SIZE));
@@ -351,12 +359,15 @@ export function CatalogTaxonomyPanel() {
     <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
       <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
             Catalog taxonomy / hosted data
           </p>
           <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
             Categories
           </h1>
+          <p className="mt-3 max-w-xl text-muted-foreground text-sm leading-6">
+            Maintain the primary catalog hierarchy for storefront navigation and catalog groupings.
+          </p>
         </div>
         <div className="flex gap-2">
           <KisokButton
@@ -405,36 +416,49 @@ export function CatalogTaxonomyPanel() {
         <Table className="mt-6">
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead className="w-16">Image</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Level</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Order</TableHead>
+              <TableHead className="text-right">Rank</TableHead>
               <TableHead className="text-right">Reorder</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {organizeCategoriesHierarchy(categories).map((category, _, array) => {
-              const siblings = array.filter((c) => c.parentId === category.parentId);
-              const siblingIdx = siblings.findIndex((c) => c.id === category.id);
-              const displayRank = formatDisplayRank(siblingIdx >= 0 ? siblingIdx : 0);
-
+            {categories.map((category) => {
+              const displayRank =
+                category.displayOrder === null ? '—' : String(category.displayOrder);
               return (
                 <TableRow key={category.id}>
-                  <TableCell className="font-medium">
-                    <div className={`flex items-center gap-3 ${category.parentId ? 'pl-6' : ''}`}>
+                  <TableCell>
+                    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
                       {category.imageUrl ? (
+                        // biome-ignore lint/a11y/useAltText: thumbnail preview
                         <img
                           alt={category.name}
-                          className="size-8 shrink-0 rounded-md border border-border object-cover bg-muted"
+                          className="h-full w-full object-cover"
                           src={category.imageUrl}
                         />
                       ) : (
-                        <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-mono text-[11px] font-semibold text-muted-foreground uppercase">
-                          {category.name.slice(0, 2)}
-                        </div>
+                        <span className="font-mono text-[9px] text-muted-foreground uppercase">
+                          None
+                        </span>
                       )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col">
                       <span>{category.name}</span>
+                      {category.parentId ? (
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          Child category
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          Root category
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
@@ -482,29 +506,13 @@ export function CatalogTaxonomyPanel() {
       )}
 
       {totalPages > 1 ? (
-        <Pagination className="mt-6 justify-start">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                aria-disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink isActive={pageNumber === page} onClick={() => setPage(pageNumber)}>
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                aria-disabled={page >= totalPages}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <div className="mt-6 flex items-center justify-between border-border border-t pt-4">
+          <p className="font-mono text-muted-foreground text-xs">
+            Showing {(page - 1) * CATEGORIES_PAGE_SIZE + 1}–
+            {Math.min(page * CATEGORIES_PAGE_SIZE, total)} of {total} categories
+          </p>
+          <CompactPagination onPageChange={setPage} page={page} totalPages={totalPages} />
+        </div>
       ) : null}
 
       <CategoryFormDialog

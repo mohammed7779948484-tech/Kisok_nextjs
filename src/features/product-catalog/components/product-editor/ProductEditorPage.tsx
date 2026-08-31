@@ -201,12 +201,17 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
                 onEditVariant={(variant) => setVariantDialog({ mode: 'edit', open: true, variant })}
                 onMedia={setMediaVariant}
                 onOptions={setOptionsVariant}
+                onRetryVariants={() => void workflow.data.refetchVariants()}
                 productId={currentProductId}
                 readOnly={workflow.isReadOnly}
-                variantMediaCounts={workflow.data.variantMediaCounts}
                 variantEligibilityById={workflow.data.variantEligibilityById}
+                variantMediaCounts={workflow.data.variantMediaCounts}
+                variantMediaStatus={workflow.data.variantMedia.status}
                 variantOptionsById={workflow.data.variantOptions.byVariantId}
+                variantOptionsStatus={workflow.data.variantOptions.status}
                 variants={workflow.data.variants.data}
+                variantsError={workflow.data.variants.error}
+                variantsStatus={workflow.data.variants.status}
               />
             }
           />

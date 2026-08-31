@@ -61,7 +61,7 @@ export function ProductEditorHeader({
             onClick={() => onSave(mode === 'create' ? 'return' : 'continue')}
             type="button"
           >
-            {isSaving ? 'Saving…' : mode === 'create' ? 'Save draft' : 'Save Product'}
+            {isSaving ? 'Saving…' : mode === 'create' ? 'Save & add Variants' : 'Save Product'}
           </KisokButton>
         ) : null}
       </div>

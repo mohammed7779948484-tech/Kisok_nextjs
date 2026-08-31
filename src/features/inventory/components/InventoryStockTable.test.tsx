@@ -45,7 +45,7 @@ describe('InventoryStockTable', () => {
     expect(screen.getByText('Organic Yirgacheffe')).toBeInTheDocument();
     expect(screen.getByText('Light Roast · 250g')).toBeInTheDocument();
     expect(screen.getByText(/ETH-YRG-250/i)).toBeInTheDocument();
-    expect(screen.getByText('Review')).toBeInTheDocument();
+    expect(screen.getByText('Low stock')).toBeInTheDocument();
     expect(screen.getByText('Healthy')).toBeInTheDocument();
     expect(screen.getByText('4')).toBeInTheDocument();
     expect(screen.getByText('50')).toBeInTheDocument();
@@ -82,6 +82,6 @@ describe('InventoryStockTable', () => {
       />,
     );
 
-    expect(screen.getByText(/no inventory records match your criteria/i)).toBeInTheDocument();
+    expect(screen.getByText(/no inventory records exist yet/i)).toBeInTheDocument();
   });
 });

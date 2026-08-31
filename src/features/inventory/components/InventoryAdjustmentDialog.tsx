@@ -53,10 +53,10 @@ const adjustmentTypes: Array<{
   value: AllowedAdjustmentType;
   label: string;
 }> = [
-  { value: 'stock_received', label: 'Stock received (+)' },
-  { value: 'manual_increase', label: 'Manual increase (+)' },
-  { value: 'manual_decrease', label: 'Manual decrease (-)' },
-  { value: 'damaged_or_expired', label: 'Damaged or expired (-)' },
+  { value: 'stock_received', label: 'Receive stock (+)' },
+  { value: 'manual_increase', label: 'Other increase (+)' },
+  { value: 'manual_decrease', label: 'Other decrease (-)' },
+  { value: 'damaged_or_expired', label: 'Record damaged/expired stock (-)' },
 ];
 
 export function InventoryAdjustmentDialog({
@@ -112,7 +112,7 @@ export function InventoryAdjustmentDialog({
     setClientError(null);
     if (target && values.finalQuantity === target.currentQuantity) {
       setClientError(
-        'Set Quantity must differ from the current quantity. No ledger entry was created.',
+        'Set Quantity must differ from the current quantity. No inventory entry was created.',
       );
       return;
     }
@@ -131,7 +131,7 @@ export function InventoryAdjustmentDialog({
       <KisokDialogContent className="max-w-md">
         <KisokDialogHeader>
           <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
-            Inventory control / Lean V2 ledger
+            Inventory control
           </p>
           <KisokDialogTitle>Adjust stock: {target?.productName}</KisokDialogTitle>
           <KisokDialogDescription>
@@ -164,7 +164,13 @@ export function InventoryAdjustmentDialog({
                     value={applyForm.watch('adjustmentType')}
                   >
                     <SelectTrigger className="w-full" id="adjustment-type">
-                      <SelectValue placeholder="Select adjustment type" />
+                      <SelectValue placeholder="Select adjustment type">
+                        {(val: string | null) => {
+                          if (!val) return 'Select adjustment type';
+                          const found = adjustmentTypes.find((t) => t.value === val);
+                          return found ? found.label : val;
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {adjustmentTypes.map((type) => (
@@ -184,6 +190,12 @@ export function InventoryAdjustmentDialog({
                     Quantity
                   </label>
                   <KisokInput
+                    aria-describedby={
+                      applyForm.formState.errors.quantityChange
+                        ? 'inventory-quantity-error'
+                        : undefined
+                    }
+                    aria-invalid={Boolean(applyForm.formState.errors.quantityChange)}
                     id="inventory-quantity"
                     inputMode="numeric"
                     min="1"
@@ -200,7 +212,11 @@ export function InventoryAdjustmentDialog({
                     }}
                   />
                   {applyForm.formState.errors.quantityChange ? (
-                    <p className="text-destructive text-xs">
+                    <p
+                      className="text-destructive text-xs"
+                      id="inventory-quantity-error"
+                      role="alert"
+                    >
                       {applyForm.formState.errors.quantityChange.message}
                     </p>
                   ) : null}
@@ -214,13 +230,21 @@ export function InventoryAdjustmentDialog({
                     Reason
                   </label>
                   <KisokTextarea
+                    aria-describedby={
+                      applyForm.formState.errors.reason ? 'inventory-reason-error' : undefined
+                    }
+                    aria-invalid={Boolean(applyForm.formState.errors.reason)}
                     className="min-h-20 resize-y"
                     id="inventory-reason"
                     placeholder="Explain why stock changed (e.g. supplier delivery, broken unit)"
                     {...applyForm.register('reason')}
                   />
                   {applyForm.formState.errors.reason ? (
-                    <p className="text-destructive text-xs">
+                    <p
+                      className="text-destructive text-xs"
+                      id="inventory-reason-error"
+                      role="alert"
+                    >
                       {applyForm.formState.errors.reason.message}
                     </p>
                   ) : null}
@@ -234,7 +258,7 @@ export function InventoryAdjustmentDialog({
             <form id="set-quantity-form" onSubmit={setForm.handleSubmit(handleSetSubmit)}>
               <div className="space-y-4">
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  This records the calculated difference directly into the Lean V2 immutable ledger.
+                  This records the calculated difference directly into the inventory audit log.
                 </p>
 
                 <div className="grid gap-2">
@@ -245,6 +269,12 @@ export function InventoryAdjustmentDialog({
                     Final quantity
                   </label>
                   <KisokInput
+                    aria-describedby={
+                      setForm.formState.errors.finalQuantity
+                        ? 'inventory-final-quantity-error'
+                        : undefined
+                    }
+                    aria-invalid={Boolean(setForm.formState.errors.finalQuantity)}
                     id="inventory-final-quantity"
                     inputMode="numeric"
                     min="0"
@@ -252,7 +282,11 @@ export function InventoryAdjustmentDialog({
                     {...setForm.register('finalQuantity', { valueAsNumber: true })}
                   />
                   {setForm.formState.errors.finalQuantity ? (
-                    <p className="text-destructive text-xs">
+                    <p
+                      className="text-destructive text-xs"
+                      id="inventory-final-quantity-error"
+                      role="alert"
+                    >
                       {setForm.formState.errors.finalQuantity.message}
                     </p>
                   ) : null}
@@ -266,13 +300,21 @@ export function InventoryAdjustmentDialog({
                     Reason
                   </label>
                   <KisokTextarea
+                    aria-describedby={
+                      setForm.formState.errors.reason ? 'inventory-set-reason-error' : undefined
+                    }
+                    aria-invalid={Boolean(setForm.formState.errors.reason)}
                     className="min-h-20 resize-y"
                     id="inventory-set-reason"
-                    placeholder="Describe the stock count, physical recount, or audit correction"
+                    placeholder="Reason for count correction (e.g. physical recount, audit)"
                     {...setForm.register('reason')}
                   />
                   {setForm.formState.errors.reason ? (
-                    <p className="text-destructive text-xs">
+                    <p
+                      className="text-destructive text-xs"
+                      id="inventory-set-reason-error"
+                      role="alert"
+                    >
                       {setForm.formState.errors.reason.message}
                     </p>
                   ) : null}
@@ -283,12 +325,12 @@ export function InventoryAdjustmentDialog({
         </Tabs>
 
         {activeError ? (
-          <p
-            className="border-destructive border-l-2 bg-destructive/10 px-3 py-2 text-destructive text-xs"
+          <div
+            className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive text-xs"
             role="alert"
           >
             {activeError}
-          </p>
+          </div>
         ) : null}
 
         <KisokDialogFooter>
@@ -297,16 +339,10 @@ export function InventoryAdjustmentDialog({
           </KisokButton>
           <KisokButton
             disabled={isWorking}
-            onClick={() => {
-              if (tab === 'adjust') {
-                void applyForm.handleSubmit(handleApplySubmit)();
-              } else {
-                void setForm.handleSubmit(handleSetSubmit)();
-              }
-            }}
-            type="button"
+            form={tab === 'adjust' ? 'apply-change-form' : 'set-quantity-form'}
+            type="submit"
           >
-            {isWorking ? 'Saving…' : tab === 'adjust' ? 'Save adjustment' : 'Save quantity'}
+            {isWorking ? 'Applying…' : tab === 'adjust' ? 'Save adjustment' : 'Save quantity'}
           </KisokButton>
         </KisokDialogFooter>
       </KisokDialogContent>

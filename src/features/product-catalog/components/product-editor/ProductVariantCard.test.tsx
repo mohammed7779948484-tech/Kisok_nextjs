@@ -29,7 +29,7 @@ describe('ProductVariantCard', () => {
       />,
     );
 
-    expect(screen.getByText('Customer hidden')).toBeInTheDocument();
+    expect(screen.getByText('Blocked')).toBeInTheDocument();
     expect(screen.getByText('Uses inactive Option Value “Berry”.')).toBeInTheDocument();
   });
 });

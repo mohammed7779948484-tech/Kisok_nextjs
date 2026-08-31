@@ -190,4 +190,42 @@ describe('VariantOptionsDialog', () => {
 
     expect(screen.queryByText('Flavor: Berry')).not.toBeInTheDocument();
   });
+
+  it('prompts confirmation when attempting to close dirty Variant options', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    testContext.listVariantOptionValues.mockResolvedValue([
+      {
+        optionTypeId: 'type-flavor',
+        optionTypeName: 'Flavor',
+        optionValueId: 'value-berry',
+        optionValueName: 'Berry',
+      },
+    ]);
+
+    render(
+      <VariantOptionsDialog
+        onOpenChange={onOpenChange}
+        open
+        optionTypes={OPTION_TYPES}
+        variantId="variant-1"
+        variantLabel="KSK-000001"
+      />,
+    );
+    await screen.findByText('Flavor: Berry');
+
+    // Modify selections by removing Flavor: Berry
+    await user.click(screen.getByRole('button', { name: 'Remove Flavor: Berry' }));
+
+    // Click Cancel
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    // Confirm discard dialog appears
+    expect(await screen.findByText('Discard unsaved Option changes?')).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    // Confirm discard
+    await user.click(screen.getByRole('button', { name: 'Discard' }));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
 });

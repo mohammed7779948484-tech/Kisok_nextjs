@@ -12,12 +12,17 @@ type ProductVariantsTabProps = {
   onEditVariant: (variant: VariantRecord) => void;
   onMedia: (variant: VariantRecord) => void;
   onOptions: (variant: VariantRecord) => void;
+  onRetryVariants?: () => void;
   productId?: string;
   readOnly: boolean;
-  variantMediaCounts: Record<string, number>;
   variantEligibilityById: Record<string, VariantEligibility>;
+  variantMediaCounts: Record<string, number>;
+  variantMediaStatus?: 'loading' | 'error' | 'ready' | 'not-requested';
   variantOptionsById: Record<string, VariantOptionValueRecord[]>;
+  variantOptionsStatus?: 'loading' | 'error' | 'ready' | 'not-requested';
   variants: VariantRecord[];
+  variantsError?: Error | null;
+  variantsStatus?: 'loading' | 'error' | 'ready' | 'not-requested';
 };
 
 export function ProductVariantsTab({
@@ -26,12 +31,16 @@ export function ProductVariantsTab({
   onEditVariant,
   onMedia,
   onOptions,
+  onRetryVariants,
   productId,
   readOnly,
-  variantMediaCounts,
   variantEligibilityById,
+  variantMediaCounts,
+  variantMediaStatus = 'ready',
   variantOptionsById,
   variants,
+  variantsError,
+  variantsStatus = 'ready',
 }: ProductVariantsTabProps) {
   if (!productId) {
     return (
@@ -55,14 +64,41 @@ export function ProductVariantsTab({
             valid.
           </p>
         </div>
-        {!readOnly ? (
+        {!readOnly && variantsStatus !== 'error' ? (
           <KisokButton onClick={onAddVariant} type="button" variant="outline">
             <PlusIcon /> Add Variant
           </KisokButton>
         ) : null}
       </div>
 
-      {variants.length === 0 ? (
+      {variantsStatus === 'loading' ? (
+        <div className="mt-5 grid gap-3 py-6" role="status">
+          <p className="text-muted-foreground text-sm">Loading Variants…</p>
+        </div>
+      ) : variantsStatus === 'error' ? (
+        <div
+          className="mt-5 grid gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-5 text-destructive"
+          role="alert"
+        >
+          <div>
+            <h3 className="font-bold text-sm">Variants could not be loaded</h3>
+            <p className="mt-1 text-xs">
+              {variantsError?.message ?? 'A database error occurred while loading Variants.'}
+            </p>
+          </div>
+          {onRetryVariants ? (
+            <KisokButton
+              className="w-fit"
+              onClick={onRetryVariants}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Retry loading Variants
+            </KisokButton>
+          ) : null}
+        </div>
+      ) : variants.length === 0 ? (
         <div className="mt-5 grid gap-3 border border-dashed border-border p-5">
           <div>
             <h3 className="font-bold">No Variants yet</h3>
@@ -83,6 +119,7 @@ export function ProductVariantsTab({
               eligibility={variantEligibilityById[variant.id]}
               key={variant.id}
               mediaCount={variantMediaCounts[variant.id] ?? 0}
+              mediaStatus={variantMediaStatus}
               onDelete={() => onDeleteVariant(variant)}
               onEdit={() => onEditVariant(variant)}
               onMedia={() => onMedia(variant)}

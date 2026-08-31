@@ -36,7 +36,10 @@ describe('useOptionValuesForType', () => {
     expect(getList).toHaveBeenCalledWith(
       expect.objectContaining({
         resource: 'option_values',
-        sorters: [{ field: 'display_order', order: 'asc' }],
+        sorters: [
+          { field: 'display_order', order: 'asc' },
+          { field: 'value', order: 'asc' },
+        ],
       }),
     );
   });

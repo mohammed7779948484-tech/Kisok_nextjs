@@ -42,7 +42,13 @@ export function InventoryHistoryFilter({
     <div className="w-full sm:w-56">
       <Select onValueChange={(val) => onTypeChange(val as HistoryFilterType)} value={selectedType}>
         <SelectTrigger aria-label="Filter adjustment type" className="h-9 w-full">
-          <SelectValue placeholder="All adjustment types" />
+          <SelectValue placeholder="All adjustment types">
+            {(val: string | null) => {
+              if (!val || val === 'all') return 'All adjustment types';
+              const found = FILTER_OPTIONS.find((opt) => opt.value === val);
+              return found ? found.label : val;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {FILTER_OPTIONS.map((opt) => (

@@ -115,14 +115,14 @@ describe('ProductEditorPage', () => {
 
     renderProductEditor();
     await user.type(await screen.findByLabelText('Product name'), 'Citrus Spark');
-    await user.click(screen.getByRole('button', { name: 'Save draft' }));
+    await user.click(screen.getByRole('button', { name: 'Save & add Variants' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('saved as an inactive draft');
     expect(screen.getByRole('link', { name: 'Open saved draft' })).toHaveAttribute(
       'href',
       '/en/admin/products/product-2/edit',
     );
-    expect(screen.getByRole('button', { name: 'Save draft' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save & add Variants' })).toBeDisabled();
   });
 
   it('provides a targeted retry action when Product reference data cannot load', async () => {
