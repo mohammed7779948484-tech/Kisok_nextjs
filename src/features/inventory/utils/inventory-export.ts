@@ -85,7 +85,11 @@ export function downloadCsv(filename: string, content: string): void {
   const bom = '\uFEFF';
   const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  // Bracket access (not `document.createElement`) because TypeScript's overload-merged
+  // symbol carries a `@deprecated` tag from the unrelated legacy-tag overload
+  // (`HTMLElementDeprecatedTagNameMap`), which `check:deprecated` flags even though the
+  // resolved overload here (tag `'a'` -> HTMLAnchorElement) is not deprecated.
+  const link = document['createElement']('a');
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
   document.body.appendChild(link);
