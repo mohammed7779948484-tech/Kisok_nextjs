@@ -135,22 +135,14 @@ export function createProductCatalogRepository(
     },
 
     async createVariant(input: VariantInput) {
-      const payload: Database['public']['Tables']['product_variants']['Insert'] = {
-        product_id: input.productId,
-        is_active: false,
-      };
-      if (input.barcode !== undefined) payload.barcode = input.barcode?.trim() || null;
-      if (input.titleOverride !== undefined)
-        payload.title_override = input.titleOverride?.trim() || null;
-      if (input.lowStockThreshold !== undefined)
-        payload.low_stock_threshold = input.lowStockThreshold;
-
       const result = await client
-        .from('product_variants')
-        .insert(payload)
-        .select(
-          'id,product_id,sku,barcode,title_override,is_active,low_stock_threshold,display_order,search_keywords,created_at,updated_at',
-        )
+        .rpc('create_variant_with_initial_stock', {
+          product_id: input.productId,
+          barcode: input.barcode?.trim() || undefined,
+          title_override: input.titleOverride?.trim() || undefined,
+          low_stock_threshold: input.lowStockThreshold ?? undefined,
+          initial_quantity: input.initialQuantity,
+        })
         .single();
       if (result.error) throw result.error;
       return mapVariant(result.data);
@@ -161,7 +153,8 @@ export function createProductCatalogRepository(
       if (result.error?.code === '23503') {
         return {
           outcome: 'history-blocked' as const,
-          message: 'This Variant is referenced by historical orders and cannot be deleted.',
+          message:
+            'This Variant has protected operational history and cannot be permanently deleted.',
         };
       }
       if (result.error) throw result.error;

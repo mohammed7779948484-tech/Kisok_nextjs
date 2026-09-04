@@ -7,8 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / "supabase" / "migrations"
 
 files = sorted(MIG.glob("*.sql"))
-if len(files) != 13:
-    raise SystemExit(f"FAIL: expected 13 migrations, found {len(files)}")
+if len(files) != 14:
+    raise SystemExit(f"FAIL: expected 14 migrations, found {len(files)}")
 
 text = "\n".join(p.read_text(encoding="utf-8") for p in files)
 
@@ -81,7 +81,7 @@ for p in files:
     assert_balanced_parentheses(p, body)
 
 functions = re.findall(
-    r"(?im)^\s*create\s+function\s+([a-z_][\w]*\.[a-z_][\w]*)\s*\(",
+    r"(?im)^\s*create\s+(?:or\s+replace\s+)?function\s+([a-z_][\w]*\.[a-z_][\w]*)\s*\(",
     text,
 )
 if len(functions) != len(set(functions)):
@@ -137,6 +137,7 @@ required_functions = {
     "public.search_admin_profiles",
     "public.get_media_asset_usage",
     "public.reorder_items",
+    "public.create_variant_with_initial_stock",
 }
 missing = sorted(required_functions - set(functions))
 if missing:
@@ -145,7 +146,7 @@ if missing:
 
 # Security-definer functions must pin an empty search_path.
 for match in re.finditer(
-    r"(?is)create\s+function\s+([a-z_][\w]*\.[a-z_][\w]*)\s*\([^;]*?\)"
+    r"(?is)create\s+(?:or\s+replace\s+)?function\s+([a-z_][\w]*\.[a-z_][\w]*)\s*\([^;]*?\)"
     r".*?security\s+definer.*?as\s+\$\$(.*?)\$\$;",
     text,
 ):
@@ -205,15 +206,14 @@ for test_file in sorted((ROOT / "supabase" / "tests").glob("*.sql")):
             f"FAIL: pgTAP plan mismatch in {test_file.name}: declared {declared}, found {actual}"
         )
 
-# Function EXECUTE grants are centralized in the final grants migration.
-final_grants_file = files[-1]
-for migration in files[:-1]:
-    if re.search(r"(?im)^\s*grant\s+execute\s+on\s+function", migration.read_text(encoding="utf-8")):
-        raise SystemExit(
-            f"FAIL: function EXECUTE grant appears before final grants migration: {migration.name}"
-        )
+# Function EXECUTE grants must not appear before the baseline grants migration (13).
+for migration in files:
+    if migration.name < "20260826050013":
+        if re.search(r"(?im)^\s*grant\s+execute\s+on\s+function", migration.read_text(encoding="utf-8")):
+            raise SystemExit(
+                f"FAIL: function EXECUTE grant appears before baseline grants migration: {migration.name}"
+            )
 
-final_grants = final_grants_file.read_text(encoding="utf-8")
 expected_authenticated_rpcs = {
     "public.current_active_profile",
     "public.get_customer_catalog",
@@ -223,6 +223,7 @@ expected_authenticated_rpcs = {
     "public.set_inventory_quantity",
     "public.get_media_asset_usage",
     "public.reorder_items",
+    "public.create_variant_with_initial_stock",
 }
 expected_service_rpcs = {
     "public.admin_update_profile",
@@ -232,7 +233,7 @@ expected_service_rpcs = {
 def grant_functions_for(role: str) -> set[str]:
     found: set[str] = set()
     pattern = rf"(?is)grant\s+execute\s+on\s+function\s+([^;]*?)\s+to\s+{role}\s*;"
-    for m in re.finditer(pattern, final_grants):
+    for m in re.finditer(pattern, text):
         function_list = m.group(1)
         for name in re.findall(
             r"(?:^|,)\s*(public\.[a-z_][\w]*)\s*\(",

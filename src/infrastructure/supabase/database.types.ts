@@ -1,6 +1,31 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       brands: {
@@ -762,6 +787,34 @@ export type Database = {
         Args: { client_request_id: string; items: Json };
         Returns: Json;
       };
+      create_variant_with_initial_stock: {
+        Args: {
+          barcode?: string;
+          initial_quantity?: number;
+          low_stock_threshold?: number;
+          product_id: string;
+          title_override?: string;
+        };
+        Returns: {
+          barcode: string | null;
+          created_at: string;
+          display_order: number;
+          id: string;
+          is_active: boolean;
+          low_stock_threshold: number | null;
+          product_id: string;
+          search_keywords: string[] | null;
+          sku: string;
+          title_override: string | null;
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: '*';
+          to: 'product_variants';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       current_active_profile: {
         Args: never;
         Returns: {
@@ -939,6 +992,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ['admin', 'preparation', 'customer'],

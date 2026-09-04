@@ -39,8 +39,8 @@ export function ProductDeleteVariantDialog({
           </KisokDialogTitle>
           <KisokDialogDescription>
             {historyBlocked
-              ? 'This Variant is referenced by historical Orders, so Lean V2 protects it from deletion. You may deactivate it instead; historical records will remain intact.'
-              : 'This permanently deletes the Variant only when it has no protected historical Order references.'}
+              ? 'This Variant has protected operational history and cannot be permanently deleted. You may deactivate it instead; operational records will remain intact.'
+              : 'This permanently deletes the Variant only when it has no protected operational history.'}
           </KisokDialogDescription>
         </KisokDialogHeader>
         <KisokDialogFooter>

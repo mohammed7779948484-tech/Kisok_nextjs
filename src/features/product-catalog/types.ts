@@ -39,6 +39,7 @@ export interface VariantInput {
   barcode?: string | null;
   titleOverride?: string | null;
   lowStockThreshold?: number | null;
+  initialQuantity: number;
 }
 
 export interface VariantUpdate {

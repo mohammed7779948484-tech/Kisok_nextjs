@@ -53,6 +53,7 @@ function toFormValues(variant?: VariantRecord): VariantEditorFormValues {
   if (!variant) return variantEditorDefaultValues;
   return {
     barcode: variant.barcode ?? '',
+    initialQuantity: '0',
     isActive: variant.isActive,
     lowStockThreshold: variant.lowStockThreshold === null ? '' : String(variant.lowStockThreshold),
     titleOverride: variant.titleOverride ?? '',
@@ -99,6 +100,7 @@ export function VariantFormDialog(props: VariantFormDialogProps) {
       if (mode === 'create') {
         await props.onCreate({
           barcode: values.barcode,
+          initialQuantity: values.initialQuantity,
           lowStockThreshold: values.lowStockThreshold,
           productId: props.productId,
           titleOverride: values.titleOverride,
@@ -160,6 +162,36 @@ export function VariantFormDialog(props: VariantFormDialogProps) {
                 </p>
               ) : null}
             </div>
+
+            {mode === 'create' ? (
+              <div className="grid gap-2">
+                <Label htmlFor="variant-initial-quantity">Initial stock quantity</Label>
+                <KisokInput
+                  aria-describedby={
+                    form.formState.errors.initialQuantity
+                      ? 'variant-initial-quantity-error'
+                      : 'variant-initial-quantity-hint'
+                  }
+                  aria-invalid={Boolean(form.formState.errors.initialQuantity)}
+                  id="variant-initial-quantity"
+                  inputMode="numeric"
+                  {...form.register('initialQuantity')}
+                />
+                <p className="text-muted-foreground text-xs" id="variant-initial-quantity-hint">
+                  Starting stock established when the Variant is created. Subsequent changes are
+                  managed in Inventory.
+                </p>
+                {form.formState.errors.initialQuantity ? (
+                  <p
+                    className="text-destructive text-sm"
+                    id="variant-initial-quantity-error"
+                    role="alert"
+                  >
+                    {form.formState.errors.initialQuantity.message}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
 
             <div className="grid gap-2">
               <Label htmlFor="variant-threshold">Low-stock threshold</Label>

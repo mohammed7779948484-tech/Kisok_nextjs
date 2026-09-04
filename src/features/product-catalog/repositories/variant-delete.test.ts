@@ -59,7 +59,7 @@ describe('Variant deletion repository', () => {
 
     await expect(productCatalogRepository.deleteVariant('variant-1')).resolves.toEqual({
       outcome: 'history-blocked',
-      message: 'This Variant is referenced by historical orders and cannot be deleted.',
+      message: 'This Variant has protected operational history and cannot be permanently deleted.',
     });
   });
 });

@@ -7,12 +7,16 @@
 -- your local Supabase instance afterward to get real, documented local
 -- credentials via the Auth Admin API. See docs/LOCAL_SUPABASE_SETUP.md.
 
-insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
+insert into auth.users (
+  id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  created_at, updated_at
+)
 values
-  ('11111111-1111-1111-1111-111111111111', 'authenticated', 'authenticated', 'admin@kiosk.local', '', now(), now(), now()),
-  ('22222222-2222-2222-2222-222222222222', 'authenticated', 'authenticated', 'admin-two@kiosk.local', '', now(), now(), now()),
-  ('33333333-3333-3333-3333-333333333333', 'authenticated', 'authenticated', 'preparation@kiosk.local', '', now(), now(), now()),
-  ('44444444-4444-4444-4444-444444444444', 'authenticated', 'authenticated', 'customer@kiosk.local', '', now(), now(), now())
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@kiosk.local', '', now(), '', '', '', '', now(), now()),
+  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-two@kiosk.local', '', now(), '', '', '', '', now(), now()),
+  ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'preparation@kiosk.local', '', now(), '', '', '', '', now(), now()),
+  ('44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'customer@kiosk.local', '', now(), '', '', '', '', now(), now())
 on conflict (id) do nothing;
 
 insert into public.profiles (id, display_name, role, is_active)
@@ -130,8 +134,8 @@ values
   -- (A-H, J-N, P-Z, 2-9 — no 0/O/1/I) per
   -- 20260826050004_lean_inventory_orders_schema.sql.
   ('80000000-0000-0000-0000-000000000001', 'KS2AB2', '81000000-0000-0000-0000-000000000001', 'kiosk.seed.001', 'new', '44444444-4444-4444-4444-444444444444', null, null, null, null, null, null),
-  ('80000000-0000-0000-0000-000000000002', 'KS2AB3', '81000000-0000-0000-0000-000000000002', 'kiosk.seed.002', 'preparing', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null),
-  ('80000000-0000-0000-0000-000000000003', 'KS2AB4', '81000000-0000-0000-0000-000000000003', 'kiosk.seed.003', 'ready', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null),
+  ('80000000-0000-0000-0000-000000000002', 'KS2AB3', '81000000-0000-0000-0000-000000000002', 'kiosk.seed.002', 'preparing', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null, null),
+  ('80000000-0000-0000-0000-000000000003', 'KS2AB4', '81000000-0000-0000-0000-000000000003', 'kiosk.seed.003', 'ready', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', null, null, null, null, null),
   ('80000000-0000-0000-0000-000000000004', 'KS2AB5', '81000000-0000-0000-0000-000000000004', 'kiosk.seed.004', 'completed', '44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now(), null, null, null),
   ('80000000-0000-0000-0000-000000000005', 'KS2AB6', '81000000-0000-0000-0000-000000000005', 'kiosk.seed.005', 'cancelled', '44444444-4444-4444-4444-444444444444', null, null, null, '33333333-3333-3333-3333-333333333333', now(), 'Customer cancelled')
 on conflict (id) do nothing;

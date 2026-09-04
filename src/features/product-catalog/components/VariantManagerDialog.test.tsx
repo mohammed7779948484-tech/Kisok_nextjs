@@ -103,6 +103,7 @@ describe('VariantManagerDialog', () => {
         barcode: null,
         titleOverride: 'Single',
         lowStockThreshold: 5,
+        initialQuantity: 0,
       }),
     );
     expect(onVariantsChanged).toHaveBeenCalled();

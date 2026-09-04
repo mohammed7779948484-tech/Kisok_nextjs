@@ -32,7 +32,7 @@
     "check:deprecated": "tsx scripts/check-deprecated.ts",
     "check:lean-v2": "python3 scripts/static_validate.py",
     "supabase:types": "python3 scripts/generate_types.py",
-    "supabase": "pnpm dlx supabase",
+    "supabase": "pnpm dlx supabase@2.115.0",
     "verify:lean-v2": "bash scripts/verify-local.sh",
     "seed:local-auth": "tsx scripts/seed-local-auth.ts",
     "type-check": "tsc --noEmit",
