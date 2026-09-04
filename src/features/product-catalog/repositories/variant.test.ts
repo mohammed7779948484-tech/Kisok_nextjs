@@ -62,12 +62,48 @@ describe('Product Variant repository', () => {
         operation: 'rpc:create_variant_with_initial_stock',
         payload: {
           product_id: 'product-2',
-          barcode: undefined,
+          barcode: null,
           title_override: 'Berry Spark Single',
           low_stock_threshold: 5,
           initial_quantity: 10,
         },
       },
     ]);
+  });
+
+  it('normalizes blank/omitted optional fields to null with no undefined RPC arguments', async () => {
+    testContext.calls.length = 0;
+
+    await productCatalogRepository.createVariant({
+      productId: 'product-2',
+      barcode: '   ',
+      titleOverride: '',
+      initialQuantity: 0,
+    });
+
+    expect(testContext.calls).toHaveLength(1);
+    const call = testContext.calls[0];
+    expect(call.operation).toBe('rpc:create_variant_with_initial_stock');
+
+    const payload = call.payload as Record<string, unknown>;
+    expect(payload).toEqual({
+      product_id: 'product-2',
+      barcode: null,
+      title_override: null,
+      low_stock_threshold: null,
+      initial_quantity: 0,
+    });
+
+    // Explicitly verify all 5 keys are present and none are undefined
+    expect(Object.keys(payload).sort()).toEqual([
+      'barcode',
+      'initial_quantity',
+      'low_stock_threshold',
+      'product_id',
+      'title_override',
+    ]);
+    for (const [key, value] of Object.entries(payload)) {
+      expect(value, `Arg ${key} must not be undefined`).not.toBeUndefined();
+    }
   });
 });

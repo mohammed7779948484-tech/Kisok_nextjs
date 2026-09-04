@@ -4,6 +4,27 @@ create extension if not exists pgtap with schema extensions;
 
 select plan(30);
 
+-- Ensure a clean fixture slate within this test transaction.
+-- (Any preexisting seed data is automatically restored on rollback.)
+truncate table
+  public.inventory_adjustments,
+  public.order_items,
+  public.orders,
+  public.product_variant_media,
+  public.variant_option_values,
+  public.product_variants,
+  public.product_categories,
+  public.products,
+  public.option_values,
+  public.option_types,
+  public.categories,
+  public.brands,
+  public.media_assets,
+  public.store_settings,
+  public.profiles
+cascade;
+delete from auth.users;
+
 -- Stable test identities.
 insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
 values

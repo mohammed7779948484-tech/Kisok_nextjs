@@ -138,9 +138,9 @@ export function createProductCatalogRepository(
       const result = await client
         .rpc('create_variant_with_initial_stock', {
           product_id: input.productId,
-          barcode: input.barcode?.trim() || undefined,
-          title_override: input.titleOverride?.trim() || undefined,
-          low_stock_threshold: input.lowStockThreshold ?? undefined,
+          barcode: input.barcode?.trim() || null,
+          title_override: input.titleOverride?.trim() || null,
+          low_stock_threshold: input.lowStockThreshold ?? null,
           initial_quantity: input.initialQuantity,
         })
         .single();

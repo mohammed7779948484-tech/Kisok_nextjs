@@ -1,31 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
   public: {
     Tables: {
       brands: {
@@ -789,11 +764,11 @@ export type Database = {
       };
       create_variant_with_initial_stock: {
         Args: {
-          barcode?: string;
-          initial_quantity?: number;
-          low_stock_threshold?: number;
+          barcode: string | null;
+          initial_quantity: number;
+          low_stock_threshold: number | null;
           product_id: string;
-          title_override?: string;
+          title_override: string | null;
         };
         Returns: {
           barcode: string | null;
@@ -992,9 +967,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       app_role: ['admin', 'preparation', 'customer'],

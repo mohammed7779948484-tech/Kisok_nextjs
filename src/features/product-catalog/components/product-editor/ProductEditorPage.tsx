@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { CircleCheckIcon, XIcon } from 'lucide-react';
 
 import { MediaPickerDialog } from '@/features/media-library/components/MediaPickerDialog';
@@ -52,7 +51,6 @@ function getLoadError(
 }
 
 export function ProductEditorPage({ mode, productId }: { mode: EditorMode; productId?: string }) {
-  const queryClient = useQueryClient();
   const workflow = useProductEditorWorkflow({ mode, productId });
   const confirmLeave = useConfirmLeave();
   const { upload, uploading, error: uploadError } = useMediaUpload();
@@ -65,9 +63,6 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
   const variantDeletion = useVariantDeletion({
     onCompleted: async () => {
       await workflow.data.refetchVariants();
-      void queryClient.invalidateQueries({ queryKey: ['products'] });
-      void queryClient.invalidateQueries({ queryKey: ['inventory'] });
-      void queryClient.invalidateQueries({ queryKey: ['inventory_adjustments'] });
       setCustomNotice('Variant deleted successfully.');
     },
   });
@@ -248,11 +243,6 @@ export function ProductEditorPage({ mode, productId }: { mode: EditorMode; produ
           onCreate={async (input) => {
             await productCatalogRepository.createVariant(input);
             await refreshVariants();
-            void queryClient.invalidateQueries({ queryKey: ['products'] });
-            void queryClient.invalidateQueries({ queryKey: ['inventory'] });
-            if (input.initialQuantity > 0) {
-              void queryClient.invalidateQueries({ queryKey: ['inventory_adjustments'] });
-            }
             setCustomNotice('Variant created successfully.');
           }}
           onOpenChange={(open) => {

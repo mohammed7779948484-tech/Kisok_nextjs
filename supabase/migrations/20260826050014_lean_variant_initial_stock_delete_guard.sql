@@ -2,10 +2,10 @@
 
 create or replace function public.create_variant_with_initial_stock(
   product_id uuid,
-  barcode text default null,
-  title_override text default null,
-  low_stock_threshold integer default null,
-  initial_quantity integer default 0
+  barcode text,
+  title_override text,
+  low_stock_threshold integer,
+  initial_quantity integer
 )
 returns public.product_variants
 language plpgsql
