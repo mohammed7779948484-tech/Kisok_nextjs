@@ -1,9 +1,15 @@
-import type { ListDataContract } from '@/shared/contracts';
+import type { Database } from '@/infrastructure/supabase/database.types';
 
-export interface LocalAdminUser {
-  access: 'Administrator' | 'Preparation';
-  name: string;
-  state: 'Active' | 'Paused';
+export interface AdminUserRecord {
+  id: string;
+  displayName: string;
+  email: string;
+  role: Database['public']['Enums']['app_role'];
+  isActive: boolean;
+  createdAt: string;
+  totalCount: number;
 }
 
-export interface AdminUsersDataContract extends ListDataContract<LocalAdminUser> {}
+export interface AdminUsersDataContract {
+  search(searchTerm: string, pageSize?: number, pageOffset?: number): Promise<AdminUserRecord[]>;
+}

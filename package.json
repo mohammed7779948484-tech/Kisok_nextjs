@@ -20,7 +20,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_ENV=production next build",
+    "build": "next build",
     "start": "next start",
     "lint": "biome check",
     "lint:fix": "biome check --write",
@@ -30,6 +30,11 @@
     "lint-staged": "lint-staged",
     "env:sync": "tsx scripts/sync-env.ts",
     "check:deprecated": "tsx scripts/check-deprecated.ts",
+    "check:lean-v2": "python3 scripts/static_validate.py",
+    "supabase:types": "python3 scripts/generate_types.py",
+    "supabase": "pnpm dlx supabase@2.115.0",
+    "verify:lean-v2": "bash scripts/verify-local.sh",
+    "seed:local-auth": "tsx scripts/seed-local-auth.ts",
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check",
     "prepare": "husky",
@@ -37,10 +42,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "validate": "pnpm ci:check && pnpm type-check && pnpm check:deprecated && pnpm test && pnpm build"
+    "validate": "pnpm ci:check && pnpm type-check && pnpm check:deprecated && pnpm check:lean-v2 && pnpm test && pnpm build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@hookform/resolvers": "^5.9.1",
     "@reduxjs/toolkit": "^2.12.0",
     "@refinedev/core": "^5.0.12",
     "@refinedev/nextjs-router": "^7.0.5",
@@ -48,6 +54,7 @@
     "@refinedev/react-table": "^6.0.1",
     "@refinedev/supabase": "^6.0.2",
     "@shadcn/react": "^0.3.0",
+    "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "@tanstack/react-query": "^5.102.4",
     "@tanstack/react-table": "^8.21.3",

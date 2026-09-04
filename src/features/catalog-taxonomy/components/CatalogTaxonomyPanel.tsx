@@ -1,43 +1,533 @@
 'use client';
 
-import { KisokButton, StatusPill } from '@/shared/ui';
+import { useEffect, useState } from 'react';
 
-import { catalogTaxonomyRepository } from '../repositories';
+import { useUpdate } from '@refinedev/core';
+import { Controller } from 'react-hook-form';
 
-export function CatalogTaxonomyPanel({ onAction }: { onAction: (message: string) => void }) {
-  const catalogRows = catalogTaxonomyRepository.list();
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { MediaPickerDialog } from '@/features/media-library/components/MediaPickerDialog';
+import { useMediaUpload } from '@/features/media-library/hooks/useMediaUpload';
+import type { MediaAssetRecord } from '@/features/media-library/types';
+import {
+  CompactPagination,
+  KisokButton,
+  KisokDialog,
+  KisokDialogContent,
+  KisokDialogDescription,
+  KisokDialogFooter,
+  KisokDialogHeader,
+  KisokDialogTitle,
+  KisokInput,
+  StatusPill,
+} from '@/shared/ui';
+
+import { CATEGORIES_PAGE_SIZE, useCategoriesList } from '../hooks/useCategoriesList';
+import { useCategoryForm } from '../hooks/useCategoryForm';
+import { useCategoryReorder } from '../hooks/useCategoryReorder';
+import { type CategoryFormValues, categoryFormDefaultValues } from '../schemas/category.schema';
+import type { CategoryRecord } from '../types';
+import { ConfirmActionDialog } from './ConfirmActionDialog';
+import { ReorderButtonGroup } from './ReorderButtonGroup';
+
+export type CategoryDialogState =
+  | { mode: 'create'; open: boolean }
+  | { mode: 'edit'; open: boolean; category: CategoryRecord };
+
+function CategoryFormDialog({
+  dialogState,
+  onOpenChange,
+}: {
+  dialogState: CategoryDialogState;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const isEdit = dialogState.mode === 'edit';
+  const category = isEdit ? dialogState.category : undefined;
+  const [parentSearchInput, setParentSearchInput] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const { uploading } = useMediaUpload();
+
+  const {
+    control,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    refineCore: { onFinish },
+    register,
+    reset,
+    setValue,
+    watch,
+  } = useCategoryForm({ id: category?.id, mode: dialogState.mode });
+
+  const {
+    categories: parentCategories,
+    isLoading: parentCategoriesLoading,
+    isError: parentCategoriesError,
+    refetch: refetchParentCategories,
+  } = useCategoriesList({
+    page: 1,
+    pageSize: 100,
+    parentId: null,
+    search: parentSearchInput,
+  });
+
+  const selectedImageMediaAssetId = watch('image_media_asset_id');
+
+  useEffect(() => {
+    if (!dialogState.open) {
+      setParentSearchInput('');
+      setSelectedImageUrl(null);
+      return;
+    }
+
+    if (category) {
+      reset({
+        name: category.name,
+        parent_id: category.parentId,
+        is_active: category.isActive,
+        image_media_asset_id: category.imageMediaAssetId,
+      });
+      setSelectedImageUrl(category.imageUrl ?? null);
+    } else {
+      reset(categoryFormDefaultValues);
+      setSelectedImageUrl(null);
+    }
+  }, [category, dialogState.open, reset]);
+
+  const parentOptions = parentCategories.filter((candidate) => candidate.id !== category?.id);
+
+  function handleSelectMedia(asset: MediaAssetRecord) {
+    setSelectedImageUrl(asset.secureUrl);
+    setValue('image_media_asset_id', asset.id, { shouldDirty: true });
+    setPickerOpen(false);
+  }
+
+  function handleRemoveMedia() {
+    setSelectedImageUrl(null);
+    setValue('image_media_asset_id', null, { shouldDirty: true });
+  }
+
+  async function onSubmit(values: CategoryFormValues) {
+    await onFinish(values);
+    onOpenChange(false);
+  }
 
   return (
-    <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">
-      <div className="flex flex-col justify-between gap-4 border-[#303030] border-b pb-6 sm:flex-row sm:items-end">
-        <div>
-          <p className="font-mono text-[#969694] text-[10px] uppercase tracking-[0.2em]">
-            Catalog taxonomy / local workspace
-          </p>
-          <h1 className="mt-2 font-black text-5xl text-[#f0f0ed] tracking-[-0.08em] sm:text-6xl">
-            Catalog control
-          </h1>
-        </div>
-        <KisokButton onClick={() => onAction('Taxonomy draft opened')} variant="outline">
-          Add taxonomy node
-        </KisokButton>
-      </div>
-      <div className="mt-6 grid gap-px border border-[#303030] bg-[#303030] md:grid-cols-3">
-        {catalogRows.map((row) => (
-          <article className="bg-[#181818] p-5" key={row.name}>
-            <p className="font-mono text-[#898987] text-[10px] uppercase tracking-[0.16em]">
-              {row.type}
-            </p>
-            <h2 className="mt-7 font-black text-3xl text-[#ededeb] tracking-[-0.06em]">
-              {row.name}
-            </h2>
-            <div className="mt-6 flex items-center justify-between border-[#303030] border-t pt-3">
-              <span className="text-[#999996] text-xs">{row.children} linked nodes</span>
-              <StatusPill>{row.visibility}</StatusPill>
+    <>
+      <KisokDialog onOpenChange={onOpenChange} open={dialogState.open}>
+        <KisokDialogContent className="max-w-lg">
+          <KisokDialogHeader>
+            <KisokDialogTitle>
+              {isEdit ? `Edit Category: ${category?.name}` : 'Add category'}
+            </KisokDialogTitle>
+            <KisokDialogDescription>
+              {isEdit
+                ? 'Update category settings, hierarchy position, or cover image.'
+                : 'Create a root or child category for the catalog taxonomy.'}
+            </KisokDialogDescription>
+          </KisokDialogHeader>
+
+          <form className="grid gap-4 py-2" onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid gap-2">
+              <Label htmlFor="category-name">Category name</Label>
+              <KisokInput
+                aria-describedby={errors.name ? 'category-name-error' : undefined}
+                aria-invalid={Boolean(errors.name)}
+                id="category-name"
+                {...register('name')}
+              />
+              {errors.name ? (
+                <p className="text-destructive text-sm" id="category-name-error" role="alert">
+                  {errors.name.message}
+                </p>
+              ) : null}
             </div>
-          </article>
-        ))}
+
+            <div className="grid gap-2">
+              <Label>Category image</Label>
+              <div className="flex items-center gap-4">
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+                  {selectedImageUrl ? (
+                    // biome-ignore lint/a11y/useAltText: thumbnail preview
+                    <img
+                      alt={category?.name ?? 'Category preview'}
+                      className="h-full w-full object-cover"
+                      src={selectedImageUrl}
+                    />
+                  ) : (
+                    <span className="font-mono text-[10px] text-muted-foreground uppercase">
+                      No image
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <KisokButton
+                    onClick={() => setPickerOpen(true)}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {selectedImageUrl ? 'Change image' : 'Choose from library'}
+                  </KisokButton>
+                  {selectedImageUrl ? (
+                    <KisokButton
+                      onClick={handleRemoveMedia}
+                      size="sm"
+                      type="button"
+                      variant="quiet"
+                    >
+                      Remove image
+                    </KisokButton>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="category-parent-search">Parent category</Label>
+              <KisokInput
+                id="category-parent-search"
+                onChange={(event) => setParentSearchInput(event.target.value)}
+                placeholder="Search parent categories"
+                value={parentSearchInput}
+              />
+              <Controller
+                control={control}
+                name="parent_id"
+                render={({ field }) =>
+                  parentCategoriesLoading ? (
+                    <p className="text-muted-foreground text-sm" role="status">
+                      Loading parent categories…
+                    </p>
+                  ) : parentCategoriesError ? (
+                    <div className="grid gap-2" role="alert">
+                      <p className="text-destructive text-sm">
+                        Parent categories could not be loaded.
+                      </p>
+                      <KisokButton
+                        onClick={() => void refetchParentCategories()}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        Try again
+                      </KisokButton>
+                    </div>
+                  ) : (
+                    <div
+                      aria-label="Parent category"
+                      className="grid max-h-48 gap-1 overflow-y-auto rounded-md border border-border p-1"
+                      role="listbox"
+                      tabIndex={0}
+                    >
+                      <button
+                        aria-selected={field.value === null}
+                        className={
+                          field.value === null
+                            ? 'rounded-sm bg-muted px-2 py-1 text-left text-sm font-medium'
+                            : 'rounded-sm px-2 py-1 text-left text-sm hover:bg-muted/60'
+                        }
+                        onClick={() => field.onChange(null)}
+                        role="option"
+                        type="button"
+                      >
+                        Root category
+                      </button>
+                      {parentOptions.map((option) => (
+                        <button
+                          aria-selected={field.value === option.id}
+                          className={
+                            field.value === option.id
+                              ? 'rounded-sm bg-muted px-2 py-1 text-left text-sm font-medium'
+                              : 'rounded-sm px-2 py-1 text-left text-sm hover:bg-muted/60'
+                          }
+                          key={option.id}
+                          onClick={() => field.onChange(option.id)}
+                          role="option"
+                          type="button"
+                        >
+                          {option.name}
+                        </button>
+                      ))}
+                    </div>
+                  )
+                }
+              />
+            </div>
+            <Controller
+              control={control}
+              name="is_active"
+              render={({ field }) => (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={field.value}
+                    id="category-active"
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                  <Label htmlFor="category-active">Active</Label>
+                </div>
+              )}
+            />
+            <KisokDialogFooter>
+              <KisokButton
+                disabled={isSubmitting}
+                onClick={() => onOpenChange(false)}
+                type="button"
+                variant="quiet"
+              >
+                Cancel
+              </KisokButton>
+              <KisokButton disabled={isSubmitting} type="submit">
+                {isSubmitting ? 'Saving…' : 'Save category'}
+              </KisokButton>
+            </KisokDialogFooter>
+          </form>
+        </KisokDialogContent>
+      </KisokDialog>
+
+      <MediaPickerDialog
+        isUploading={uploading}
+        onOpenChange={setPickerOpen}
+        onSelect={handleSelectMedia}
+        open={pickerOpen}
+        selectedAssetId={selectedImageMediaAssetId ?? null}
+        title="Select Category Image"
+      />
+    </>
+  );
+}
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
+export function CatalogTaxonomyPanel() {
+  const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+  const { categories, total, isLoading, isError, refetch } = useCategoriesList({
+    page,
+    search: debouncedSearch,
+  });
+  const { move: moveCategory, isReordering } = useCategoryReorder(() => void refetch());
+  const { mutate: updateCategory } = useUpdate();
+  const [dialogState, setDialogState] = useState<CategoryDialogState>({
+    mode: 'create',
+    open: false,
+  });
+  const [deactivateTarget, setDeactivateTarget] = useState<CategoryRecord | null>(null);
+
+  const totalPages = Math.max(1, Math.ceil(total / CATEGORIES_PAGE_SIZE));
+
+  function toggleActive(category: CategoryRecord) {
+    if (category.isActive) {
+      setDeactivateTarget(category);
+      return;
+    }
+    updateCategory({
+      id: category.id,
+      resource: 'categories',
+      values: { is_active: true },
+    });
+  }
+
+  function confirmDeactivate() {
+    if (!deactivateTarget) return;
+    updateCategory({
+      id: deactivateTarget.id,
+      resource: 'categories',
+      values: { is_active: false },
+    });
+    setDeactivateTarget(null);
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card/90 p-4 text-card-foreground shadow-panel sm:p-7">
+      <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
+        <div>
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+            Catalog taxonomy / hosted data
+          </p>
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
+            Categories
+          </h1>
+          <p className="mt-3 max-w-xl text-muted-foreground text-sm leading-6">
+            Maintain the primary catalog hierarchy for storefront navigation and catalog groupings.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <KisokButton
+            onClick={() => setDialogState({ mode: 'create', open: true })}
+            variant="default"
+          >
+            Add category
+          </KisokButton>
+          <KisokButton onClick={() => void refetch()} variant="outline">
+            Refresh
+          </KisokButton>
+        </div>
       </div>
+
+      <div className="mt-6 max-w-lg">
+        <Label className="sr-only" htmlFor="category-search">
+          Search categories
+        </Label>
+        <KisokInput
+          id="category-search"
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search categories"
+          value={searchInput}
+        />
+      </div>
+
+      {isLoading ? (
+        <p className="mt-6 text-muted-foreground text-sm" role="status">
+          Loading categories…
+        </p>
+      ) : isError ? (
+        <div className="mt-6 grid gap-3" role="alert">
+          <p className="text-destructive text-sm">
+            Categories could not be loaded. Check the connection and try again.
+          </p>
+          <KisokButton onClick={() => void refetch()} variant="outline">
+            Try again
+          </KisokButton>
+        </div>
+      ) : categories.length === 0 ? (
+        <p className="mt-6 text-muted-foreground text-sm">No categories match this search.</p>
+      ) : (
+        <Table className="mt-6">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-16">Image</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Rank</TableHead>
+              <TableHead className="text-right">Reorder</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {categories.map((category) => {
+              const displayRank =
+                category.displayOrder === null ? '—' : String(category.displayOrder);
+              return (
+                <TableRow key={category.id}>
+                  <TableCell>
+                    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+                      {category.imageUrl ? (
+                        // biome-ignore lint/a11y/useAltText: thumbnail preview
+                        <img
+                          alt={category.name}
+                          className="h-full w-full object-cover"
+                          src={category.imageUrl}
+                        />
+                      ) : (
+                        <span className="font-mono text-[9px] text-muted-foreground uppercase">
+                          None
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col">
+                      <span>{category.name}</span>
+                      {category.parentId ? (
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          Child category
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          Root category
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-xs">
+                    {category.parentId ? 'Child' : 'Root'}
+                  </TableCell>
+                  <TableCell>
+                    <StatusPill tone={category.isActive ? 'success' : 'destructive'}>
+                      {category.isActive ? 'Active' : 'Inactive'}
+                    </StatusPill>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-muted-foreground text-xs">
+                    {displayRank}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ReorderButtonGroup
+                      hasActiveSearch={Boolean(debouncedSearch.trim())}
+                      isReordering={isReordering}
+                      itemName={category.name}
+                      onMoveDown={() => void moveCategory(category, 'down')}
+                      onMoveUp={() => void moveCategory(category, 'up')}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <KisokButton
+                      onClick={() => setDialogState({ category, mode: 'edit', open: true })}
+                      size="sm"
+                      variant="quiet"
+                    >
+                      Edit
+                    </KisokButton>
+                    <KisokButton
+                      aria-label={`${category.isActive ? 'Deactivate' : 'Activate'} ${category.name}`}
+                      onClick={() => toggleActive(category)}
+                      size="sm"
+                      variant="quiet"
+                    >
+                      {category.isActive ? 'Deactivate' : 'Activate'}
+                    </KisokButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      )}
+
+      {totalPages > 1 ? (
+        <div className="mt-6 flex items-center justify-between border-border border-t pt-4">
+          <p className="font-mono text-muted-foreground text-xs">
+            Showing {(page - 1) * CATEGORIES_PAGE_SIZE + 1}–
+            {Math.min(page * CATEGORIES_PAGE_SIZE, total)} of {total} categories
+          </p>
+          <CompactPagination onPageChange={setPage} page={page} totalPages={totalPages} />
+        </div>
+      ) : null}
+
+      <CategoryFormDialog
+        dialogState={dialogState}
+        onOpenChange={(open) => setDialogState((current) => ({ ...current, open }))}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Deactivate"
+        description={`Deactivating ${deactivateTarget?.name ?? 'this category'} may hide Products/Variants that depend on it from customers. Continue?`}
+        onCancel={() => setDeactivateTarget(null)}
+        onConfirm={confirmDeactivate}
+        open={deactivateTarget !== null}
+        title={`Deactivate ${deactivateTarget?.name ?? 'Category'}`}
+      />
     </section>
   );
 }

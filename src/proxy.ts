@@ -1,20 +1,50 @@
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 
-import { routing } from './i18n/routing';
+import { createServerClient } from '@supabase/ssr';
 
-// Build the middleware once at module load (not per request) — the factory does
-// non-trivial locale-matcher/route-parsing setup. Matches next-intl's docs.
+import { env } from '@/lib/env';
+
+import { routing } from './i18n/routing';
+import { getSupabaseConfig } from './infrastructure/supabase/client/supabase-config';
+
 const handleI18nRouting = createMiddleware(routing);
 
-export function proxy(request: NextRequest) {
-  return handleI18nRouting(request);
+export async function proxy(request: NextRequest) {
+  request.headers.set('x-pathname', request.nextUrl.pathname);
+  const response = handleI18nRouting(request) ?? NextResponse.next({ request });
+  const config = getSupabaseConfig(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  );
+
+  if (!config) {
+    return response;
+  }
+
+  const supabase = createServerClient(config.url, config.key, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet, headers) {
+        for (const { name, value, options } of cookiesToSet) {
+          request.cookies.set(name, value);
+          response.cookies.set(name, value, options);
+        }
+        for (const [key, value] of Object.entries(headers)) {
+          response.headers.set(key, value);
+        }
+      },
+    },
+  });
+
+  await supabase.auth.getClaims();
+  return response;
 }
 
 export const config = {
-  // Run on every path except: API/tRPC routes, Next.js internals, Vercel
-  // assets, /public files (favicon, robots, sitemap, og-image, manifest, etc.),
-  // and any path with a static-asset extension.
   matcher: [
     '/((?!api|trpc|_next/static|_next/image|_vercel|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|sw.js|opengraph-image\\.[^/]+|twitter-image\\.[^/]+|apple-icon\\.[^/]+|icon\\.[^/]+|.*\\.(?:js|css|map|json|svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2|ttf|otf|eot|mp4|webm)).*)',
   ],

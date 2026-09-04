@@ -11,4 +11,6 @@ export {
 export { Input as KisokInput } from '@/components/ui/input';
 export { Textarea as KisokTextarea } from '@/components/ui/textarea';
 
+export { CompactPagination } from './CompactPagination';
+export { OfflineBanner } from './OfflineBanner';
 export { StatusPill } from './StatusPill';

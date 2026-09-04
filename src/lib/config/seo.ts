@@ -18,9 +18,6 @@ type SEOParams = {
 };
 
 function localizedUrl(path: string, locale: string): string {
-  if (routing.localePrefix === 'never' || locale === routing.defaultLocale) {
-    return `${APP_URL}${path}`;
-  }
   return `${APP_URL}/${locale}${path}`;
 }
 
@@ -33,9 +30,7 @@ function toOpenGraphLocale(locale: string): string {
 }
 
 function buildLanguageAlternates(path: string): Record<string, string> | undefined {
-  // hreflang is meaningless when every locale resolves to the same unprefixed
-  // URL, which is exactly what localePrefix: 'never' produces.
-  if (routing.localePrefix === 'never' || routing.locales.length <= 1) return undefined;
+  if (routing.locales.length <= 1) return undefined;
   const languages = Object.fromEntries(
     routing.locales.map((locale) => [locale, localizedUrl(path, locale)]),
   );

@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
   KisokButton,
   KisokDialog,
@@ -15,158 +17,300 @@ import {
 } from '@/shared/ui';
 
 import { ordersRepository } from '../repositories';
-import type { LocalOrder } from '../types';
+import { ORDERS_PAGE_SIZE } from '../repositories/supabase';
+import type { OrderRecord } from '../types';
 
-export function OrdersPanel({ onAction }: { onAction: (message: string) => void }) {
+function statusLabel(status: OrderRecord['status']) {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/**
+ * `update_order_status` (Lean V2) restricts each actor role to its own
+ * transitions: Preparation owns new→preparing and preparing→ready; Admin
+ * owns only ready→completed. This panel is the Admin surface, so it must
+ * never offer the Preparation-only advances.
+ */
+function nextStatusForAdmin(status: OrderRecord['status']): OrderRecord['status'] | null {
+  return status === 'ready' ? 'completed' : null;
+}
+
+function canCancel(status: OrderRecord['status']) {
+  return status !== 'cancelled' && status !== 'completed';
+}
+
+export function OrdersPanel() {
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [cancellationOrder, setCancellationOrder] = useState<OrderRecord | null>(null);
   const [cancellationReason, setCancellationReason] = useState('');
-  const [handoffNote, setHandoffNote] = useState('');
-  const [orderForCancellation, setOrderForCancellation] = useState<LocalOrder | null>(null);
-  const [orderForHandoff, setOrderForHandoff] = useState<LocalOrder | null>(null);
-  const orderRows = ordersRepository.list();
+  const [includeCompleted, setIncludeCompleted] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  function stageCancellation() {
-    if (orderForCancellation) {
-      onAction(`Cancellation staged for ${orderForCancellation.id}`);
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await ordersRepository.listOrders({ includeCompleted });
+      setOrders(result);
+      setHasMore(result.length >= ORDERS_PAGE_SIZE);
+    } catch {
+      setError('Orders could not be loaded. Check the connection and try again.');
+    } finally {
+      setLoading(false);
     }
-    setCancellationReason('');
-    setOrderForCancellation(null);
+  }, [includeCompleted]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  async function loadOlderOrders() {
+    const cursor = orders.at(-1)?.createdAt;
+    if (!cursor) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const older = await ordersRepository.listOrders({ includeCompleted, before: cursor });
+      setOrders((previous) => [...previous, ...older]);
+      setHasMore(older.length >= ORDERS_PAGE_SIZE);
+    } catch {
+      setError('Older orders could not be loaded.');
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
-  function stageHandoff() {
-    if (orderForHandoff) {
-      onAction(`Handoff staged for ${orderForHandoff.id}`);
+  async function advanceOrder(order: OrderRecord) {
+    const targetStatus = nextStatusForAdmin(order.status);
+    if (!targetStatus) return;
+    setUpdatingOrderId(order.id);
+    setError(null);
+    try {
+      await ordersRepository.updateStatus(order.id, targetStatus);
+      await refresh();
+    } catch {
+      setError(`Order ${order.displayNumber} could not be advanced.`);
+    } finally {
+      setUpdatingOrderId(null);
     }
-    setHandoffNote('');
-    setOrderForHandoff(null);
+  }
+
+  function openCancellation(order: OrderRecord) {
+    setCancellationOrder(order);
+    setCancellationReason('');
+    setError(null);
+  }
+
+  function closeCancellation(open: boolean) {
+    if (open) return;
+    setCancellationOrder(null);
+    setCancellationReason('');
+  }
+
+  async function cancelOrder() {
+    if (!(cancellationOrder && cancellationReason.trim())) return;
+    setUpdatingOrderId(cancellationOrder.id);
+    setError(null);
+    try {
+      await ordersRepository.updateStatus(
+        cancellationOrder.id,
+        'cancelled',
+        cancellationReason.trim(),
+      );
+      closeCancellation(false);
+      await refresh();
+    } catch {
+      setError(`Order ${cancellationOrder.displayNumber} could not be cancelled.`);
+    } finally {
+      setUpdatingOrderId(null);
+    }
   }
 
   return (
-    <section className="border border-[#292929] bg-[#181818] p-5 sm:p-7">
-      <div className="flex flex-col justify-between gap-4 border-[#303030] border-b pb-6 sm:flex-row sm:items-end">
+    <section className="space-y-6 rounded-2xl border border-border bg-card/65 p-4 shadow-panel sm:p-7">
+      <div className="flex flex-col justify-between gap-4 border-border border-b pb-6 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-[#969694] text-[10px] uppercase tracking-[0.2em]">
-            Fulfillment queue / local workspace
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+            Fulfillment queue / hosted data
           </p>
-          <h1 className="mt-2 font-black text-5xl text-[#f0f0ed] tracking-[-0.08em] sm:text-6xl">
+          <h1 className="mt-2 text-balance font-black text-4xl tracking-[-0.05em] sm:text-5xl">
             Order queue
           </h1>
+          <p className="mt-3 max-w-xl text-muted-foreground text-sm leading-6">
+            Work operational records through their Lean V2 status lifecycle.
+          </p>
         </div>
-        <StatusPill>Refresh simulated</StatusPill>
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={includeCompleted}
+              id="orders-include-completed"
+              onCheckedChange={(checked) => setIncludeCompleted(checked === true)}
+            />
+            <Label className="text-muted-foreground text-xs" htmlFor="orders-include-completed">
+              Include completed &amp; cancelled
+            </Label>
+          </div>
+          <KisokButton onClick={() => void refresh()} variant="outline">
+            Refresh
+          </KisokButton>
+        </div>
       </div>
-      <div className="mt-6 grid gap-px border border-[#303030] bg-[#303030] md:grid-cols-3">
-        {orderRows.map((order) => (
-          <article className="bg-[#181818] p-5" key={order.id}>
-            <div className="flex items-center justify-between">
-              <p className="font-mono text-[#9a9a97] text-xs">{order.id}</p>
-              <StatusPill>{order.status}</StatusPill>
-            </div>
-            <p className="mt-10 font-black text-4xl text-[#eeeeeb] tracking-[-0.07em]">
-              {order.total}
-            </p>
-            <p className="mt-2 text-[#a0a09d] text-sm">{order.type}</p>
-            <div className="mt-6 grid gap-2 sm:grid-cols-2">
-              <KisokButton
-                aria-label={`Review handoff for ${order.id}`}
-                onClick={() => setOrderForHandoff(order)}
-                size="sm"
-                variant="outline"
-              >
-                Review handoff
-              </KisokButton>
-              <KisokButton
-                aria-label={`Review cancellation for ${order.id}`}
-                onClick={() => setOrderForCancellation(order)}
-                size="sm"
-                variant="quiet"
-              >
-                Review cancellation
-              </KisokButton>
-            </div>
-          </article>
-        ))}
-      </div>
-      <KisokDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setOrderForCancellation(null);
-          }
-        }}
-        open={Boolean(orderForCancellation)}
-      >
+
+      {loading ? (
+        <p className="text-muted-foreground text-sm" role="status">
+          Loading orders…
+        </p>
+      ) : error ? (
+        <div className="grid gap-3" role="alert">
+          <p className="text-destructive text-sm">{error}</p>
+          <KisokButton onClick={() => void refresh()} variant="outline">
+            Try again
+          </KisokButton>
+        </div>
+      ) : orders.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No orders are available.</p>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-3">
+          {orders.map((order) => (
+            <article
+              className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-panel motion-reduce:transform-none"
+              key={order.id}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-mono text-muted-foreground text-xs">{order.displayNumber}</p>
+                <StatusPill
+                  tone={
+                    order.status === 'completed'
+                      ? 'success'
+                      : order.status === 'cancelled'
+                        ? 'destructive'
+                        : order.status === 'ready'
+                          ? 'info'
+                          : 'warning'
+                  }
+                >
+                  {statusLabel(order.status)}
+                </StatusPill>
+              </div>
+              <p className="mt-8 font-black text-4xl tracking-[-0.07em]">{order.itemCount}</p>
+              <p className="mt-1 text-muted-foreground text-xs uppercase tracking-[0.15em]">
+                line items
+              </p>
+
+              {order.items.length > 0 ? (
+                <div className="mt-6 space-y-3 border-border border-t pt-4">
+                  <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+                    Order Items
+                  </p>
+                  {order.items.map((item) => (
+                    <div
+                      className="border-border border-b pb-3 last:border-0 last:pb-0"
+                      key={item.id}
+                    >
+                      <p className="font-semibold text-sm">{item.productName}</p>
+                      <p className="mt-1 font-mono text-muted-foreground text-[10px]">
+                        {item.variantName ? `${item.variantName} · ` : ''}
+                        {item.variantSku}
+                      </p>
+                      {item.variantOptions ? (
+                        <p className="mt-1 text-muted-foreground text-xs">{item.variantOptions}</p>
+                      ) : null}
+                      <p className="mt-1 text-muted-foreground text-xs">Quantity {item.quantity}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className="mt-6 flex flex-wrap gap-2 border-border border-t pt-4">
+                {nextStatusForAdmin(order.status) ? (
+                  <KisokButton
+                    disabled={updatingOrderId === order.id}
+                    onClick={() => void advanceOrder(order)}
+                    variant="outline"
+                  >
+                    {updatingOrderId === order.id ? 'Updating…' : 'Advance status'}
+                  </KisokButton>
+                ) : null}
+                {canCancel(order.status) ? (
+                  <KisokButton
+                    disabled={updatingOrderId === order.id}
+                    onClick={() => openCancellation(order)}
+                    variant="destructive"
+                  >
+                    Cancel order
+                  </KisokButton>
+                ) : null}
+              </div>
+              <dl className="mt-6 grid gap-2 border-border border-t pt-4 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Created</dt>
+                  <dd>{new Date(order.createdAt).toLocaleString()}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Record ID</dt>
+                  <dd className="font-mono text-xs">{order.id}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {!(loading || error) && hasMore ? (
+        <div className="flex justify-center">
+          <KisokButton
+            disabled={loadingMore}
+            onClick={() => void loadOlderOrders()}
+            variant="outline"
+          >
+            {loadingMore ? 'Loading…' : 'Load older orders'}
+          </KisokButton>
+        </div>
+      ) : null}
+
+      <KisokDialog onOpenChange={closeCancellation} open={cancellationOrder !== null}>
         <KisokDialogContent>
           <KisokDialogHeader>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#969694]">
-              Fulfillment queue / local action
+            <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+              Fulfillment control / cancellation
             </p>
-            <KisokDialogTitle>Cancel local order</KisokDialogTitle>
+            <KisokDialogTitle>Cancel order</KisokDialogTitle>
             <KisokDialogDescription>
-              {orderForCancellation?.id} will remain unchanged until the integration phase. Capture
-              a reason now so the eventual audit contract has a clear local counterpart.
+              Cancellation restores reserved inventory through the Lean V2 transaction. A reason is
+              required.
             </KisokDialogDescription>
           </KisokDialogHeader>
           <label className="grid gap-2" htmlFor="order-cancellation-reason">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
+            <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
               Cancellation reason
             </span>
             <KisokTextarea
-              className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
+              aria-label="Cancellation reason"
+              className="min-h-28 w-full resize-y"
               id="order-cancellation-reason"
               onChange={(event) => setCancellationReason(event.target.value)}
-              placeholder="Explain why fulfillment should be stopped."
+              placeholder="Describe why this order is being cancelled."
               value={cancellationReason}
             />
           </label>
           <KisokDialogFooter>
-            <KisokButton onClick={() => setOrderForCancellation(null)} variant="quiet">
+            <KisokButton
+              disabled={updatingOrderId !== null}
+              onClick={() => closeCancellation(false)}
+              variant="quiet"
+            >
               Keep order
             </KisokButton>
             <KisokButton
-              disabled={!cancellationReason.trim()}
-              onClick={stageCancellation}
+              disabled={updatingOrderId !== null || !cancellationReason.trim()}
+              onClick={() => void cancelOrder()}
               variant="destructive"
             >
-              Stage local cancellation
-            </KisokButton>
-          </KisokDialogFooter>
-        </KisokDialogContent>
-      </KisokDialog>
-      <KisokDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setOrderForHandoff(null);
-          }
-        }}
-        open={Boolean(orderForHandoff)}
-      >
-        <KisokDialogContent>
-          <KisokDialogHeader>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#969694]">
-              Fulfillment queue / local action
-            </p>
-            <KisokDialogTitle>Confirm local handoff</KisokDialogTitle>
-            <KisokDialogDescription>
-              {orderForHandoff?.id} remains unchanged in this local workspace. Record a handoff note
-              before staging the future fulfillment action.
-            </KisokDialogDescription>
-          </KisokDialogHeader>
-          <label className="grid gap-2" htmlFor="order-handoff-note">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#c2c2be]">
-              Handoff note
-            </span>
-            <KisokTextarea
-              className="min-h-28 w-full resize-y border border-[#4c4c4c] bg-[#111111] p-3 text-[#f0f0ed] text-sm outline-none placeholder:text-[#6d6d6a] focus:border-[#e7e7e4]"
-              id="order-handoff-note"
-              onChange={(event) => setHandoffNote(event.target.value)}
-              placeholder="Record the delivery or pickup handoff."
-              value={handoffNote}
-            />
-          </label>
-          <KisokDialogFooter>
-            <KisokButton onClick={() => setOrderForHandoff(null)} variant="quiet">
-              Keep order
-            </KisokButton>
-            <KisokButton disabled={!handoffNote.trim()} onClick={stageHandoff}>
-              Stage local handoff
+              {updatingOrderId !== null ? 'Cancelling…' : 'Confirm cancellation'}
             </KisokButton>
           </KisokDialogFooter>
         </KisokDialogContent>

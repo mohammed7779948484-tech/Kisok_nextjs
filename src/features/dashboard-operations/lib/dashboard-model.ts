@@ -1,3 +1,5 @@
+export { resolveLowStockThreshold } from '@/lib/utils/inventory/low-stock-threshold';
+
 export type DashboardInventoryRecord = {
   available: number;
   lowStockAt: number;
@@ -5,17 +7,29 @@ export type DashboardInventoryRecord = {
 };
 
 export type DashboardOrderRecord = {
-  amount: number;
-  status: 'completed' | 'new' | 'preparing';
+  status: 'cancelled' | 'completed' | 'new' | 'preparing' | 'ready';
+};
+
+export type DashboardProductRecord = {
+  isActive: boolean;
+};
+
+export type DashboardVariantRecord = {
+  available: number;
 };
 
 export function summarizeOperations(input: {
   inventory: DashboardInventoryRecord[];
   orders: DashboardOrderRecord[];
+  products: DashboardProductRecord[];
+  variants: DashboardVariantRecord[];
 }) {
   return {
-    grossSales: input.orders.reduce((total, order) => total + order.amount, 0),
+    activeProductCount: input.products.filter((product) => product.isActive).length,
     lowStockCount: input.inventory.filter((item) => item.available <= item.lowStockAt).length,
-    openOrderCount: input.orders.filter((order) => order.status !== 'completed').length,
+    openOrderCount: input.orders.filter(
+      (order) => !['cancelled', 'completed'].includes(order.status),
+    ).length,
+    unavailableVariantCount: input.variants.filter((variant) => variant.available <= 0).length,
   };
 }

@@ -31,6 +31,13 @@ export const env = defineEnv({
       .string()
       .default('en')
       .describe('Fallback locale when a request locale cannot be resolved.'),
+    SUPABASE_SERVICE_ROLE_KEY: e
+      .string()
+      .optional()
+      .describe('Supabase service role key for server-only privileged operations.'),
+    CLOUDINARY_CLOUD_NAME: e.string().optional(),
+    CLOUDINARY_API_KEY: e.string().optional(),
+    CLOUDINARY_API_SECRET: e.string().optional(),
   },
   client: {
     NEXT_PUBLIC_API_URL: e
@@ -41,6 +48,11 @@ export const env = defineEnv({
       .url()
       .default('http://localhost:3000')
       .describe('Public URL this app is served from (OG/canonical URLs).'),
+    NEXT_PUBLIC_SUPABASE_URL: e.url().optional().describe('Local or hosted Supabase project URL.'),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: e
+      .string()
+      .optional()
+      .describe('Supabase publishable/anon key safe for browser use.'),
   },
   shared: {
     NODE_ENV: e.enum(['development', 'production', 'test']).default('development'),
@@ -50,6 +62,12 @@ export const env = defineEnv({
     DEFAULT_LOCALE: process.env.DEFAULT_LOCALE,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
     NODE_ENV: process.env.NODE_ENV,
   },
 });

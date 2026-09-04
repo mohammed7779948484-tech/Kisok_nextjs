@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Interface"
+  short_description: "Design product interfaces with deliberate craft"
+  default_prompt: "Use $design-interface to design and implement this product interface with clear hierarchy and restrained interaction."

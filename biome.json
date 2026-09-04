@@ -9,6 +9,7 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
+      "!.agents",
       "!node_modules",
       "!.next",
       "!.yarn",

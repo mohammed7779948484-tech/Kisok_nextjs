@@ -1,74 +1,34 @@
-# Refine integration plan for Kisok Admin
+# Refine integration status for Kisok Admin
 
-## Chosen architecture
+This document originally described a *plan* for a future Supabase/Refine activation. That activation has happened — the hosted Supabase project has been live since `3af2c3d` (`feat(db): validate lean v2 against hosted supabase`) and every Feature's `repositories/supabase.ts` (or `server/` action) talks to it directly. This document now records what is actually wired up versus what remains, so it stops contradicting the code. For architecture rules (layering, which operations must stay outside Refine), see `docs/frontend-layering.md`.
 
-Kisok will use **headless Refine Core** as the CRUD orchestration runtime. `RootProvider` remains the app-level owner of Redux, theme, `next-intl`, and shadcn tooltip context. A new client-only `RefineProvider` will be nested below it and will host `<Refine>`, the Next.js router binding, a resource manifest, and a deliberately non-network data provider while persistence is deferred.
+## What's live today
 
-> Presentation components keep their current rule: they receive data and action state from a feature hook; they do not import a Supabase client, a Refine provider, or database code.
+| Layer | Current state |
+| --- | --- |
+| `src/providers/RefineProvider.tsx` | Mounts `<Refine>` with a real `supabaseDataProvider(supabaseClient)` against the hosted browser client — not a deferred/non-network provider. No `authProvider`, no `accessControlProvider`, no `liveProvider`. |
+| `src/infrastructure/refine/resources.ts` | Registers the actual Lean V2 table names (`brands`, `categories`, `option_types`, `option_values`, `products`, `product_categories`, `product_variants`, `variant_option_values`, `product_variant_media`, `media_assets`, `inventory`, `inventory_adjustments`, `orders`, `order_items`, `profiles`) — not the placeholder names (`operators`, `catalog-taxonomy`, …) an earlier draft of this plan used. Every entry defines only a `list` route; no resource defines `create`/`edit`/`show` actions yet. |
+| `src/infrastructure/supabase/<feature>/` and `src/features/<feature>/repositories/supabase.ts` | Live. There is no `deferred-data-provider.ts` — it was deleted once the hosted provider replaced it (`src/infrastructure/refine/refine-runtime.test.ts` asserts it stays absent). |
+| `@refinedev/core`, `@refinedev/nextjs-router`, `@refinedev/supabase` | Installed and mounted, but **no Feature component calls a Refine hook** (`useList`, `useTable`, `useForm`, …) — every panel uses `useState`/`useEffect` against a repository instead. Decorative, not load-bearing, today. |
+| `@refinedev/react-table`, `@tanstack/react-table`, `@refinedev/react-hook-form`, `react-hook-form`, `zod` | Installed. Zero imports anywhere under `src/features` or `src/app`. |
 
-| Layer | New responsibility | Prohibited responsibility |
-| --- | --- | --- |
-| `src/providers/RefineProvider.tsx` | Mount `Refine`, TanStack Query-backed runtime, and router binding in a client boundary. | Business rules, component layout, or direct Supabase setup. |
-| `src/infrastructure/refine/resources.ts` | Declare stable resource names and future action-path templates. | Render pages or own feature mutations. |
-| `src/infrastructure/refine/deferred-data-provider.ts` | Provide a safe non-network data-provider contract before integration. | Return fixtures as if they were production data or make HTTP calls. |
-| `src/infrastructure/supabase/<feature>/` | Later host feature-scoped query mappings and Supabase adaptation. | Be imported by presentation components. |
-| `src/features/<feature>/hooks/` | Compose Refine hooks, Zod parsing, repository interfaces, and status mapping. | Reach through to UI primitives or hard-code SQL/RLS rules. |
-| `src/features/<feature>/components/` | Render Kisok’s shadcn-based CRUD layout and send user intent. | Import Refine data providers, Supabase clients, or auth secrets. |
+## Remaining work, in priority order
 
-## Resource and routing model
+1. **Migrate simple table-shaped CRUD onto real Refine hooks** — Brands, Categories, Option Types, Option Values, Media Assets list, Store Settings (singleton). These map cleanly onto `useList`/`useCreate`/`useUpdate`/`useSelect` + `@refinedev/react-table` for list state (sorting/filtering/pagination) and `@refinedev/react-hook-form` + the existing (currently unused) `store-settings.schema.ts` Zod schema for forms. This removes real duplicated `loading`/`error`/`data` `useState` triads (100+ call sites across 9 panels).
+2. **Decide the `profiles` Refine resource's fate.** It is registered like any other resource but has no real data-provider-backed CRUD path (RLS grants nothing to `authenticated` on `profiles`; Admin User search/mutation go through `service_role`-only server actions). Either remove it from `refineResources` or gate it behind an `accessControlProvider` once one exists — do not leave it indistinguishable from a normal browser-CRUD resource.
+3. **Add `authProvider`/`accessControlProvider`** only if they add real value (identity display, `CanAccess`/`useCan`, logout wiring) — Next.js server-side route protection (`current_active_profile()` via `getTrustedAdminSession()`) remains the authoritative gate regardless; Refine's version must never weaken it.
+4. **`create`/`edit`/`show` resource actions and routes** for the resources migrated in (1), once their forms exist.
 
-The first resource manifest will name the existing feature domains without replacing the current local panel navigation. The resource action paths are placeholders for a later route migration under the existing locale segment:
+## What must never move onto generic Refine/TanStack CRUD
 
-| Refine resource | Feature owner | Future localized action paths |
-| --- | --- | --- |
-| `products` | `product-catalog` | `/{locale}/admin/products`, `/create`, `/edit/:id`, `/show/:id` |
-| `orders` | `orders` | `/{locale}/admin/orders`, `/show/:id` |
-| `inventory-adjustments` | `inventory` | `/{locale}/admin/inventory-adjustments`, `/create` |
-| `catalog-taxonomy` | `catalog-taxonomy` | `/{locale}/admin/catalog`, `/create`, `/edit/:id` |
-| `media-assets` | `media-library` | `/{locale}/admin/media`, `/show/:id` |
-| `operators` | `admin-users` | `/{locale}/admin/users`, `/show/:id` |
-| `store-settings` | `store-settings` | `/{locale}/admin/settings`, `/edit/:id` |
+These have DB-enforced role/ledger/atomicity rules a generic `update`/`insert` would silently bypass — keep them as custom domain mutations, with Refine (if adopted) only orchestrating the surrounding query cache/UI lifecycle:
 
-Refine uses colon route parameters such as `:id`, while Next uses bracketed folder parameters such as `[id]`; its official router binding resolves that difference. The actual route files will be introduced per feature only after the Supabase schema and accepted CRUD scope exist. [1]
-
-## Controlled installation set
-
-The setup will install the packages below through `pnpm` from the repository root, without a code generator and without a Supabase project connection.
-
-| Dependency | Use in Kisok | Enable now |
-| --- | --- | --- |
-| `@refinedev/core` | `<Refine>`, providers, resources, and CRUD hooks. | Yes |
-| `@tanstack/react-query` | Required Refine peer and cache lifecycle. | Yes |
-| `@refinedev/nextjs-router` | App Router binding for future resource routes. | Yes |
-| `@refinedev/react-table`, `@tanstack/react-table` | Real list-page sorting/filtering/pagination after server data exists. | Yes, package only |
-| `@refinedev/react-hook-form`, `react-hook-form` | Create/edit workflows with Zod schemas. | Yes, package only |
-| `@refinedev/supabase`, `@supabase/supabase-js` | Provider/client bridge to be activated in a later Supabase phase. | Yes, no configuration |
-
-The project will **not** use `create refine-app`, Refine Inferencer, example demo data, prefilled Supabase credentials, permissive RLS policies, or a Refine-generated application layout. Those shortcuts would conflict with the existing next-maker project, Kisok visual system, and security boundary. [2] [3]
+- Inventory adjustments (`apply_inventory_adjustment`, `set_inventory_quantity` RPCs)
+- Order status transitions (`update_order_status` RPC — role-scoped: Preparation owns `new→preparing`/`preparing→ready`, Admin owns `ready→completed`)
+- Admin User search/mutation (`search_admin_profiles`, `admin_update_profile` — `service_role`-only)
+- Cloudinary signing/deletion (server-only secrets)
+- Variant Option replacement (diff-based mutation; see `src/features/product-catalog/repositories/supabase.ts`)
 
 ## shadcn component policy
 
-The official shadcn command supports an all-components installation. Kisok will use it in non-overwrite mode after a dry run, so it adds every missing official registry component and dependency without replacing the already-customized Base UI source files. The design system remains token-first: `globals.css` semantic variables and Kisok variants are the customization authority. [4] [5]
-
-Refine's optional shadcn registry will not be bulk-applied because it targets Radix-oriented generated files while the current official Kisok registry uses Base UI. Instead, Refine performs data orchestration and Kisok uses its own official shadcn source files for visual views, forms, buttons, and tables. A Refine registry file can be selectively evaluated only when it adds a reusable headless-compatible pattern without conflicting primitives. [3]
-
-## Deferred Supabase activation sequence
-
-1. Request project URL and publishable key through the approved secret flow; never place these values in source.
-2. Establish tables, foreign keys, audit fields, RLS, and role policies before exposing any Refine resource.
-3. Replace `deferredDataProvider` with a Supabase provider bridge, then map each resource to a separately tested feature adapter.
-4. Implement `authProvider` and `accessControlProvider` from the approved Kisok admin roles; do not use the quickstart's anonymous write policies.
-5. Add per-feature `useList`, `useOne`, `useCreate`, `useUpdate`, and `useDelete` hooks, Zod schemas, and the relevant Kisok shadcn CRUD screens.
-6. Activate realtime/live behavior only for resources that have a defined operational need, audit semantics, and RLS coverage.
-
-## Validation contract
-
-The preparation stage must prove that the provider renders without network access, resources are deterministic, existing local workflows remain unchanged, and the feature-component Supabase boundary still holds. Each provider/manifest behavior is added test-first, then verified by TypeScript, Biome, Vitest, and the Next production build on Node.js 24+.
-
-## Sources
-
-[1]: https://refine.dev/core/docs/routing/integrations/next-js/ "Refine Next.js router"
-[2]: https://refine.dev/core/docs/guides-concepts/usage-with-existing-projects/ "Refine in existing projects"
-[3]: https://refine.dev/core/docs/ui-integrations/shadcn/introduction/ "Refine shadcn/ui integration"
-[4]: https://ui.shadcn.com/docs/cli "shadcn CLI"
-[5]: https://ui.shadcn.com/docs/theming "shadcn theming"
+Unchanged from the original plan: `src/components/ui` is the official shadcn/Base UI primitive source; `src/shared/ui` holds only Kisok-specific wrappers. Refine's own shadcn registry (Radix-oriented) is not bulk-applied — it would conflict with the Base UI primitives already in place.

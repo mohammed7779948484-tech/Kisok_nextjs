@@ -1,12 +1,28 @@
-import type { ListDataContract } from '@/shared/contracts';
+import type { Database } from '@/infrastructure/supabase/database.types';
 
-export type OrderStatus = 'Completed' | 'New' | 'Preparing';
+export type OrderStatus = Database['public']['Enums']['order_status'];
 
-export interface LocalOrder {
+export interface OrderItemRecord {
   id: string;
-  status: OrderStatus;
-  total: string;
-  type: string;
+  productName: string;
+  variantName: string | null;
+  variantSku: string;
+  variantOptions: string;
+  brandName: string | null;
+  imageSecureUrl: string | null;
+  quantity: number;
 }
 
-export interface OrdersDataContract extends ListDataContract<LocalOrder> {}
+export interface OrderRecord {
+  id: string;
+  displayNumber: string;
+  status: OrderStatus;
+  itemCount: number;
+  items: OrderItemRecord[];
+  createdAt: string;
+}
+
+export interface OrdersDataContract {
+  listOrders(): Promise<OrderRecord[]>;
+  updateStatus(orderId: string, targetStatus: OrderStatus, reason?: string): Promise<unknown>;
+}
