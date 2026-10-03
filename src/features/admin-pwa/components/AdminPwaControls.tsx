@@ -118,6 +118,19 @@ export function AdminPwaControls({ userId, locale }: { userId: string; locale: s
     }
   }
 
+  async function resetDevice() {
+    setBusy(true);
+    setError(null);
+    try {
+      await disableDeviceNotifications();
+      setState(Notification.permission === 'denied' ? 'blocked' : 'disabled');
+    } catch {
+      setError('Device reset could not finish. Check the connection and retry.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function install() {
     if (!installPrompt) return;
     try {
@@ -163,6 +176,11 @@ export function AdminPwaControls({ userId, locale }: { userId: string; locale: s
           ? '. Requires an installed Home Screen app on iOS 16.4+.'
           : ''}
       </p>
+      {pushSupported() && (error || state === 'blocked') ? (
+        <KisokButton disabled={busy} onClick={resetDevice} size="sm" type="button" variant="quiet">
+          Reset device registration
+        </KisokButton>
+      ) : null}
       {error ? (
         <p className="text-destructive text-xs" role="alert">
           {error}
