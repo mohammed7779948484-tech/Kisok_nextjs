@@ -78,6 +78,25 @@ describe('authenticated device actions', () => {
     await expect(registerDeviceSubscription(input, 'en')).rejects.toThrow(/could not be saved/);
   });
 
+  it('refreshes its own row when two tabs race to register one device', async () => {
+    context.session = { userId: 'admin' };
+    const updateId = vi.fn().mockResolvedValue({ error: null });
+    const query = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi
+        .fn()
+        .mockResolvedValueOnce({ data: null, error: null })
+        .mockResolvedValueOnce({ data: { id: 'own-device' }, error: null }),
+      insert: vi.fn().mockResolvedValue({ error: { code: '23505' } }),
+      update: vi.fn().mockReturnValue({ eq: updateId }),
+    };
+    context.client.from.mockReturnValue(query);
+    await registerDeviceSubscription(input, 'en');
+    expect(updateId).toHaveBeenCalledWith('id', 'own-device');
+    expect(query.update.mock.calls[0][0]).not.toHaveProperty('user_id');
+  });
+
   it('scopes removal to the signed-in user', async () => {
     context.client.auth.getClaims.mockResolvedValue({ data: { claims: { sub: 'admin' } } });
     const eq = vi.fn();

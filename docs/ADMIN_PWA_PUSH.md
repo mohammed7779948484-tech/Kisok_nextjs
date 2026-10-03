@@ -236,3 +236,6 @@ conditional stale cleanup, strict UUID/message validation, a fixed click URL,
 user-switch invalidation, failed-registration rollback, blocked-device reset UX,
 and overload-aware deprecated API checking. Next Server Actions retain built-in
 same-origin checks. No full provider errors or capability URLs are logged.
+
+Concurrent registration retries a uniqueness conflict only when RLS exposes an
+own-device row; it never takes over a different Admin's endpoint.

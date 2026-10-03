@@ -36,7 +36,7 @@ export async function registerDeviceSubscription(input: unknown, locale: string)
     .eq('endpoint', subscription.endpoint)
     .maybeSingle();
   if (readError) throw new Error('Device notification registration could not be checked.');
-  const result = existing
+  let result = existing
     ? await client
         .from('push_subscriptions')
         .update({ ...values, last_seen_at: new Date().toISOString() })
@@ -46,6 +46,20 @@ export async function registerDeviceSubscription(input: unknown, locale: string)
         endpoint: subscription.endpoint,
         user_id: session.userId,
       });
+  if (result.error?.code === '23505') {
+    // Two tabs may register the same device concurrently. Retry only an RLS-visible own row.
+    const { data: concurrent, error: retryError } = await client
+      .from('push_subscriptions')
+      .select('id')
+      .eq('endpoint', subscription.endpoint)
+      .maybeSingle();
+    if (concurrent && !retryError) {
+      result = await client
+        .from('push_subscriptions')
+        .update({ ...values, last_seen_at: new Date().toISOString() })
+        .eq('id', concurrent.id);
+    }
+  }
   if (result.error) {
     logger.warn({ code: result.error.code }, 'Device push registration failed');
     throw new Error('Device notifications could not be saved. Disable and enable them again.');
