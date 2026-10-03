@@ -76,11 +76,9 @@ describe('authenticated device actions', () => {
 
   it('scopes removal to the signed-in user', async () => {
     context.client.auth.getClaims.mockResolvedValue({ data: { claims: { sub: 'admin' } } });
-    const query = {
-      delete: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      then: (resolve: (value: unknown) => void) => resolve({ error: null }),
-    };
+    const eq = vi.fn();
+    const query = { delete: vi.fn().mockReturnThis(), eq };
+    eq.mockReturnValueOnce(query).mockResolvedValueOnce({ error: null });
     context.client.from.mockReturnValue(query);
     await removeDeviceSubscription(input.endpoint);
     expect(query.eq).toHaveBeenCalledWith('user_id', 'admin');

@@ -11,7 +11,10 @@ describe('deprecation checking', () => {
       'declare function read(value: number): void;',
       'read("current");',
       'read(123);',
-      'declare const value: { /** @deprecated old property */ old: string };',
+      'declare const value: {',
+      '/** @deprecated old property */',
+      'old: string;',
+      '};',
       'value.old;',
     ].join('\n');
     const source = ts.createSourceFile('/fixture.ts', code, ts.ScriptTarget.Latest, true);
