@@ -138,7 +138,9 @@ describe('order service worker', () => {
       },
     });
     await pending;
-    expect(context.openWindow).toHaveBeenCalledWith('https://kisok-omega.vercel.app/en/admin/orders');
+    expect(context.openWindow).toHaveBeenCalledWith(
+      'https://kisok-omega.vercel.app/en/admin/orders',
+    );
   });
 
   it('does not install a fetch handler or business-data cache', () => {

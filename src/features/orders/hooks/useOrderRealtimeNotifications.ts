@@ -98,7 +98,7 @@ export function useOrderRealtimeNotifications(options: UseOrderRealtimeNotificat
         document.visibilityState !== 'visible' ||
         event.data?.type !== 'KISOK_FOREGROUND_ORDER' ||
         typeof order?.id !== 'string' ||
-        !/^[0-9a-f-]{36}$/i.test(order.id) ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(order.id) ||
         !/^[A-HJ-NP-Z2-9]{6}$/.test(order.displayNumber) ||
         !Number.isFinite(Date.parse(order.createdAt))
       ) {

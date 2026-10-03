@@ -9,7 +9,7 @@ function parseOrder(data) {
     const order = data?.json();
     if (
       order?.type !== 'KISOK_ORDER' ||
-      !/^[0-9a-f-]{36}$/i.test(order.orderId) ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(order.orderId) ||
       !/^[A-HJ-NP-Z2-9]{6}$/.test(order.displayNumber) ||
       !Number.isFinite(Date.parse(order.createdAt))
     ) return null;
