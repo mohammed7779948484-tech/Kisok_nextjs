@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { hasLocale } from 'next-intl';
-import { setRequestLocale } from 'next-intl/server';
 
 import { routing } from '@/i18n/routing';
 
@@ -13,6 +12,5 @@ export default async function Home({ params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     redirect('/en/login');
   }
-  setRequestLocale(locale);
   redirect(`/${locale}/admin`);
 }

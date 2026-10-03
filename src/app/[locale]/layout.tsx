@@ -4,7 +4,7 @@ import '@/styles/globals.css';
 import { Livvic } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
-import { getMessages, getTimeZone, setRequestLocale } from 'next-intl/server';
+import { getMessages, getTimeZone } from 'next-intl/server';
 
 import { PwaRuntime } from '@/features/admin-pwa/components/PwaRuntime';
 import { routing } from '@/i18n/routing';
@@ -68,12 +68,13 @@ export default async function RootLayout({
     notFound();
   }
 
-  setRequestLocale(locale);
-
   // Hydrates the entire message catalog — the intended next-intl default and
   // fine for a starter. Apps with large catalogs should scope messages per route
   // segment (multiple NextIntlClientProvider boundaries) to trim the payload.
-  const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()]);
+  const [messages, timeZone] = await Promise.all([
+    getMessages({ locale }),
+    getTimeZone({ locale }),
+  ]);
 
   return (
     <html lang={locale} dir={getLocaleDirection(locale)} suppressHydrationWarning={true}>

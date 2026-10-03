@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { hasLocale } from 'next-intl';
-import { setRequestLocale } from 'next-intl/server';
 
 import { AdminLoginForm } from '@/features/auth-admin-access/components/AdminLoginForm';
 import { routing } from '@/i18n/routing';
@@ -25,7 +24,6 @@ export default async function LoginPage({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  setRequestLocale(locale);
 
   const query = await searchParams;
   const nextValue = Array.isArray(query.next) ? query.next[0] : query.next;

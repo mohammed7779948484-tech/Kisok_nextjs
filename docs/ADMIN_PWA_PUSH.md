@@ -222,3 +222,17 @@ Documentation was retrieved through official documentation connectors and
 maintainer documentation repositories, rather than relying on tutorial snippets.
 The current maintained web-push source version is 3.6.7; GitHub's latest published
 release record still names 3.6.5, so package/runtime validation is also required.
+
+## Compatibility and review notes
+
+The installed next-intl 4.13.7 deprecates the baseline setRequestLocale calls.
+Removed redundant page calls and pass the validated locale explicitly to layout
+getMessages/getTimeZone. Existing request configuration, prefix routing, middleware,
+and client provider remain in place. See [maintainer guidance](https://next-intl.dev/blog/nextjs-root-params)
+for the API transition; this feature does not migrate the entire routing architecture.
+
+Review fixed immutable ownership with column grants, provider-host allowlists,
+conditional stale cleanup, strict UUID/message validation, a fixed click URL,
+user-switch invalidation, failed-registration rollback, blocked-device reset UX,
+and overload-aware deprecated API checking. Next Server Actions retain built-in
+same-origin checks. No full provider errors or capability URLs are logged.
