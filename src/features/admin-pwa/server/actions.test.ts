@@ -16,7 +16,11 @@ vi.mock('@/infrastructure/supabase/client/server-client', () => ({
   getServerSupabaseClient: async () => context.client,
 }));
 vi.mock('@/lib/env', () => ({
-  env: { get NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY() { return context.publicKey; } },
+  env: {
+    get NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY() {
+      return context.publicKey;
+    },
+  },
 }));
 vi.mock('@/lib/logger', () => ({ logger: { warn: vi.fn() } }));
 

@@ -7,6 +7,10 @@ export function isDeprecatedReference(checker: ts.TypeChecker, node: ts.Identifi
     const signature = checker.getResolvedSignature(parent);
     if (signature) return signature.getJsDocTags().some((tag) => tag.name === 'deprecated');
   }
-  return checker.getSymbolAtLocation(node)?.getJsDocTags(checker)
-    .some((tag) => tag.name === 'deprecated') ?? false;
+  return (
+    checker
+      .getSymbolAtLocation(node)
+      ?.getJsDocTags(checker)
+      .some((tag) => tag.name === 'deprecated') ?? false
+  );
 }

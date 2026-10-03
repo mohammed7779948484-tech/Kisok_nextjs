@@ -10,7 +10,7 @@ try {
   let available = false;
   for (let attempt = 0; attempt < 60; attempt++) {
     try {
-      if ((await fetch(origin + '/manifest.webmanifest')).ok) {
+      if ((await fetch(`${origin}/manifest.webmanifest`)).ok) {
         available = true;
         break;
       }
@@ -20,7 +20,7 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   assert(available, 'Production server did not start');
-  const response = await fetch(origin + '/manifest.webmanifest');
+  const response = await fetch(`${origin}/manifest.webmanifest`);
   const manifest = await response.json();
   assert.equal(manifest.name, 'KISOK Admin');
   assert.equal(manifest.start_url, '/en/admin');
@@ -32,22 +32,27 @@ try {
     const bytes = new Uint8Array(await result.arrayBuffer());
     assert.equal(bytes[0], 137, 'Icon must be a real PNG');
   }
-  const worker = await fetch(origin + '/sw.js');
+  const worker = await fetch(`${origin}/sw.js`);
   assert(worker.ok);
   assert.match(worker.headers.get('cache-control'), /no-store/);
   assert.match(worker.headers.get('content-type'), /javascript/);
   browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  await page.goto(origin + '/en/login');
+  await page.goto(`${origin}/en/login`);
   const registration = await page.evaluate(async () => {
     const result = await navigator.serviceWorker.ready;
     return { scope: result.scope, script: result.active?.scriptURL };
   });
-  assert.equal(registration.scope, origin + '/');
-  assert.equal(registration.script, origin + '/sw.js');
-  assert.equal(await page.locator('link[rel="manifest"]').getAttribute('href'), '/manifest.webmanifest');
+  assert.equal(registration.scope, `${origin}/`);
+  assert.equal(registration.script, `${origin}/sw.js`);
+  assert.equal(
+    await page.locator('link[rel="manifest"]').getAttribute('href'),
+    '/manifest.webmanifest',
+  );
   assert.deepEqual(await page.evaluate(() => caches.keys()), []);
-  console.log('PASS: production-build manifest, PNG icons, worker headers, browser registration, no caches');
+  console.log(
+    'PASS: production-build manifest, PNG icons, worker headers, browser registration, no caches',
+  );
 } finally {
   await browser?.close();
   if (server.pid) process.kill(-server.pid, 'SIGTERM');

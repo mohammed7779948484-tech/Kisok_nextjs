@@ -10,9 +10,9 @@
 
 import ts from 'typescript';
 
-import path from 'node:path';
-
 import { isDeprecatedReference } from './lib/deprecation';
+
+import path from 'node:path';
 
 const cwd = process.cwd();
 const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, 'tsconfig.json');

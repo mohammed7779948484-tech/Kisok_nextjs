@@ -19,7 +19,7 @@ describe('deprecation checking', () => {
     ].join('\n');
     const source = ts.createSourceFile('/fixture.ts', code, ts.ScriptTarget.Latest, true);
     const host = ts.createCompilerHost({ noLib: true });
-    host.getSourceFile = (file) => file === '/fixture.ts' ? source : undefined;
+    host.getSourceFile = (file) => (file === '/fixture.ts' ? source : undefined);
     host.fileExists = (file) => file === '/fixture.ts';
     const program = ts.createProgram(['/fixture.ts'], { noLib: true }, host);
     const checker = program.getTypeChecker();
