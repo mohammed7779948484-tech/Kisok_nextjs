@@ -239,3 +239,7 @@ same-origin checks. No full provider errors or capability URLs are logged.
 
 Concurrent registration retries a uniqueness conflict only when RLS exposes an
 own-device row; it never takes over a different Admin's endpoint.
+
+Opening the app with an absent/expired INITIAL_SESSION also clears any prior
+browser push capability. An already closed app cannot run authenticated session
+cleanup; provider invalidation/reconciliation happens on the next app visit.
