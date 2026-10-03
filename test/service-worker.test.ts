@@ -90,6 +90,20 @@ describe('order service worker', () => {
     expect(context.showNotification).toHaveBeenCalledOnce();
   });
 
+  it('delivers when the app is completely closed', async () => {
+    const context = worker();
+    context.self.clients.matchAll.mockResolvedValue([]);
+    await context.push();
+    expect(context.showNotification).toHaveBeenCalledOnce();
+  });
+
+  it('does not suppress for a visible login page', async () => {
+    const context = worker(true);
+    context.client.url = 'https://kisok-omega.vercel.app/en/login';
+    await context.push();
+    expect(context.showNotification).toHaveBeenCalledOnce();
+  });
+
   it('does not display malformed payloads', async () => {
     const context = worker();
     await context.push({ type: 'KISOK_ORDER', displayNumber: '<script>' });
@@ -124,9 +138,7 @@ describe('order service worker', () => {
       },
     });
     await pending;
-    expect(context.openWindow).toHaveBeenCalledWith(
-      'https://kisok-omega.vercel.app/en/admin/orders',
-    );
+    expect(context.openWindow).toHaveBeenCalledWith('https://kisok-omega.vercel.app/en/admin/orders');
   });
 
   it('does not install a fetch handler or business-data cache', () => {

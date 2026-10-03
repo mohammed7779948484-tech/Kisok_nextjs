@@ -12,18 +12,22 @@ const source = readFileSync(
   resolve(import.meta.dirname, '../supabase/functions/order-push/index.ts'),
   'utf8',
 );
-const compiled = ts.transpile(source, { module: ts.ModuleKind.CommonJS });
+const compiled = ts.transpileModule(source, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS },
+}).outputText;
 
 function boot(configured = true) {
   const secret = 's'.repeat(64);
-  const env: Record<string, string> = configured ? {
-    ORDER_PUSH_WEBHOOK_SECRET: secret,
-    WEB_PUSH_VAPID_PUBLIC_KEY: 'B'.repeat(87),
-    WEB_PUSH_VAPID_PRIVATE_KEY: 'A'.repeat(43),
-    WEB_PUSH_VAPID_SUBJECT: 'mailto:operator@example.com',
-    SUPABASE_URL: 'https://project.supabase.co',
-    SUPABASE_SERVICE_ROLE_KEY: 'test-only-key',
-  } : {};
+  const env: Record<string, string> = configured
+    ? {
+        ORDER_PUSH_WEBHOOK_SECRET: secret,
+        WEB_PUSH_VAPID_PUBLIC_KEY: 'B'.repeat(87),
+        WEB_PUSH_VAPID_PRIVATE_KEY: 'A'.repeat(43),
+        WEB_PUSH_VAPID_SUBJECT: 'mailto:operator@example.com',
+        SUPABASE_URL: 'https://project.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'test-only-key',
+      }
+    : {};
   const from = vi.fn();
   const order = {
     id: '12345678-1234-1234-1234-123456789abc',
@@ -31,20 +35,17 @@ function boot(configured = true) {
     created_at: new Date().toISOString(),
   };
   from.mockImplementation((table) => {
-    const query = Object.assign(
-      Promise.resolve({ data: [], error: null }),
-      {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        or: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({
-          data: table === 'orders' ? order : null,
-          error: null,
-        }),
-      },
-    );
+    const query = Object.assign(Promise.resolve({ data: [], error: null }), {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      or: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: table === 'orders' ? order : null,
+        error: null,
+      }),
+    });
     return query;
   });
   let handler: ((request: Request) => Promise<Response>) | undefined;
@@ -58,7 +59,9 @@ function boot(configured = true) {
     },
     Deno: {
       env: { get: (name: string) => env[name] },
-      serve: (callback: typeof handler) => { handler = callback; },
+      serve: (callback: typeof handler) => {
+        handler = callback;
+      },
     },
     console: { info: vi.fn(), error: vi.fn() },
     Request,
@@ -69,13 +72,15 @@ function boot(configured = true) {
     Date,
   });
   if (!handler) throw new Error('Handler was not registered');
-  const invoke = (payload: unknown, credential: string | null = secret) => handler(
-    new Request('https://project.supabase.co/functions/v1/order-push', {
-      method: 'POST',
-      headers: credential ? { 'x-kisok-webhook-secret': credential } : {},
-      body: JSON.stringify(payload),
-    }),
-  );
+  const invokeHandler = handler;
+  const invoke = (payload: unknown, credential: string | null = secret) =>
+    invokeHandler(
+      new Request('https://project.supabase.co/functions/v1/order-push', {
+        method: 'POST',
+        headers: credential ? { 'x-kisok-webhook-secret': credential } : {},
+        body: JSON.stringify(payload),
+      }),
+    );
   return {
     invoke,
     from,

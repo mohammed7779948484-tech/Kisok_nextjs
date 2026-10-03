@@ -60,7 +60,7 @@ jobs:
       - name: Show safe formatting fixes after a failed check
         if: ${{ failure() }}
         run: |
-          pnpm exec biome check --write src/features/admin-pwa scripts/lib/deprecation.ts scripts/lib/deprecation.test.ts scripts/check-deprecated.ts scripts/pwa-browser-check.mjs || true
+          pnpm exec biome check --write src/features/admin-pwa scripts/lib/deprecation.ts scripts/lib/deprecation.test.ts scripts/check-deprecated.ts scripts/pwa-browser-check.mjs test/order-push-handler.test.ts test/service-worker.test.ts || true
           node --input-type=module - <<'NODE'
           import { execFileSync } from 'node:child_process';
           import { readFileSync } from 'node:fs';

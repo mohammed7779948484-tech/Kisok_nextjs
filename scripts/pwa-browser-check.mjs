@@ -26,7 +26,7 @@ try {
   assert.equal(manifest.start_url, '/en/admin');
   assert.equal(manifest.display, 'standalone');
   for (const icon of manifest.icons) {
-    const result = await fetch(origin + icon.src);
+    const result = await fetch(`${origin}${icon.src}`);
     assert(result.ok, 'PWA icon did not render');
     assert.match(result.headers.get('content-type'), /image\/png/);
     const bytes = new Uint8Array(await result.arrayBuffer());
