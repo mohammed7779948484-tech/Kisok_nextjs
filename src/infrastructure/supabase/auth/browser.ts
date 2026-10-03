@@ -1,3 +1,5 @@
+import { disableDeviceNotifications } from '@/features/admin-pwa/lib/device';
+
 import { getBrowserSupabaseClient } from '../client/browser-client';
 
 export type AdminSignInResult =
@@ -49,6 +51,7 @@ export async function signOutCurrentUser() {
     return;
   }
 
+  await disableDeviceNotifications();
   const { error } = await supabase.auth.signOut();
   if (error) {
     throw error;

@@ -93,6 +93,42 @@ describe('useOrderRealtimeNotifications', () => {
     expect(soundModule.playOrderChime).not.toHaveBeenCalled();
   });
 
+  it('counts a repeated order only once', () => {
+    const { result } = renderHook(() => useOrderRealtimeNotifications());
+    const payload = {
+      new: {
+        id: 'same-order',
+        display_number: 'ABC234',
+        status: 'new',
+        created_at: new Date().toISOString(),
+      },
+    };
+    act(() => {
+      mockChannelCallback(payload);
+      mockChannelCallback(payload);
+    });
+    expect(result.current.unreadCount).toBe(1);
+    expect(soundModule.playOrderChime).toHaveBeenCalledTimes(1);
+  });
+
+  it('retains unread state without playing the chime while hidden', () => {
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    const { result } = renderHook(() => useOrderRealtimeNotifications());
+    act(() => {
+      mockChannelCallback({
+        new: {
+          id: 'hidden-order',
+          display_number: 'ABC234',
+          status: 'new',
+          created_at: new Date().toISOString(),
+        },
+      });
+    });
+    expect(result.current.unreadCount).toBe(1);
+    expect(soundModule.playOrderChime).not.toHaveBeenCalled();
+    visibility.mockRestore();
+  });
+
   describe('AudioContext lifecycle', () => {
     afterEach(() => {
       vi.unstubAllGlobals();

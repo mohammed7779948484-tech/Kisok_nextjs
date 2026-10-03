@@ -3,6 +3,68 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      push_delivery_claims: {
+        Row: { order_id: string; claimed_at: string };
+        Insert: { order_id: string; claimed_at?: string };
+        Update: { order_id?: string; claimed_at?: string };
+        Relationships: [
+          {
+            foreignKeyName: 'push_delivery_claims_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: true;
+            referencedRelation: 'orders';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          vapid_public_key: string;
+          locale: string;
+          user_agent: string | null;
+          expires_at: string | null;
+          created_at: string;
+          updated_at: string;
+          last_seen_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          vapid_public_key: string;
+          locale?: string;
+          user_agent?: string | null;
+          expires_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          last_seen_at?: string;
+        };
+        Update: {
+          p256dh?: string;
+          auth?: string;
+          vapid_public_key?: string;
+          locale?: string;
+          user_agent?: string | null;
+          expires_at?: string | null;
+          last_seen_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'push_subscriptions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       brands: {
         Row: {
           created_at: string;

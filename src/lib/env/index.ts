@@ -40,6 +40,7 @@ export const env = defineEnv({
     CLOUDINARY_API_SECRET: e.string().optional(),
   },
   client: {
+    NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY: e.string().optional(),
     NEXT_PUBLIC_API_URL: e
       .url()
       .optional()
@@ -58,6 +59,7 @@ export const env = defineEnv({
     NODE_ENV: e.enum(['development', 'production', 'test']).default('development'),
   },
   runtimeEnv: {
+    NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY,
     DEFAULT_TIMEZONE: process.env.DEFAULT_TIMEZONE,
     DEFAULT_LOCALE: process.env.DEFAULT_LOCALE,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,

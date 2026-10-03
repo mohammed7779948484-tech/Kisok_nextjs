@@ -167,6 +167,19 @@
   },
   "overrides": [
     {
+      "includes": ["supabase/functions/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": {
+              "level": "error",
+              "options": { "allow": ["info", "warn", "error"] }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["scripts/**", "*.config.{ts,js,mjs,cjs}", "vitest.config.ts", "next.config.ts"],
       "linter": {
         "rules": {
