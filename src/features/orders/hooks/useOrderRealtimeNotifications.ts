@@ -24,6 +24,7 @@ export function useOrderRealtimeNotifications(options: UseOrderRealtimeNotificat
   const { soundEnabled = true, onNewOrder } = options;
   const [unreadCount, setUnreadCount] = useState(0);
   const [latestOrder, setLatestOrder] = useState<IncomingOrderNotification | null>(null);
+  const seenOrderIds = useRef(new Set<string>());
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const dismissLatest = useCallback(() => {
@@ -71,6 +72,45 @@ export function useOrderRealtimeNotifications(options: UseOrderRealtimeNotificat
     };
   }, []);
 
+  const receiveOrder = useCallback(
+    (order: IncomingOrderNotification) => {
+      if (seenOrderIds.current.has(order.id)) return;
+      seenOrderIds.current.add(order.id);
+      if (seenOrderIds.current.size > 256) {
+        const oldest = seenOrderIds.current.values().next().value;
+        if (oldest) seenOrderIds.current.delete(oldest);
+      }
+      setUnreadCount((prev) => prev + 1);
+      setLatestOrder(order);
+      if (soundEnabled && document.visibilityState === 'visible') {
+        playOrderChime(getAudioContext() ?? undefined);
+      }
+      onNewOrder?.(order);
+    },
+    [soundEnabled, getAudioContext, onNewOrder],
+  );
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const onPush = (event: MessageEvent) => {
+      const order = event.data?.order;
+      if (
+        document.visibilityState !== 'visible' ||
+        event.data?.type !== 'KISOK_FOREGROUND_ORDER' ||
+        typeof order?.id !== 'string' ||
+        !/^[0-9a-f-]{36}$/i.test(order.id) ||
+        !/^[A-HJ-NP-Z2-9]{6}$/.test(order.displayNumber) ||
+        !Number.isFinite(Date.parse(order.createdAt))
+      ) {
+        return;
+      }
+      receiveOrder({ ...order, status: 'new' });
+      event.ports[0]?.postMessage({ handled: true });
+    };
+    navigator.serviceWorker.addEventListener('message', onPush);
+    return () => navigator.serviceWorker.removeEventListener('message', onPush);
+  }, [receiveOrder]);
+
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();
     if (!supabase) {
@@ -96,14 +136,7 @@ export function useOrderRealtimeNotifications(options: UseOrderRealtimeNotificat
             createdAt: row.created_at,
           };
 
-          setUnreadCount((prev) => prev + 1);
-          setLatestOrder(order);
-
-          if (soundEnabled) {
-            playOrderChime(getAudioContext() ?? undefined);
-          }
-
-          onNewOrder?.(order);
+          receiveOrder(order);
         },
       )
       .subscribe();
@@ -111,7 +144,7 @@ export function useOrderRealtimeNotifications(options: UseOrderRealtimeNotificat
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [soundEnabled, onNewOrder, getAudioContext]);
+  }, [receiveOrder]);
 
   return {
     unreadCount,

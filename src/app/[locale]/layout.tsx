@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 
 import { Livvic } from 'next/font/google';
@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getMessages, getTimeZone, setRequestLocale } from 'next-intl/server';
 
+import { PwaRuntime } from '@/features/admin-pwa/components/PwaRuntime';
 import { routing } from '@/i18n/routing';
 import { getLocaleDirection } from '@/lib/config/app-locales';
 import { APP_NAME, APP_URL } from '@/lib/config/seo';
@@ -26,7 +27,11 @@ export const metadata: Metadata = {
     default: APP_NAME,
     template: `%s | ${APP_NAME}`,
   },
-  description: 'Starter template for Next.js projects with TypeScript and Tailwind CSS',
+  description: 'KISOK store administration and order queue.',
+  applicationName: APP_NAME,
+  manifest: '/manifest.webmanifest',
+  icons: { icon: '/pwa-icons/192.png', apple: '/pwa-icons/180.png' },
+  appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: 'default' },
   openGraph: {
     type: 'website',
     siteName: APP_NAME,
@@ -43,6 +48,8 @@ export const metadata: Metadata = {
     'max-snippet': -1,
   },
 };
+
+export const viewport: Viewport = { themeColor: '#3159c9' };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -73,6 +80,7 @@ export default async function RootLayout({
       <body className={`${livvic.variable} antialiased`}>
         <RootProvider locale={locale} messages={messages} timeZone={timeZone}>
           <HttpClientBundleSentinel />
+          <PwaRuntime />
           {children}
         </RootProvider>
       </body>

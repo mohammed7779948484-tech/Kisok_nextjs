@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
+import { AdminPwaControls } from '@/features/admin-pwa/components/AdminPwaControls';
 import { OrderNotificationCenter, useOrderRealtimeNotifications } from '@/features/orders';
 import { signOutCurrentUser } from '@/infrastructure/supabase/auth/browser';
 import { GuardedLink } from '@/shared/navigation/UnsavedChangesGuard';
@@ -40,10 +41,12 @@ export function AdminShell({
   children,
   displayName,
   locale,
+  userId,
 }: {
   children: React.ReactNode;
   displayName: string;
   locale: string;
+  userId?: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -129,6 +132,7 @@ export function AdminShell({
               );
             })}
           </nav>
+          {userId ? <AdminPwaControls locale={locale} userId={userId} /> : null}
         </aside>
 
         <div className="min-w-0">

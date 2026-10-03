@@ -23,7 +23,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminShell displayName={session.profile.display_name} locale={locale}>
+    <AdminShell displayName={session.profile.display_name} locale={locale} userId={session.userId}>
       {children}
     </AdminShell>
   );

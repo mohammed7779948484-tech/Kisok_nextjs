@@ -6,7 +6,7 @@ import { env } from '@/lib/env';
 import type { SupportedLocale } from '@/types/i18n';
 
 const APP_URL = env.NEXT_PUBLIC_APP_URL;
-const APP_NAME = 'Nextjs Starter';
+const APP_NAME = 'KISOK Admin';
 
 type SEOParams = {
   title: string;
