@@ -243,3 +243,30 @@ own-device row; it never takes over a different Admin's endpoint.
 Opening the app with an absent/expired INITIAL_SESSION also clears any prior
 browser push capability. An already closed app cannot run authenticated session
 cleanup; provider invalidation/reconciliation happens on the next app visit.
+
+## Deployment acceptance status
+
+The first complete automated run passed all validation steps, 596 unit tests,
+all 122 local pgTAP assertions, Deno check, and the headless Chromium production
+build smoke: [CI run 37091385634](https://github.com/mohammed7779948484-tech/Kisok_nextjs/actions/runs/37091385634).
+Subsequent review adds registration-race and expired-session regression coverage;
+the PR's latest required checks provide the final results.
+
+The additive production migration and order-push Edge Function version 2 are
+deployed. The function source was retrieved and compared byte-for-byte with
+repository index.ts/core.js. Migration SQL was compared byte-for-byte with the
+remote recorded statements. Production business-row counts remain unchanged.
+No existing production business data was modified.
+
+Push Vault configuration is absent, so the trigger is inert. VAPID/Edge secrets
+and the Vercel public build key still require configuration through a trusted
+operator terminal/Dashboard: the connected tools expose neither secret-setting
+API. Do not enable the Vault URL before those values and application deployment
+are ready. The production application remains on the verified baseline; feature
+previews are available through [draft PR #11](https://github.com/mohammed7779948484-tech/Kisok_nextjs/pull/11).
+
+Real installed-device permission, OS background/closed delivery, two physical
+devices, and standalone authentication/session acceptance have not been verified.
+Headless Chromium verifies install infrastructure, worker registration, PNG
+assets and no-cache behavior; unit/VM tests verify permission and push logic.
+No production orders were created to simulate those acceptance cases.
