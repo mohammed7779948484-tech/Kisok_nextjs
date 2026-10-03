@@ -62,3 +62,34 @@ jobs:
             console.log('PWA_FORMATTED_FILE ' + JSON.stringify({ path, content: readFileSync(path, 'utf8') }));
           }
           NODE
+
+  database-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+      - name: Start isolated local Supabase
+        run: pnpm supabase start
+      - name: Run local pgTAP tests
+        run: pnpm supabase test db
+      - name: Stop local Supabase
+        if: ${{ always() }}
+        run: pnpm supabase stop --no-backup
+
+  edge-type-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check push Edge Function
+        run: deno check --config supabase/functions/order-push/deno.json supabase/functions/order-push/index.ts
