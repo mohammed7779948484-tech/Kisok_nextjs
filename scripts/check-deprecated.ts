@@ -12,6 +12,8 @@ import ts from 'typescript';
 
 import path from 'node:path';
 
+import { isDeprecatedReference } from './lib/deprecation';
+
 const cwd = process.cwd();
 const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, 'tsconfig.json');
 const generatedUiPath = `${path.join(cwd, 'src', 'components', 'ui')}${path.sep}`;
@@ -31,11 +33,6 @@ const program = ts.createProgram({
 
 const checker = program.getTypeChecker();
 
-function isDeprecated(sym: ts.Symbol | undefined): boolean {
-  if (!sym) return false;
-  return sym.getJsDocTags(checker).some((tag) => tag.name === 'deprecated');
-}
-
 let hits = 0;
 
 for (const sourceFile of program.getSourceFiles()) {
@@ -46,8 +43,7 @@ for (const sourceFile of program.getSourceFiles()) {
 
   const visit = (node: ts.Node): void => {
     if (ts.isIdentifier(node)) {
-      const sym = checker.getSymbolAtLocation(node);
-      if (isDeprecated(sym)) {
+      if (isDeprecatedReference(checker, node)) {
         const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
         console.log(
           `${path.relative(cwd, sourceFile.fileName)}:${line + 1}:${character + 1}  ${node.text}  (@deprecated)`,

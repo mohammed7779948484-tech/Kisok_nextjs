@@ -53,7 +53,8 @@ $$, '23505', null, 'duplicate endpoint denied');
 
 set local "request.jwt.claim.sub" = '20000000-0000-0000-0000-000000000002';
 select is((select count(*)::integer from public.push_subscriptions), 0, 'second Admin cannot enumerate first Admin devices');
-select is((with deleted as (delete from public.push_subscriptions returning id) select count(*)::integer from deleted), 0, 'second Admin cannot delete first Admin devices');
+with deleted as (delete from public.push_subscriptions returning id)
+select is((select count(*)::integer from deleted), 0, 'second Admin cannot delete first Admin devices');
 
 set local "request.jwt.claim.sub" = '20000000-0000-0000-0000-000000000003';
 select throws_ok($$
