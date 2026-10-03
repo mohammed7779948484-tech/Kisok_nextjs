@@ -7,8 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / "supabase" / "migrations"
 
 files = sorted(MIG.glob("*.sql"))
-if len(files) != 15:
-    raise SystemExit(f"FAIL: expected 15 migrations, found {len(files)}")
+if len(files) != 17:
+    raise SystemExit(f"FAIL: expected 17 migrations, found {len(files)}")
 
 text = "\n".join(p.read_text(encoding="utf-8") for p in files)
 
@@ -84,11 +84,13 @@ functions = re.findall(
     r"(?im)^\s*create\s+(?:or\s+replace\s+)?function\s+([a-z_][\w]*\.[a-z_][\w]*)\s*\(",
     text,
 )
-if len(functions) != len(set(functions)):
-    dupes = sorted({f for f in functions if functions.count(f) > 1})
+# This feature replaces its own dispatch function once to add signed transport.
+allowed_replacements = {"private.dispatch_order_push"}
+dupes = sorted({f for f in functions if functions.count(f) > 1} - allowed_replacements)
+if dupes:
     raise SystemExit(f"FAIL: duplicate function definitions: {dupes}")
 
-if len(functions) > 25:
+if len(set(functions)) > 25:
     raise SystemExit(f"FAIL: lean function budget exceeded: {len(functions)}")
 
 triggers = re.findall(r"(?im)^\s*create\s+trigger\s+([a-z_][\w]*)", text)
@@ -259,7 +261,7 @@ tables = [
     "profiles","media_assets","store_settings","brands","categories",
     "option_types","option_values","products","product_categories",
     "product_variants","variant_option_values","product_variant_media",
-    "inventory","inventory_adjustments","orders","order_items","push_subscriptions",
+    "inventory","inventory_adjustments","orders","order_items","push_subscriptions","push_delivery_claims",
 ]
 for table in tables:
     needle = f"alter table public.{table} enable row level security;"

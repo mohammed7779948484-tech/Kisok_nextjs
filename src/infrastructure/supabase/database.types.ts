@@ -3,6 +3,20 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      push_delivery_claims: {
+        Row: { order_id: string; claimed_at: string };
+        Insert: { order_id: string; claimed_at?: string };
+        Update: { order_id?: string; claimed_at?: string };
+        Relationships: [
+          {
+            foreignKeyName: 'push_delivery_claims_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: true;
+            referencedRelation: 'orders';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       push_subscriptions: {
         Row: {
           id: string;

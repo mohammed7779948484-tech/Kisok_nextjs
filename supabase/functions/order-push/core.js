@@ -79,3 +79,18 @@ export async function deliverBatch(subscriptions, payload, send, remove, concurr
   );
   return results;
 }
+
+export async function signatureMatches(supplied, body, secret) {
+  if (!secret || secret.length < 32 || !/^[0-9a-f]{64}$/.test(supplied ?? '')) return false;
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const bytes = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(body)));
+  const expected = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return secretMatches(supplied, expected);
+}

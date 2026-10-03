@@ -16,7 +16,7 @@ const compiled = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS },
 }).outputText;
 
-function boot(configured = true) {
+function boot(configured = true, claimed = false) {
   const secret = 's'.repeat(64);
   const env: Record<string, string> = configured
     ? {
@@ -36,6 +36,7 @@ function boot(configured = true) {
   };
   from.mockImplementation((table) => {
     const query = Object.assign(Promise.resolve({ data: [], error: null }), {
+      insert: vi.fn().mockResolvedValue({ error: claimed ? { code: '23505' } : null }),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       or: vi.fn().mockReturnThis(),
@@ -68,19 +69,36 @@ function boot(configured = true) {
     Response,
     crypto: webcrypto,
     TextEncoder,
+    TextDecoder,
     AbortSignal,
     Date,
   });
   if (!handler) throw new Error('Handler was not registered');
   const invokeHandler = handler;
-  const invoke = (payload: unknown, credential: string | null = secret) =>
-    invokeHandler(
+  const invoke = async (payload: unknown, credential: string | null = secret) => {
+    const body = JSON.stringify(payload);
+    let signature: string | null = null;
+    if (credential) {
+      const key = await webcrypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(credential),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign'],
+      );
+      const digest = await webcrypto.subtle.sign('HMAC', key, new TextEncoder().encode(body));
+      signature = Array.from(new Uint8Array(digest), (byte) =>
+        byte.toString(16).padStart(2, '0'),
+      ).join('');
+    }
+    return invokeHandler(
       new Request('https://project.supabase.co/functions/v1/order-push', {
         method: 'POST',
-        headers: credential ? { 'x-kisok-webhook-secret': credential } : {},
-        body: JSON.stringify(payload),
+        headers: signature ? { 'x-kisok-webhook-signature': signature } : {},
+        body,
       }),
     );
+  };
   return {
     invoke,
     from,
@@ -111,9 +129,19 @@ describe('order webhook HTTP boundary', () => {
     expect(response.status).toBe(200);
     expect(context.from.mock.calls.map(([table]) => table)).toEqual([
       'orders',
+      'push_delivery_claims',
       'push_subscriptions',
     ]);
     expect(await response.json()).toEqual(expect.objectContaining({ targets: 0, sent: 0 }));
+  });
+
+  it('ignores replayed events before scanning subscriptions', async () => {
+    const context = boot(true, true);
+    expect((await context.invoke(context.event)).status).toBe(202);
+    expect(context.from.mock.calls.map(([table]) => table)).toEqual([
+      'orders',
+      'push_delivery_claims',
+    ]);
   });
 
   it('ignores fabricated order display data', async () => {

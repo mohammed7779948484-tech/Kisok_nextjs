@@ -44,12 +44,13 @@ HTTP targets. Delivery requests reject redirects and have a five-second deadline
 An INSERT-only trigger reads URL and shared-secret configuration from Vault
 and enqueues pg_net HTTP work. Missing configuration is the off switch.
 Its exception handler isolates enqueue failure from order creation. No old orders
-are backfilled. The Edge Function verifies the shared secret, event shape,
+are backfilled. The Edge Function verifies an HMAC-SHA256 signature over the bounded raw body, event shape,
 public.orders INSERT, actual order identity, number, timestamp and five-minute
 freshness. It joins subscriptions to active Admin profiles, scans bounded pages,
 sends with five workers, deletes 404/410 devices, and retains transient failures.
 There is no retry loop or guaranteed delivery; repeated events use stable OS tags.
-Only aggregate counts and order IDs are logged.
+Only aggregate counts and order IDs are logged. A service-only order claim is inserted
+before delivery, so signed-event replays cannot initiate a second broadcast.
 
 Supabase Edge Functions were selected over a Vercel route because the event
 origin is the database and asynchronous pg_net already fits that boundary.
@@ -126,8 +127,8 @@ Redeploy after changing a NEXT_PUBLIC variable.
 
 Deploy the exact repository function:
 `pnpm supabase functions deploy order-push --project-ref lccplcswursecygwpltj --no-verify-jwt`.
-verify_jwt=false is intentional: custom webhook authentication rejects missing,
-wrong or unconfigured secrets before any database access. The service-role key
+verify_jwt=false is intentional: custom signed-webhook authentication rejects missing,
+wrong or unconfigured credentials before any database access. The service-role key
 is never used as the public invocation credential.
 
 In Supabase Vault, create two named secrets through the Dashboard:
@@ -140,11 +141,15 @@ Observe Edge aggregate logs and net._http_response after activation.
 
 ## Database source of truth and drift
 
-Applied migration: 20261003022452_admin_push_subscriptions.sql.
+Applied migrations:
+- 20261003022452_admin_push_subscriptions.sql
+- 20261003030203_admin_push_transport_privileges.sql
+- 20261003030506_admin_push_signed_webhooks.sql
 The local file is the exact SQL supplied to apply_migration; its version matches
 the remote ledger. Added: push table, constraints, three indexes, four policies,
 restricted grants, timestamp trigger, pg_net extension, private dispatch function,
-and the orders INSERT trigger. The existing orders table gained that trigger;
+the orders INSERT trigger, and a service-only push_delivery_claims table.
+The existing orders table gained only the trigger;
 its columns, rows, constraints and grants were untouched.
 
 Before/after comparisons confirmed existing business schema unchanged except
@@ -252,7 +257,7 @@ build smoke: [CI run 37091385634](https://github.com/mohammed7779948484-tech/Kis
 Subsequent review adds registration-race and expired-session regression coverage;
 the PR's latest required checks provide the final results.
 
-The additive production migration and order-push Edge Function version 2 are
+The additive production migration and order-push signed-webhook Edge Function are
 deployed. The function source was retrieved and compared byte-for-byte with
 repository index.ts/core.js. Migration SQL was compared byte-for-byte with the
 remote recorded statements. Production business-row counts remain unchanged.
@@ -270,3 +275,30 @@ devices, and standalone authentication/session acceptance have not been verified
 Headless Chromium verifies install infrastructure, worker registration, PNG
 assets and no-cache behavior; unit/VM tests verify permission and push logic.
 No production orders were created to simulate those acceptance cases.
+
+## Managed queue security and replay protection
+
+pg_net owns its transport objects as supabase_admin. The production migration
+role lacks grant options: the transport-privileges migration was recorded but
+its GRANT/REVOKE statements could not change managed ACLs. Local Supabase applies
+those restrictions when its migration owner permits them. This ownership
+difference is documented drift; it does not affect business-table permissions.
+
+The final dispatch function therefore NEVER puts the long-lived webhook secret
+in the request queue. It signs the exact UTF8 body::text with pgcrypto HMAC-SHA256;
+pg_net's maintained source confirms that serialization. The Edge Function reads
+at most 8192 bytes and verifies that signature before reading application tables.
+A signature copied from a queue row cannot authenticate modified content.
+A unique, RLS-protected push_delivery_claims order_id permits only one delivery
+attempt per genuine fresh order. Only service_role INSERT is granted; browsers
+cannot read, write or erase claims. Claims follow order deletion because they are
+ephemeral delivery state, with no business-row mutation or history rewrite.
+
+Delivery is at most one attempt, with no guaranteed retry processing.
+A crash after claiming, partial fan-out, provider error or time/page limit may
+miss device delivery; the Orders queue and Realtime remain authoritative.
+The additive claim table is retained on rollback. Do not erase claims or replay
+old production orders for testing. The shared secret still belongs only in
+Vault and Edge secrets; queued signatures can safely remain in managed transport.
+
+Additional source: [maintained pg_net HTTP serialization](https://github.com/supabase/pg_net/blob/master/sql/pg_net.sql).

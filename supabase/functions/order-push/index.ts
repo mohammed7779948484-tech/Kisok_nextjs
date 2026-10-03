@@ -1,4 +1,4 @@
-import { deliverBatch, parseWebhook, secretMatches } from './core.js';
+import { deliverBatch, parseWebhook, signatureMatches } from './core.js';
 
 import { createClient } from 'npm:@supabase/supabase-js@2.112.4';
 import webpush from 'npm:web-push@3.6.7';
@@ -11,17 +11,36 @@ function required(name: string): string {
 
 Deno.serve(async (request: Request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-  if (
-    !(await secretMatches(
-      request.headers.get('x-kisok-webhook-secret'),
-      Deno.env.get('ORDER_PUSH_WEBHOOK_SECRET'),
-    ))
-  ) {
-    return new Response('Unauthorized', { status: 401 });
-  }
   try {
-    const text = await request.text();
-    if (text.length > 8192) return new Response('Payload too large', { status: 413 });
+    const reader = request.body?.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        if (size > 8192) {
+          await reader.cancel();
+          return new Response('Payload too large', { status: 413 });
+        }
+        chunks.push(value);
+      }
+    }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    const text = new TextDecoder().decode(bytes);
+    if (!(await signatureMatches(
+      request.headers.get('x-kisok-webhook-signature'),
+      text,
+      Deno.env.get('ORDER_PUSH_WEBHOOK_SECRET'),
+    ))) {
+      return new Response('Unauthorized', { status: 401 });
+    }
     let payload: unknown;
     try {
       payload = JSON.parse(text);
@@ -61,6 +80,12 @@ Deno.serve(async (request: Request) => {
     ) {
       return new Response('Event ignored', { status: 202 });
     }
+
+    const { error: claimError } = await client
+      .from('push_delivery_claims')
+      .insert({ order_id: order.id });
+    if (claimError?.code === '23505') return new Response('Event already claimed', { status: 202 });
+    if (claimError) throw new Error('Delivery claim failed');
 
     const message = JSON.stringify({
       type: 'KISOK_ORDER',

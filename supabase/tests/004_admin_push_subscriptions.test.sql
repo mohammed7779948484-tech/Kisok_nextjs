@@ -1,7 +1,7 @@
 -- Local Supabase only. Never run the repository behavior suite against Production.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(33);
 
 select ok(to_regclass('public.push_subscriptions') is not null, 'device table exists');
 select ok((select relrowsecurity from pg_class where oid='public.push_subscriptions'::regclass), 'RLS enabled');
@@ -18,6 +18,15 @@ select ok(exists(select 1 from pg_constraint where conrelid='public.push_subscri
 select ok(exists(select 1 from pg_indexes where tablename='push_subscriptions' and indexname='push_subscriptions_user_id_idx'), 'user lookup is indexed');
 select ok(not has_function_privilege('authenticated','private.dispatch_order_push()','EXECUTE'), 'browser cannot invoke webhook trigger');
 select ok((select (tgtype & 4) = 4 and (tgtype & 16) = 0 and (tgtype & 8) = 0 from pg_trigger where tgname='orders_dispatch_web_push'), 'order trigger is INSERT only');
+
+select ok(to_regclass('public.push_delivery_claims') is not null, 'delivery claim table exists');
+select ok((select relrowsecurity from pg_class where oid='public.push_delivery_claims'::regclass), 'claims RLS enabled');
+select ok(not has_table_privilege('authenticated','public.push_delivery_claims','SELECT'), 'browser cannot enumerate claims');
+select ok(not has_table_privilege('authenticated','public.push_delivery_claims','INSERT'), 'browser cannot claim delivery');
+select ok(has_table_privilege('service_role','public.push_delivery_claims','INSERT'), 'sender may claim once');
+select ok(not has_table_privilege('service_role','public.push_delivery_claims','DELETE'), 'sender cannot erase claims to replay');
+select ok(position('x-kisok-webhook-signature' in pg_get_functiondef('private.dispatch_order_push()'::regprocedure)) > 0, 'trigger signs the exact queued body');
+select ok(position('x-kisok-webhook-secret' in pg_get_functiondef('private.dispatch_order_push()'::regprocedure)) = 0, 'long-lived secret never enters managed request queue');
 
 insert into auth.users(id,aud,role,email,created_at,updated_at)
 values

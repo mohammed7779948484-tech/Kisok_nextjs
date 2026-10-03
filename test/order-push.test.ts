@@ -5,6 +5,7 @@ import {
   parseWebhook,
   safeEndpoint,
   secretMatches,
+  signatureMatches,
 } from '../supabase/functions/order-push/core.js';
 
 const event = {
@@ -44,6 +45,26 @@ describe('order push delivery', () => {
     expect(await secretMatches(secret, undefined)).toBe(false);
     expect(await secretMatches('wrong', secret)).toBe(false);
     expect(await secretMatches(secret, secret)).toBe(true);
+  });
+
+  it('authenticates the exact body and rejects a modified event', async () => {
+    const secret = 's'.repeat(64);
+    const body = JSON.stringify(event);
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+    const digest = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body));
+    const signature = Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join('');
+    expect(await signatureMatches(signature, body, secret)).toBe(true);
+    expect(await signatureMatches(signature, `${body} `, secret)).toBe(false);
+    expect(await signatureMatches(signature, body, undefined)).toBe(false);
+    expect(await signatureMatches(secret, body, secret)).toBe(false);
   });
 
   it('sends to multiple devices with controlled concurrency', async () => {
