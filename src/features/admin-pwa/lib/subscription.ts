@@ -28,7 +28,8 @@ export async function enableSubscription({
   persist: (subscription: PushSubscriptionJSON) => Promise<void>;
 }) {
   const granted = permission === 'default' ? await requestPermission() : permission;
-  if (granted === 'denied') throw new Error('Device notifications are blocked in browser settings.');
+  if (granted === 'denied')
+    throw new Error('Device notifications are blocked in browser settings.');
   if (granted !== 'granted') throw new Error('Notification permission was not granted.');
   const existing = await manager.getSubscription();
   const subscription =

@@ -1,5 +1,7 @@
+import { env } from '@/lib/env';
+
 import { registerDeviceSubscription, removeDeviceSubscription } from '../server/actions';
-import { disableSubscription } from './subscription';
+import { applicationServerKey, disableSubscription } from './subscription';
 
 const OWNER_KEY = 'kisok_push_owner';
 let pendingRemoval: string | null = null;
@@ -29,7 +31,21 @@ export async function reconcileDevice(userId: string, locale: string) {
     localStorage.removeItem(OWNER_KEY);
     return null;
   }
-  if (subscription) await registerDeviceSubscription(subscription.toJSON(), locale);
+  if (subscription) {
+    const key = env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY;
+    const existingKey = subscription.options.applicationServerKey;
+    const expected = key ? applicationServerKey(key) : null;
+    if (
+      existingKey &&
+      expected &&
+      (existingKey.byteLength !== expected.byteLength ||
+        new Uint8Array(existingKey).some((byte, index) => byte !== expected[index]))
+    ) {
+      await disableSubscription(subscription, removeDeviceSubscription);
+      return null;
+    }
+    await registerDeviceSubscription(subscription.toJSON(), locale);
+  }
   return subscription;
 }
 

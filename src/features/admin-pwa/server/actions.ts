@@ -12,7 +12,7 @@ import { subscriptionSchema } from './schema';
 export async function registerDeviceSubscription(input: unknown, locale: string): Promise<void> {
   const client = await getServerSupabaseClient();
   const session = await getTrustedAdminSession(client);
-  if (!client || !session) throw new Error('Sign in as an active Admin to enable notifications.');
+  if (!(client && session)) throw new Error('Sign in as an active Admin to enable notifications.');
   const parsed = subscriptionSchema.safeParse(input);
   const publicKey = env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY;
   if (!parsed.success || locale !== 'en' || !publicKey || !/^[A-Za-z0-9_-]{87}$/.test(publicKey)) {

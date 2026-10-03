@@ -110,7 +110,9 @@ export function AdminPwaControls({ userId, locale }: { userId: string; locale: s
       }
     } catch (cause) {
       if (Notification.permission === 'denied') setState('blocked');
-      setError(cause instanceof Error ? cause.message : 'Device notifications could not be changed.');
+      setError(
+        cause instanceof Error ? cause.message : 'Device notifications could not be changed.',
+      );
     } finally {
       setBusy(false);
     }
@@ -134,7 +136,7 @@ export function AdminPwaControls({ userId, locale }: { userId: string; locale: s
           Install KISOK
         </KisokButton>
       ) : null}
-      {!installed && !installPrompt ? (
+      {!(installed || installPrompt) ? (
         <p className="text-muted-foreground text-xs">
           {ios
             ? 'Install KISOK: Share → Add to Home Screen. Open that app to enable device notifications.'
@@ -157,7 +159,9 @@ export function AdminPwaControls({ userId, locale }: { userId: string; locale: s
       <p aria-live="polite" className="text-muted-foreground text-xs">
         Device notifications: {state}
         {state === 'blocked' ? '. Allow notifications in your browser settings.' : ''}
-        {state === 'unsupported' && ios ? '. Requires an installed Home Screen app on iOS 16.4+.' : ''}
+        {state === 'unsupported' && ios
+          ? '. Requires an installed Home Screen app on iOS 16.4+.'
+          : ''}
       </p>
       {error ? (
         <p className="text-destructive text-xs" role="alert">

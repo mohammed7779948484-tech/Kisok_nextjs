@@ -33,7 +33,7 @@ export function safeEndpoint(value) {
 }
 
 export async function secretMatches(supplied, expected) {
-  if (!supplied || !expected || expected.length < 32 || supplied.length > 256) return false;
+  if (!(supplied && expected) || expected.length < 32 || supplied.length > 256) return false;
   const encode = new TextEncoder();
   const [left, right] = await Promise.all(
     [supplied, expected].map((value) => crypto.subtle.digest('SHA-256', encode.encode(value))),

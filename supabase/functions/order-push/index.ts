@@ -1,7 +1,7 @@
+import { deliverBatch, parseWebhook, secretMatches } from './core.js';
+
 import { createClient } from 'npm:@supabase/supabase-js@2.112.4';
 import webpush from 'npm:web-push@3.6.7';
-
-import { deliverBatch, parseWebhook, secretMatches } from './core.js';
 
 function required(name: string): string {
   const value = Deno.env.get(name);
@@ -35,9 +35,11 @@ Deno.serve(async (request: Request) => {
     const privateKey = required('WEB_PUSH_VAPID_PRIVATE_KEY');
     const subject = required('WEB_PUSH_VAPID_SUBJECT');
     if (
-      !/^[A-Za-z0-9_-]{87}$/.test(publicKey) ||
-      !/^[A-Za-z0-9_-]{43}$/.test(privateKey) ||
-      !/^(mailto:[^\s@]+@[^\s@]+\.[^\s@]+|https:\/\/[^\s]+)$/.test(subject)
+      !(
+        /^[A-Za-z0-9_-]{87}$/.test(publicKey) &&
+        /^[A-Za-z0-9_-]{43}$/.test(privateKey) &&
+        /^(mailto:[^\s@]+@[^\s@]+\.[^\s@]+|https:\/\/[^\s]+)$/.test(subject)
+      )
     ) {
       throw new Error('Push configuration invalid');
     }
@@ -81,7 +83,7 @@ Deno.serve(async (request: Request) => {
         .eq('profiles.role', 'admin')
         .eq('profiles.is_active', true)
         .eq('vapid_public_key', publicKey)
-        .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString())
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order('id')
         .limit(100);
       if (after) query = query.gt('id', after);

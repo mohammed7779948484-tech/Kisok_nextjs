@@ -57,7 +57,7 @@ describe('order push delivery', () => {
     });
     const subscriptions = Array.from({ length: 12 }, (_, i) => ({
       id: String(i),
-      endpoint: 'https://fcm.googleapis.com/' + i,
+      endpoint: `https://fcm.googleapis.com/${i}`,
     }));
     const result = await deliverBatch(subscriptions, 'payload', send, vi.fn(), 3);
     expect(result.sent).toBe(12);
@@ -77,17 +77,20 @@ describe('order push delivery', () => {
     expect(remove).toHaveBeenCalledWith(device);
   });
 
-  it.each([429, 500, 503, undefined])('retains devices on transient %s failures', async (statusCode) => {
-    const remove = vi.fn();
-    const result = await deliverBatch(
-      [{ endpoint: 'https://fcm.googleapis.com/123' }],
-      'payload',
-      vi.fn().mockRejectedValue({ statusCode }),
-      remove,
-    );
-    expect(result.transient).toBe(1);
-    expect(remove).not.toHaveBeenCalled();
-  });
+  it.each([429, 500, 503, undefined])(
+    'retains devices on transient %s failures',
+    async (statusCode) => {
+      const remove = vi.fn();
+      const result = await deliverBatch(
+        [{ endpoint: 'https://fcm.googleapis.com/123' }],
+        'payload',
+        vi.fn().mockRejectedValue({ statusCode }),
+        remove,
+      );
+      expect(result.transient).toBe(1);
+      expect(remove).not.toHaveBeenCalled();
+    },
+  );
 
   it('isolates cleanup failure from successful device delivery', async () => {
     const result = await deliverBatch(
