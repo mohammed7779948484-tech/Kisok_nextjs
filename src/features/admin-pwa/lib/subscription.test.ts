@@ -51,7 +51,10 @@ describe('device subscriptions', () => {
     });
     expect(requestPermission).toHaveBeenCalledOnce();
     expect(subscribe).toHaveBeenCalledWith(
-      expect.objectContaining({ userVisibleOnly: true, applicationServerKey: expect.any(Uint8Array) }),
+      expect.objectContaining({
+        userVisibleOnly: true,
+        applicationServerKey: expect.any(Uint8Array),
+      }),
     );
   });
 

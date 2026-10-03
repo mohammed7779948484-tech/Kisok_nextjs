@@ -44,6 +44,7 @@ jobs:
         run: pnpm check:lean-v2
 
       - name: Run tests
+        if: ${{ !cancelled() }}
         run: pnpm test
 
       - name: Build application
