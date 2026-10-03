@@ -7,8 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / "supabase" / "migrations"
 
 files = sorted(MIG.glob("*.sql"))
-if len(files) != 14:
-    raise SystemExit(f"FAIL: expected 14 migrations, found {len(files)}")
+if len(files) != 15:
+    raise SystemExit(f"FAIL: expected 15 migrations, found {len(files)}")
 
 text = "\n".join(p.read_text(encoding="utf-8") for p in files)
 
@@ -259,7 +259,7 @@ tables = [
     "profiles","media_assets","store_settings","brands","categories",
     "option_types","option_values","products","product_categories",
     "product_variants","variant_option_values","product_variant_media",
-    "inventory","inventory_adjustments","orders","order_items",
+    "inventory","inventory_adjustments","orders","order_items","push_subscriptions",
 ]
 for table in tables:
     needle = f"alter table public.{table} enable row level security;"
