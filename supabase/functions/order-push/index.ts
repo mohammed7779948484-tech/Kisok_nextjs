@@ -34,11 +34,13 @@ Deno.serve(async (request: Request) => {
       offset += chunk.byteLength;
     }
     const text = new TextDecoder().decode(bytes);
-    if (!(await signatureMatches(
-      request.headers.get('x-kisok-webhook-signature'),
-      text,
-      Deno.env.get('ORDER_PUSH_WEBHOOK_SECRET'),
-    ))) {
+    if (
+      !(await signatureMatches(
+        request.headers.get('x-kisok-webhook-signature'),
+        text,
+        Deno.env.get('ORDER_PUSH_WEBHOOK_SECRET'),
+      ))
+    ) {
       return new Response('Unauthorized', { status: 401 });
     }
     let payload: unknown;
