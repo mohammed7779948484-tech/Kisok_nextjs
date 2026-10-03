@@ -49,3 +49,16 @@ jobs:
 
       - name: Build application
         run: pnpm build
+
+      - name: Show safe formatting fixes after a failed check
+        if: ${{ failure() }}
+        run: |
+          pnpm exec biome check --write 'src/app/manifest.ts' 'src/app/pwa-icons/[size]/route.tsx' 'src/lib/config/seo.ts' 'src/app/[locale]/layout.tsx' 'src/proxy.ts' 'next.config.ts' 'src/features/admin-pwa/lib/subscription.ts' 'src/features/admin-pwa/server/schema.ts' 'src/features/admin-pwa/server/actions.ts' 'src/features/admin-pwa/lib/device.ts' 'src/features/admin-pwa/lib/install.ts' 'src/infrastructure/supabase/auth/push-session.ts' 'src/features/admin-pwa/components/PwaRuntime.tsx' 'src/features/admin-pwa/components/AdminPwaControls.tsx' 'src/features/dashboard-operations/components/AdminShell.tsx' 'src/app/[locale]/admin/layout.tsx' 'src/infrastructure/supabase/auth/browser.ts' 'src/lib/env/index.ts' 'src/features/orders/hooks/useOrderRealtimeNotifications.ts' 'src/features/orders/hooks/useOrderRealtimeNotifications.test.ts' 'src/infrastructure/supabase/database.types.ts' 'supabase/functions/order-push/core.js' 'supabase/functions/order-push/index.ts' 'supabase/functions/order-push/deno.json' 'tsconfig.json' 'test/order-push.test.ts' 'src/features/admin-pwa/server/schema.test.ts' 'test/service-worker.test.ts' || true
+          node --input-type=module - <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { readFileSync } from 'node:fs';
+          const paths = execFileSync('git', ['diff', '--name-only', '-z']).toString().split('\0').filter(Boolean);
+          for (const path of paths) {
+            console.log('PWA_FORMATTED_FILE ' + JSON.stringify({ path, content: readFileSync(path, 'utf8') }));
+          }
+          NODE
