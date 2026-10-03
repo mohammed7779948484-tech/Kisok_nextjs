@@ -50,6 +50,13 @@ jobs:
       - name: Build application
         run: pnpm build
 
+      - name: Install browser smoke tooling
+        run: |
+          npm install --prefix /tmp/kisok-browser-tools --no-package-lock --no-save playwright@1.61.0
+          node /tmp/kisok-browser-tools/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Run PWA browser smoke
+        run: node scripts/pwa-browser-check.mjs
+
       - name: Show safe formatting fixes after a failed check
         if: ${{ failure() }}
         run: |
